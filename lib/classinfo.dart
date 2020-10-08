@@ -12,7 +12,6 @@ class ClassInfo {
   List<Lecture> classes;
   DateTime lastUpdated;
   int userColor;
-  bool userAllowed;
   bool isDoneLoading = false;
 
   Future updateInfo() async {
