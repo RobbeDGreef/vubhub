@@ -70,6 +70,7 @@ class ClassInfo {
         buf.add(l.toString());
       }
       file.writeAsString(buf.join('\n'));
+      final prefs = await SharedPreferences.getInstance();
       prefs.setString("lastUpdated", DateTime.now().toString());
 
       print("store done\n");
@@ -82,6 +83,11 @@ class ClassInfo {
     print("loading user data");
     final prefs = await SharedPreferences.getInstance();
     this.userColor = prefs.getInt("userColor") ?? 0;
+    String s = prefs.getString("lastUpdated") ?? "";
+    if (s != "")
+      this.lastUpdated = DateTime.parse(s);
+    else
+      this.lastUpdated = DateTime(0, 0, 0);
 
     print("Loaded user data");
   }
