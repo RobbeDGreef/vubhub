@@ -96,11 +96,38 @@ class ClassesToday extends State<MainUi> {
     return s;
   }
 
+  List<Color> _colorFromRotString(String rotsystem) {
+    rotsystem = rotsystem.toLowerCase();
+    if (rotsystem.contains("blauw"))
+      return [Color.fromARGB(0xFF, 0, 52, 154), Colors.white];
+    else if (rotsystem.contains("oranje"))
+      return [Color.fromARGB(0xFF, 251, 106, 16), Colors.white];
+
+    return [null, null];
+  }
+
   /// Creates a class or lecture tab for the
   Widget _createClassItem(BuildContext context, int i) {
     var icon = Icons.record_voice_over_outlined;
     if (this.classes[i].name.toLowerCase().contains("wpo"))
       icon = Icons.subject;
+
+    var colors = _colorFromRotString(this.classes[i].name);
+
+    if (this.classes[i].name.toLowerCase().contains("rotatiesysteem"))
+      return Card(
+          child: ListTile(
+              title: Text(this.classes[i].name,
+                  style: TextStyle(color: colors[1]))),
+          color: colors[0]);
+
+    String policyString = this.classes[i].remarks;
+    if (this.classes[i].remarks.toLowerCase().contains("rotatiesysteem"))
+      policyString = "Rotatiesysteem: " +
+          ((this.info.isUserAllowed())
+              ? "you are allowed to come"
+              : "you are not allowed to come");
+
     return Card(
         child: ListTile(
             leading: Icon(icon),
