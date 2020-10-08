@@ -8,6 +8,30 @@ class Lecture {
   DateTime start;
   DateTime end;
 
+  Lecture() {}
+
+  Lecture.fromString(List<String> data) {
+    this.name = data[0];
+    this.details = data[1];
+    this.location = data[2];
+    this.remarks = data[3];
+    this.start = DateTime.parse(data[4]);
+    this.end = DateTime.parse(data[5]);
+  }
+
+  @override
+  String toString() {
+    List<String> data = List();
+    data.add(this.name);
+    data.add(this.details);
+    data.add(this.location);
+    data.add(this.remarks);
+    data.add(this.start.toString());
+    data.add(this.end.toString());
+
+    return data.join('\n');
+  }
+
   void show() {
     print("name: " + name);
     print("\tdetails: " + details);
