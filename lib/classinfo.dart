@@ -1,5 +1,7 @@
 import "dart:io";
 import "dart:convert";
+import 'package:shared_preferences/shared_preferences.dart';
+
 import "parser.dart";
 import "package:path_provider/path_provider.dart";
 
@@ -9,6 +11,9 @@ class ClassInfo {
   Function() updateCallback;
   List<Lecture> classes;
   DateTime lastUpdated;
+  int userColor;
+  bool userAllowed;
+  bool isDoneLoading = false;
 
   Future updateInfo() async {
     List<String> chunks = new List();
@@ -22,7 +27,10 @@ class ClassInfo {
     return Future.wait([stream.asFuture()]).then((e) {
       var content = chunks.join('');
       this.classes = IcalParser().parse(LineSplitter.split(content));
-      if (this.updateCallback != null) this.updateCallback();
+      this.isDoneLoading = true;
+      if (this.updateCallback != null) {
+        this.updateCallback();
+      }
       storeInfo();
     });
   }
@@ -38,10 +46,12 @@ class ClassInfo {
   }
 
   void loadInfo() async {
+    this.isDoneLoading = false;
     try {
       final file = await _localFile;
       String contents = await file.readAsString();
       this.classes = IcalParser().reparseSaved(LineSplitter.split(contents));
+      this.isDoneLoading = true;
       if (this.updateCallback != null) {
         this.updateCallback();
       }
@@ -57,10 +67,7 @@ class ClassInfo {
       final file = await _localFile;
       List<String> buf = List();
       for (Lecture l in this.classes) {
-        buf.add(l.name);
-        buf.add(l.details);
-        buf.add(l.start.toString());
-        buf.add(l.end.toString());
+        buf.add(l.toString());
       }
       file.writeAsString(buf.join('\n'));
       print("store done\n");
@@ -69,12 +76,23 @@ class ClassInfo {
     }
   }
 
+  void loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    this.userColor = prefs.getInt("userColor") ?? 0;
+  }
+
   ClassInfo(String url, {Function() callback}) {
     this.infoUrl = url;
     this.updateCallback = callback;
 
+    loadUserData();
     loadInfo();
   }
+
+  bool isUserAllowed() {
+    return this.userColor == 0;
+  }
+
   void setCallback(Function() callback) {
     this.updateCallback = callback;
     if (this.isDoneLoading) {
