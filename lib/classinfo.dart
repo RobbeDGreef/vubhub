@@ -110,4 +110,19 @@ class ClassInfo {
       this.updateCallback();
     }
   }
+
+  String getUserColorString() {
+    return (this.userColor == 1) ? "orange" : "blue";
+  }
+
+  void updateColorFromString(String color) async {
+    // @todo: Magic values are evil
+    if (color == "orange")
+      this.userColor = 1;
+    else
+      this.userColor = 0;
+
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt("userColor", this.userColor);
+  }
 }
