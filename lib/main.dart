@@ -162,16 +162,36 @@ class ClassesToday extends State<MainUi> {
   Widget _buildMainScreen() {
     var list = ListView.builder(
         itemBuilder: _createClassItem, itemCount: this.classes.length);
-    return Column(children: [
-      _buildLastUpdatedWidget(),
-      _buildWeekScroller(),
-      Expanded(child: list)
-    ]);
+    return Column(children: [_buildWeekScroller(), Expanded(child: list)]);
+  }
+
+  void openSettings() {
+    print("Settings");
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (BuildContext context) => SettingsMenu(this.info)));
+  }
+
+  void openAbout() {
+    print("About");
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+        child: ListView(
+      children: [
+        DrawerHeader(
+            child: Text("Header"),
+            decoration: BoxDecoration(color: Colors.blue)),
+        ListTile(title: Text("Settings"), onTap: openSettings),
+        ListTile(title: Text("About"), onTap: openAbout)
+      ],
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        drawer: _buildDrawer(),
         appBar: AppBar(
             title: Text("Today's classes"),
             actions: [
@@ -179,7 +199,7 @@ class ClassesToday extends State<MainUi> {
                   icon: Icon(Icons.replay_sharp),
                   onPressed: () => this.info.updateInfo())
             ],
-            leading: IconButton(icon: Icon(Icons.list), onPressed: null)),
+        ),
         body: _buildMainScreen());
   }
 }
