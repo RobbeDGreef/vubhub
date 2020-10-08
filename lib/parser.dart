@@ -45,6 +45,11 @@ class IcalParser {
                   .toLowerCase();
       } else if (line.startsWith("DESCRIPTION")) {
         event.details = line.substring("DESCRIPTION".length + 1);
+        int indx = line.indexOf("Location:") + 10;
+        event.location = line.substring(indx, line.indexOf("\\n", indx));
+
+        indx = line.indexOf("Remarks:") + 9;
+        event.remarks = line.substring(indx, line.indexOf("\\n", indx));
       } else if (line.startsWith("DTSTART")) {
         try {
           event.start = DateTime.parse(line.substring(line.indexOf(':') + 1));
@@ -83,15 +88,12 @@ class IcalParser {
 
     // @todo: this is bound to go corrupt wtf, fix this.
     for (this.index = 0; this.index < this.file.length; ++this.index) {
-      print("index: " + this.index.toString());
-      Lecture l = Lecture();
-      l.name = file.elementAt(this.index);
-      l.details = file.elementAt(this.index + 1);
-      l.start = DateTime.parse(file.elementAt(this.index + 2));
-      l.end = DateTime.parse(file.elementAt(this.index + 3));
-      this.index += 3;
-
-      this.parsedList.add(l);
+      List<String> data = List();
+      for (int i = 0; i < 6; ++i) {
+        data.add(file.elementAt(this.index + i));
+      }
+      this.parsedList.add(Lecture.fromString(data));
+      this.index += 5;
     }
 
     return this.parsedList;
