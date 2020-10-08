@@ -31,7 +31,7 @@ class MainUi extends StatefulWidget {
   @override
   ClassesToday createState() {
     var state = ClassesToday(this.info);
-    info.updateCallback = state.update;
+    info.setCallback(state.update);
     return state;
   }
 }

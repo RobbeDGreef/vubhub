@@ -6,8 +6,7 @@ import "package:path_provider/path_provider.dart";
 /// Classinfo object, used to store all current loaded lecture data.
 class ClassInfo {
   String infoUrl;
-  Function()
-      updateCallback; // @todo: this variable should get a setting and not be set rawly by other functions.
+  Function() updateCallback;
   List<Lecture> classes;
   DateTime lastUpdated;
 
@@ -75,5 +74,11 @@ class ClassInfo {
     this.updateCallback = callback;
 
     loadInfo();
+  }
+  void setCallback(Function() callback) {
+    this.updateCallback = callback;
+    if (this.isDoneLoading) {
+      this.updateCallback();
+    }
   }
 }
