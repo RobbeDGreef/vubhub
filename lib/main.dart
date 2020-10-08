@@ -3,6 +3,7 @@ import "package:calendar_strip/calendar_strip.dart";
 
 import "parser.dart";
 import "classinfo.dart";
+import "settings.dart";
 
 void main() => runApp(Vub());
 
@@ -73,11 +74,6 @@ class ClassesToday extends State<MainUi> {
         }
       }
     });
-  }
-
-  Widget _buildLastUpdatedWidget() {
-    // @todo: Last updated, maybe we will display this in the navigator view
-    return Text("Last updated: ");
   }
 
   Widget _buildWeekScroller() {
@@ -193,12 +189,12 @@ class ClassesToday extends State<MainUi> {
     return Scaffold(
         drawer: _buildDrawer(),
         appBar: AppBar(
-            title: Text("Today's classes"),
-            actions: [
-              IconButton(
-                  icon: Icon(Icons.replay_sharp),
-                  onPressed: () => this.info.updateInfo())
-            ],
+          title: Text("Today's classes"),
+          actions: [
+            IconButton(
+                icon: Icon(Icons.replay_sharp),
+                onPressed: () => this.info.updateInfo())
+          ],
         ),
         body: _buildMainScreen());
   }
