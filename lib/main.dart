@@ -132,13 +132,26 @@ class ClassesToday extends State<MainUi> {
         child: ListTile(
             leading: Icon(icon),
             title: Text(this.classes[i].name),
-            subtitle: Text(this.classes[i].start.hour.toString() +
-                ":" +
-                _minutes(this.classes[i].end.minute) +
-                " - " +
-                this.classes[i].end.hour.toString() +
-                ":" +
-                _minutes(this.classes[i].end.minute))));
+            isThreeLine: false,
+            subtitle: Padding(
+                padding: EdgeInsets.all(0),
+                child: Column(children: [
+                  Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: Row(children: [
+                        Text(this.classes[i].location),
+                        Text(this.classes[i].start.hour.toString() +
+                            ":" +
+                            _minutes(this.classes[i].end.minute) +
+                            " - " +
+                            this.classes[i].end.hour.toString() +
+                            ":" +
+                            _minutes(this.classes[i].end.minute))
+                      ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
+                  Row(
+                      children: [Text(policyString)],
+                      mainAxisAlignment: MainAxisAlignment.start)
+                ]))));
   }
 
   /// Builds the lesson tray (the main screen actually)
