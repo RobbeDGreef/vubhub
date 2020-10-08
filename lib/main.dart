@@ -139,7 +139,9 @@ class ClassesToday extends State<MainUi> {
                   Padding(
                       padding: EdgeInsets.only(bottom: 8),
                       child: Row(children: [
-                        Text(this.classes[i].location),
+                        Expanded(
+                            child: Text(this.classes[i].location,
+                                overflow: TextOverflow.ellipsis)),
                         Text(this.classes[i].start.hour.toString() +
                             ":" +
                             _minutes(this.classes[i].end.minute) +
@@ -148,9 +150,11 @@ class ClassesToday extends State<MainUi> {
                             ":" +
                             _minutes(this.classes[i].end.minute))
                       ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
-                  Row(
-                      children: [Text(policyString)],
-                      mainAxisAlignment: MainAxisAlignment.start)
+                  Row(children: [
+                    Expanded(
+                        child:
+                            Text(policyString, overflow: TextOverflow.ellipsis))
+                  ], mainAxisAlignment: MainAxisAlignment.start)
                 ]))));
   }
 
