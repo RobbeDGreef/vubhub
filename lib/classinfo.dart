@@ -47,6 +47,7 @@ class ClassInfo {
   void loadInfo() async {
     this.isDoneLoading = false;
     try {
+      print("loading data from last time");
       final file = await _localFile;
       String contents = await file.readAsString();
       this.classes = IcalParser().reparseSaved(LineSplitter.split(contents));
@@ -69,6 +70,8 @@ class ClassInfo {
         buf.add(l.toString());
       }
       file.writeAsString(buf.join('\n'));
+      prefs.setString("lastUpdated", DateTime.now().toString());
+
       print("store done\n");
     } catch (e) {
       print("sad :(");
@@ -76,8 +79,11 @@ class ClassInfo {
   }
 
   void loadUserData() async {
+    print("loading user data");
     final prefs = await SharedPreferences.getInstance();
     this.userColor = prefs.getInt("userColor") ?? 0;
+
+    print("Loaded user data");
   }
 
   ClassInfo(String url, {Function() callback}) {
