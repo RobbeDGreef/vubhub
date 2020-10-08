@@ -3,8 +3,10 @@ import "dart:io";
 /// The lecture object, used to represent VEvent's from the iCalendar
 /// file
 class Lecture {
-  String name;
-  String details;
+  String name = "";
+  String details = "";
+  String location = "No location specified";
+  String remarks = "";
   DateTime start;
   DateTime end;
 
