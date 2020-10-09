@@ -5,6 +5,7 @@ import "dart:io";
 class Lecture {
   String name = "";
   String details = "";
+  String professor = "";
   String location = "No location specified";
   String remarks = "";
   DateTime start;
