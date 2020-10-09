@@ -136,3 +136,42 @@ class IcalParser {
     return this.parsedList;
   }
 }
+
+List<Lecture> parseLectureList(String data, int week) {
+  if (data == null) return List();
+  var doc = html.parse(data);
+  List<Lecture> lectures = List();
+  // Iterate over every day in the week
+  for (var day in doc.getElementsByClassName("TableBody")[0].children[0].children) {
+    if (day.children[0].className != "tdCol") continue;
+
+    Lecture lec = Lecture();
+    lec.name = day.children[0].text;
+    lec.professor = day.children[1].text;
+    lec.location = day.children[6].text;
+    lec.remarks = day.children[8].text;
+
+    for (String date in day.children[5].text.split(")")) {
+      if (date == "" || int.parse(date.substring(0, date.indexOf(" "))) != week) {
+        continue;
+      }
+      var parts = date.substring(date.indexOf("(") + 1).split("/");
+      var toDay = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+      lec.start = DateTime(
+          toDay.year,
+          toDay.month,
+          toDay.day,
+          int.parse(day.children[2].text.split(":")[0]),
+          int.parse(day.children[2].text.split(":")[1]));
+      lec.end = DateTime(
+          toDay.year,
+          toDay.month,
+          toDay.day,
+          int.parse(day.children[3].text.split(":")[0]),
+          int.parse(day.children[3].text.split(":")[1]));
+      print("lec: ${lec.name} date: ${lec.start}");
+      lectures.add(new Lecture.fromObject(lec));
+    }
+  }
+  return lectures;
+}
