@@ -1,3 +1,52 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
+import "crawler.dart";
+import "parser.dart";
+import "const.dart";
+
+class Cache {
+  void storeString(String key, String val) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(key, val);
+  }
+
+  void storeInt(String key, int val) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt(key, val);
+  }
+
+  Future<String> tryToLoadString(String key, String defaultValue) async {
+    final prefs = await SharedPreferences.getInstance();
+    String val = prefs.getString(key);
+    if (val == null) {
+      storeString(key, defaultValue);
+    }
+    return val;
+  }
+
+  Future<int> tryToLoadInt(String key, int defaultValue) async {
+    final prefs = await SharedPreferences.getInstance();
+    int val = prefs.getInt(key);
+    if (val == null) {
+      storeInt(key, defaultValue);
+    }
+    return val;
+  }
+
+  List<Lecture> getWeekData(int week) {
+    print("trying to get week data from week $week");
+    return null;
+  }
+
+  void populateWeekData(int week, List<Lecture> data) {
+    // Save the week data
+  }
+
+  void doForcedCacheUpdate() {
+    // Force update everything
+  }
+}
+
 /// Handles information exchange with other objects
 class InfoHandler {
   // Variables:
