@@ -1,9 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
 import "package:flutter/material.dart";
 import "package:calendar_strip/calendar_strip.dart";
 
 import "parser.dart";
-import "classinfo.dart";
+import "infohandler.dart";
 import "settings.dart";
+
+import "package:http/http.dart" as http;
+import "package:html/parser.dart" as html;
 
 void main() => runApp(Vub());
 
