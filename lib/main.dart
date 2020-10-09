@@ -25,58 +25,46 @@ class Vub extends StatelessWidget {
 /// Statefull widget used to store all immutable data
 /// so that we can change state using the State widget
 class MainUi extends StatefulWidget {
-  // @todo: The test string here only works for group 3 (non-choice) so yeah, we need to create settings and stuff.
-  final teststring =
-      "http://splus.cumulus.vub.ac.be/sws/v3/evenjr/NL/XML/default.aspx?ical_set&p1=EF29CC48C18E1A2B440A71EC42FE89AE";
-
-  ClassInfo info;
+  InfoHandler infoHandler;
 
   MainUi() {
-    info = ClassInfo(teststring);
+    infoHandler = InfoHandler();
   }
 
   @override
   ClassesToday createState() {
-    var state = ClassesToday(this.info);
-    info.setCallback(state.update);
-    return state;
+    return ClassesToday(this.infoHandler);
   }
 }
 
 /// The state object, this object will be regenerated and
 /// the data is thus mutable.
 class ClassesToday extends State<MainUi> {
-  ClassInfo info;
+  InfoHandler info;
   List<Lecture> classes = new List();
   DateTime selectedDay = DateTime.now();
+  int todaysColor = 0;
 
-  ClassesToday(ClassInfo info) {
+  ClassesToday(InfoHandler info) {
     this.info = info;
+    this.info.getClassesOfDay(DateTime.now()).then((list) => update(list));
   }
 
-  // @todo: Optimize this crap because waw those are some hacky algorithms
-  void update() {
+  void update(List<Lecture> classes) {
     print("Updating");
     setState(() {
-      classes.clear();
-
-      DateTime today = DateTime(
-          this.selectedDay.year, this.selectedDay.month, this.selectedDay.day);
-
-      for (Lecture lec in this.info.classes) {
-        DateTime classday =
-            DateTime(lec.start.year, lec.start.month, lec.start.day);
-
-        if (classday == today) {
-          int i = 0;
-          for (Lecture cur in this.classes) {
-            if (lec.start.compareTo(cur.start) < 0) {
-              classes.insert(i, lec);
-              break;
-            }
-            i++;
+      this.classes.clear();
+      for (Lecture lec in classes) {
+        int i = 0;
+        for (Lecture prevLec in this.classes) {
+          if (lec.start.compareTo(prevLec.start) < 0) {
+            this.classes.insert(i, lec);
+            break;
           }
-          if (i == this.classes.length) classes.add(lec);
+          ++i;
+        }
+        if (this.classes.length == i) {
+          this.classes.add(lec);
         }
       }
     });
@@ -85,7 +73,7 @@ class ClassesToday extends State<MainUi> {
   Widget _buildWeekScroller() {
     return CalendarStrip(onDateSelected: ((date) {
       this.selectedDay = date;
-      update();
+      this.info.getClassesOfDay(date).then((list) => update(list));
     }));
   }
 
@@ -111,22 +99,23 @@ class ClassesToday extends State<MainUi> {
   /// Creates a class or lecture tab for the
   Widget _createClassItem(BuildContext context, int i) {
     var icon = Icons.record_voice_over_outlined;
-    if (this.classes[i].name.toLowerCase().contains("wpo"))
-      icon = Icons.subject;
+    if (this.classes[i].name.toLowerCase().contains("wpo")) icon = Icons.subject;
 
     var colors = _colorFromRotString(this.classes[i].name);
 
-    if (this.classes[i].name.toLowerCase().contains("rotatiesysteem"))
+    if (this.classes[i].name.toLowerCase().contains("rotatie"))
       return Card(
           child: ListTile(
-              title: Text(this.classes[i].name,
+              title: Text(
+                  "Rotatiesysteem: rotatie " +
+                      (this.classes[i].name.contains("BLAUW") ? "blauw" : "oranje"),
                   style: TextStyle(color: colors[1]))),
           color: colors[0]);
 
     String policyString = this.classes[i].remarks;
     if (this.classes[i].remarks.toLowerCase().contains("rotatiesysteem"))
       policyString = "Rotatiesysteem: " +
-          ((this.info.isUserAllowed())
+          ((this.info.isUserAllowed(this.todaysColor))
               ? "you are allowed to come"
               : "you are not allowed to come");
 
@@ -142,8 +131,7 @@ class ClassesToday extends State<MainUi> {
                       padding: EdgeInsets.only(bottom: 8),
                       child: Row(children: [
                         Expanded(
-                            child: Text(this.classes[i].location,
-                                overflow: TextOverflow.ellipsis)),
+                            child: Text(this.classes[i].location, overflow: TextOverflow.ellipsis)),
                         Text(this.classes[i].start.hour.toString() +
                             ":" +
                             _minutes(this.classes[i].end.minute) +
@@ -153,24 +141,21 @@ class ClassesToday extends State<MainUi> {
                             _minutes(this.classes[i].end.minute))
                       ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
                   Row(children: [
-                    Expanded(
-                        child:
-                            Text(policyString, overflow: TextOverflow.ellipsis))
+                    Expanded(child: Text(policyString, overflow: TextOverflow.ellipsis))
                   ], mainAxisAlignment: MainAxisAlignment.start)
                 ]))));
   }
 
   /// Builds the lesson tray (the main screen actually)
   Widget _buildMainScreen() {
-    var list = ListView.builder(
-        itemBuilder: _createClassItem, itemCount: this.classes.length);
+    var list = ListView.builder(itemBuilder: _createClassItem, itemCount: this.classes.length);
     return Column(children: [_buildWeekScroller(), Expanded(child: list)]);
   }
 
   void openSettings() {
     print("Settings");
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (BuildContext context) => SettingsMenu(this.info)));
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this.info)));
   }
 
   void openAbout() {
@@ -181,9 +166,7 @@ class ClassesToday extends State<MainUi> {
     return Drawer(
         child: ListView(
       children: [
-        DrawerHeader(
-            child: Text("Header"),
-            decoration: BoxDecoration(color: Colors.blue)),
+        DrawerHeader(child: Text("Header"), decoration: BoxDecoration(color: Colors.blue)),
         ListTile(title: Text("Settings"), onTap: openSettings),
         ListTile(title: Text("About"), onTap: openAbout)
       ],
@@ -198,8 +181,7 @@ class ClassesToday extends State<MainUi> {
           title: Text("Today's classes"),
           actions: [
             IconButton(
-                icon: Icon(Icons.replay_sharp),
-                onPressed: () => this.info.updateInfo())
+                icon: Icon(Icons.replay_sharp), onPressed: () => this.info.forceCacheUpdate())
           ],
         ),
         body: _buildMainScreen());
