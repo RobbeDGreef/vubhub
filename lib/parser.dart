@@ -1,4 +1,5 @@
 import "dart:io";
+import "package:html/parser.dart" as html;
 
 /// The lecture object, used to represent VEvent's from the iCalendar
 /// file
