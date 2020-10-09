@@ -77,8 +77,7 @@ class IcalParser {
         if (event.name[0] == '&') // Rotatiesysteem
           event.name = "Rotatiesysteem: " +
               line
-                  .substring(
-                      line.indexOf(';', 16) + 1) // @todo magic values are evil
+                  .substring(line.indexOf(';', 16) + 1) // TODO magic values are evil
                   .toLowerCase();
       } else if (line.startsWith("DESCRIPTION")) {
         event.details = line.substring("DESCRIPTION".length + 1);
@@ -123,7 +122,7 @@ class IcalParser {
     this.parsedList = List();
     this.file = file;
 
-    // @todo: this is bound to go corrupt wtf, fix this.
+    // TODO: this is bound to go corrupt wtf, fix this.
     for (this.index = 0; this.index < this.file.length; ++this.index) {
       List<String> data = List();
       for (int i = 0; i < 6; ++i) {
