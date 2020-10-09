@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-/// @todo: Implement own week scroller because I am
+/// TODO: Implement own week scroller because I am
 /// not certain that the scroller we use right now
 /// is cross compatible with ios.
 
