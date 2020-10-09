@@ -11,6 +11,15 @@ class Lecture {
   DateTime end;
 
   Lecture() {}
+  Lecture.fromObject(Lecture obj) {
+    this.name = obj.name;
+    this.details = obj.details;
+    this.professor = obj.professor;
+    this.location = obj.location;
+    this.remarks = obj.remarks;
+    this.start = obj.start;
+    this.end = obj.end;
+  }
 
   Lecture.fromString(List<String> data) {
     this.name = data[0];
