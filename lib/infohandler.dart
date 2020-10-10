@@ -207,8 +207,8 @@ class InfoHandler {
 
   int calcWeekFromDate(DateTime date) {
     DateTime start = calcStartDate();
-    DateTime thisWeekStart = date.subtract(Duration(days: date.weekday - 1));
-    return thisWeekStart.difference(start).inDays ~/ 7 + 1;
+    DateTime selectedWeekStart = date.subtract(Duration(days: date.weekday - 1));
+    return selectedWeekStart.difference(start).inDays ~/ 7 + 1;
   }
 
   bool isUserAllowed(int color) {
