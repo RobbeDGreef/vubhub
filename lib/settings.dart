@@ -182,6 +182,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               (val) {
             setState(() {
               this.dropDownEdu = val;
+              this.selectedUserGroups = [];
               this.info.setUserEdu(val).then((v) {
                 setState(() {
                   this.userGroups = this.info.getUserGroups();
