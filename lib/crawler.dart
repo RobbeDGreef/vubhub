@@ -132,10 +132,24 @@ class Crawler {
     }
   }
 
+  Future waitForContent(Duration interval) {
+    var compl = Completer();
+    check() {
+      if (this.content != null)
+        compl.complete();
+      else
+        Timer(interval, check);
+    }
+
+    check();
+    return compl.future;
+  }
+
   Future<String> getWeekData(int week) async {
     // get week data
     // TODO: yuk pls find a better way to do this:
-    while (this.content == null) {}
+
+    await waitForContent(Duration(seconds: 2));
 
     String body = "";
     var doc = html.parse(this.content);
