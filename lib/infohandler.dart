@@ -165,10 +165,8 @@ class InfoHandler {
 
     // When the user education type is set we also want to update the crawler to fetch the
     // new url
-    print("set user id");
     this._crawler.curId = getUserId();
     await this._crawler.updateConnection();
-    print("updated user connection and stuff");
   }
 
   void setUserFac(String fac) {
