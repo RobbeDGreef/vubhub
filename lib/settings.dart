@@ -171,7 +171,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               this.info.setUserEduType(newval);
             });
           }),
-          _settingChoose("Faculty", this.dropDownFac, Icon(Icons.domain),
+          _settingChoose("Faculty", this.dropDownFac, Icon(Icons.account_balance),
               EducationData[this.dropDownEduType].keys.toList(), (String newval) {
             setState(() {
               this.dropDownFac = newval;
