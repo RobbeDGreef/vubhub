@@ -181,7 +181,9 @@ class ClassesToday extends State<MainUi> {
           title: Text("Today's classes"),
           actions: [
             IconButton(
-                icon: Icon(Icons.replay_sharp), onPressed: () => this.info.forceCacheUpdate())
+                icon: Icon(Icons.replay_sharp),
+                onPressed: () =>
+                    this.info.forceCacheUpdate(this.info.calcWeekFromDate(this.selectedDay)))
           ],
         ),
         body: _buildMainScreen());

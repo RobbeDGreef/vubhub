@@ -215,8 +215,16 @@ class InfoHandler {
     return color == this._userColor;
   }
 
-  void forceCacheUpdate() {
-    _cache.doForcedCacheUpdate();
+  Future forceCacheUpdate(int week) async {
+    // TODO: update all weeks instead of just the currently selected one
+    // Also when we implement that maybe update them in the following order:
+    // - the current week
+    // - all preloaded next weeks
+    // - the previous weeks
+    var data = await this._crawler.getWeekData(week);
+    await _cache.populateWeekData(
+        week, this._userEduType, this._userFac, this._userEdu, parseLectureList(data, week));
+    //_cache.doForcedCacheUpdate(await this._crawler.getWeekData(week));
   }
 
   String colorIntToString(int color) {
