@@ -219,7 +219,9 @@ class InfoHandler {
           print("range error due to inpropper crawler request");
         }
       }
+      if (data != null) {
       allData.addAll(data);
+    }
     }
 
     return allData;
