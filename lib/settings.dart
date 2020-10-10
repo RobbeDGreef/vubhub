@@ -4,6 +4,64 @@ import "infohandler.dart";
 import "const.dart";
 import "package:settings_ui/settings_ui.dart";
 
+class SelectMultiMenu extends StatefulWidget {
+  String _title;
+  List<String> _selected;
+  List<String> _selection;
+  Function(bool, String) _callback;
+
+  SelectMultiMenu(
+      String title, List<String> selected, List<String> selection, Function(bool, String) ptr) {
+    this._title = title;
+    this._selected = selected;
+    this._selection = selection;
+    this._callback = ptr;
+  }
+
+  @override
+  _SelectMultiMenuState createState() =>
+      _SelectMultiMenuState(this._title, this._selected, this._selection, this._callback);
+}
+
+class _SelectMultiMenuState extends State<SelectMultiMenu> {
+  String _title;
+  List<String> _selected;
+  List<String> _selection;
+  Function(bool, String) _callback;
+
+  _SelectMultiMenuState(
+      String title, List<String> selected, List<String> selection, Function(bool, String) ptr) {
+    this._title = title;
+    this._selected = selected;
+    this._selection = selection;
+    this._callback = ptr;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> tiles = List();
+    for (String select in this._selection) {
+      tiles.add(CheckboxListTile(
+        title: Text(select),
+        value: this._selected.contains(select),
+        onChanged: (bool val) {
+          setState(() {
+            if (val) {
+              if (!this._selected.contains(select)) this._selected.add(select);
+            } else {
+              this._selected.remove(select);
+            }
+            this._callback(val, select);
+          });
+        },
+      ));
+      tiles.add(Divider());
+    }
+
+    return Scaffold(appBar: AppBar(title: Text(this._title)), body: ListView(children: tiles));
+  }
+}
+
 class SettingsMenu extends StatefulWidget {
   InfoHandler info;
 
@@ -20,7 +78,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
   String dropDownEduType = EducationData.keys.first;
   String dropDownFac = EducationData[EducationData.keys.first].keys.first;
   String dropDownEdu;
+  String dropDownUserGroup;
+  List<String> userGroups = [];
   InfoHandler info;
+  List<String> selectedUserGroups;
 
   List<String> getEducations() {
     return EducationData[this.dropDownEduType][this.dropDownFac].keys.toList();
@@ -59,6 +120,17 @@ class _SettingsMenuState extends State<SettingsMenu> {
                   _selectionScreen(title, selection, selected, ptr)));
         });
   }
+
+  SettingsTile _settingChooseMulti(String title, List<String> selected, Icon icon,
+      List<String> selection, Function(bool, String) ptr) {
+    return SettingsTile(
+        title: title,
+        leading: icon,
+        //trailing: Icon(Icons.arrow_forward_ios),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) => SelectMultiMenu(title, selected, selection, ptr)));
+        });
   }
 
   SettingsTile _settingDropdown(
@@ -111,12 +183,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
               });
             });
           }),
-          // TODO
-          _settingDropdown("Group", getEducations(), this.dropDownEdu, (String newval) {
-            print("new: $newval");
+          _settingChooseMulti("Groups", this.selectedUserGroups, Icon(Icons.group), this.userGroups,
+              (valueSet, val) {
             setState(() {
-              this.dropDownEdu = newval;
-              this.info.setUserEdu(newval);
+              // TODO: maybe use a Set() for this ?
+              if (valueSet && !this.selectedUserGroups.contains(val)) {
+                this.selectedUserGroups.add(val);
+              } else if (!valueSet) {
+                this.selectedUserGroups.remove(val);
+              }
+
+              // TODO: this is probably inefficient
+              this.info.setUserGroups(this.selectedUserGroups);
             });
           }),
         ],
