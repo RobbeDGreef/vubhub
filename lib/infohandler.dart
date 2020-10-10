@@ -65,6 +65,19 @@ class Cache {
     // TODO: save this to the memory cache first
     return parseCacheStored(content);
   }
+
+  void populateWeekData(
+      int week, String userEduType, String userFac, String userEdu, List<Lecture> data) async {
+    // Save the week data to cache
+    print("saving data");
+    // TODO: save the data to the memory cache
+    final file = await _getWeekFile(week, userEduType, userFac, userEdu);
+    String cacheData = "";
+    for (Lecture lec in data) {
+      cacheData += lec.toString() + "\n";
+    }
+    print(cacheData);
+    file.writeAsString(cacheData);
   }
 
   void doForcedCacheUpdate() {
