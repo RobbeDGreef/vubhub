@@ -167,10 +167,16 @@ class InfoHandler {
       week = calcWeekFromDate(DateTime.now());
     }
 
-    List<Lecture> data = _cache.getWeekData(week);
+    // TODO: this can't be healthy
+    await waitFor(() {
+      return this._userEdu != null;
+    }, Duration(seconds: 2));
+
+    List<Lecture> data =
+        await _cache.getWeekData(week, this._userEduType, this._userFac, this._userEdu);
     if (data == null) {
       data = parseLectureList(await _crawler.getWeekData(week), week);
-      _cache.populateWeekData(week, data);
+      _cache.populateWeekData(week, this._userEduType, this._userFac, this._userEdu, data);
     }
 
     return data;
