@@ -107,6 +107,34 @@ class ClassesToday extends State<MainUi> {
     return [null, null];
   }
 
+  Widget _buildLectureDetails(int index) {
+    Lecture lec = this.classes[index];
+    return Scaffold(
+        appBar: AppBar(title: Text("Details")),
+        body: ListView(children: [
+          Padding(
+              padding: EdgeInsets.only(left: 4, right: 4, bottom: 16, top: 16),
+              child: Text(lec.name, style: TextStyle(fontSize: 20))),
+          Card(child: ListTile(title: Text(lec.professor), leading: Icon(Icons.person_outline))),
+          Card(child: ListTile(title: Text(lec.details), leading: Icon(Icons.dehaze))),
+          Card(child: ListTile(title: Text(lec.location), leading: Icon(Icons.location_on))),
+          Card(child: ListTile(title: Text(lec.remarks), leading: Icon(Icons.event_note_outlined))),
+          Card(
+              child: ListTile(
+                  title: Text(DateFormat("EEEE d MMMM").format(lec.start) +
+                      " from " +
+                      DateFormat("H:mm").format(lec.start) +
+                      " until " +
+                      DateFormat("H:mm").format(lec.end)),
+                  leading: Icon(Icons.access_time))),
+        ]));
+  }
+
+  void openLectureDetails(int index) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (BuildContext context) => _buildLectureDetails(index)));
+  }
+
   /// Creates a class or lecture tab for the
   Widget _createClassItem(BuildContext context, int i) {
     var icon = Icons.record_voice_over_outlined;
@@ -136,6 +164,7 @@ class ClassesToday extends State<MainUi> {
             leading: Icon(icon),
             title: Text(this.classes[i].name),
             isThreeLine: false,
+            onTap: () => openLectureDetails(i),
             subtitle: Padding(
                 padding: EdgeInsets.all(0),
                 child: Column(children: [
