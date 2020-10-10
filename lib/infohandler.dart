@@ -66,7 +66,7 @@ class Cache {
     return parseCacheStored(content);
   }
 
-  void populateWeekData(
+  Future populateWeekData(
       int week, String userEduType, String userFac, String userEdu, List<Lecture> data) async {
     // Save the week data to cache
     print("saving data");
