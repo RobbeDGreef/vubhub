@@ -83,13 +83,15 @@ class Crawler {
     return null;
   }
 
-  List<String> getDepartmentGroups() {
-    if (this.content == null) return null;
+  Map<String, String> getDepartmentGroups() {
+    if (this.content == null) return {};
+
     var doc = html.parse(this.content);
-    List<String> items = List();
+    Map<String, String> items = Map();
     for (var e in doc.getElementsByClassName("DepartmentFilter").first.children) {
-      items.add(e.text);
+      items.addAll({e.text: e.attributes["value"]});
     }
+    print(items);
     return items;
   }
 
@@ -143,7 +145,7 @@ class Crawler {
     return compl.future;
   }
 
-  Future<String> getWeekData(int week) async {
+  Future<String> getWeekData(int week, String group) async {
     // get week data
     // TODO: yuk pls find a better way to do this:
 
@@ -159,7 +161,7 @@ class Crawler {
     body += "&__EVENTVALIDATION=" +
         Uri.encodeComponent(doc.getElementById("__EVENTVALIDATION").attributes["value"]);
     body += "&tLinkType=setbytag";
-    body += "&tWildcard=&dlObject=" + Uri.encodeComponent("#SPLUS0ABF6A");
+    body += "&tWildcard=&dlObject=" + Uri.encodeComponent(/* "#SPLUS0ABF6A" */ group);
     body += "&lbWeeks=+" + week.toString();
     body += "&lbDays=1%3B2%3B3%3B4%3B5%3B6";
     body +=
@@ -177,7 +179,7 @@ class Crawler {
       // @TODO: URGENT: this could deadlock and cause infinite recursion and thus
       // stackoverflows and thus crashes
       await updateConnection();
-      return getWeekData(week);
+      return getWeekData(week, group);
     }
 
     // Save the url for later because we might be running this function many

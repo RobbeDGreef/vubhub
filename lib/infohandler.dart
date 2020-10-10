@@ -42,14 +42,16 @@ class Cache {
     return val;
   }
 
-  Future<File> _getWeekFile(int week, String userEduType, String userFac, String userEdu) async {
+  Future<File> _getWeekFile(
+      int week, String userEduType, String userFac, String userEdu, String group) async {
     final dir = await getApplicationDocumentsDirectory();
-    print("get week file for: " + "$userEduType-$userFac-$userEdu-$week".replaceAll(" ", ""));
-    return File("${dir.path}/" + "$userEduType-$userFac-$userEdu-$week".replaceAll(' ', ''));
+    print(
+        "get week file for: " + "$userEduType-$userFac-$userEdu-$week-$group".replaceAll(" ", ""));
+    return File("${dir.path}/" + "$userEduType-$userFac-$userEdu-$week-$group".replaceAll(' ', ''));
   }
 
   Future<List<Lecture>> getWeekData(
-      int week, String userEduType, String userFac, String userEdu) async {
+      int week, String userEduType, String userFac, String userEdu, String group) async {
     // Retrieve the week data from cache
 
     print("trying to get week data from week $week");
@@ -57,7 +59,7 @@ class Cache {
     // TODO: check if the data is already loaded in into the memory cache
     // TODO: create a memory cache
 
-    final file = await _getWeekFile(week, userEduType, userFac, userEdu);
+    final file = await _getWeekFile(week, userEduType, userFac, userEdu, group);
 
     // If the file does not exist, return null and tell the InfoHandler that it should be retrieved
     if (!(await file.exists())) {
@@ -71,18 +73,27 @@ class Cache {
     return parseCacheStored(content);
   }
 
-  Future populateWeekData(
-      int week, String userEduType, String userFac, String userEdu, List<Lecture> data) async {
+  Future populateWeekData(int week, String userEduType, String userFac, String userEdu,
+      List<Lecture> data, String group) async {
     // Save the week data to cache
     print("saving data");
     // TODO: save the data to the memory cache
-    final file = await _getWeekFile(week, userEduType, userFac, userEdu);
+    final file = await _getWeekFile(week, userEduType, userFac, userEdu, group);
     String cacheData = "";
     for (Lecture lec in data) {
       cacheData += lec.toString() + "\n";
     }
     print(cacheData);
     file.writeAsString(cacheData);
+  }
+
+  Future<List<String>> getSelectedGroups() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList("userSelectedGroups") ?? [];
+  }
+
+  void saveSelectedGroups(List<String> val) {
+    storeStringList("userSelectedGroups", val);
   }
 
   void doForcedCacheUpdate(String data) {
@@ -109,14 +120,18 @@ class InfoHandler {
   String _userEduType;
   String _userFac;
   String _userEdu;
+  Map<String, String> _userGroups;
+  List<String> _selectedUserGroups = [];
 
   void initCrawler() async {
     await loadUserInfo();
     _crawler = Crawler(id: getUserId());
+    this._userGroups = this._crawler.getDepartmentGroups();
   }
 
   InfoHandler() {
     _cache = Cache();
+    this._cache.getSelectedGroups().then((groups) => this._selectedUserGroups = groups);
 
     // The crawler initialisation has go be called after loadUserInfo()
     // meaning we have to do this in a seperate async function
@@ -125,6 +140,9 @@ class InfoHandler {
 
   String getUserId() => EducationData[this._userEduType][this._userFac][this._userEdu];
   String getUserEduType() => this._userEduType;
+  String getUserFac() => this._userFac;
+  String getUserEdu() => this._userEdu;
+
   int getUserColor() => this._userColor;
 
   void setUserColor(int color) {
@@ -137,9 +155,20 @@ class InfoHandler {
     this._cache.storeString("userEduType", edu);
   }
 
-  void setUserEdu(String edu) {
+  Future<void> setUserEdu(String edu) async {
     this._userEdu = edu;
     this._cache.storeString("userEdu", edu);
+
+    // New education type means no more selected user groups
+    // TODO: maybe this needs to be fixed to save previous user groups too
+    setUserGroups([]);
+
+    // When the user education type is set we also want to update the crawler to fetch the
+    // new url
+    print("set user id");
+    this._crawler.curId = getUserId();
+    await this._crawler.updateConnection();
+    print("updated user connection and stuff");
   }
 
   void setUserFac(String fac) {
@@ -177,19 +206,23 @@ class InfoHandler {
       return this._userEdu != null;
     }, Duration(seconds: 2));
 
-    List<Lecture> data =
-        await _cache.getWeekData(week, this._userEduType, this._userFac, this._userEdu);
-    if (data == null) {
-      try {
-        data = parseLectureList(await _crawler.getWeekData(week), week);
-        _cache.populateWeekData(week, this._userEduType, this._userFac, this._userEdu, data);
-      } catch (RangeError) {
-        print("range error due to inpropper crawler request");
-        return List();
+    List<Lecture> allData = List();
+    for (String group in this._selectedUserGroups) {
+      List<Lecture> data =
+          await _cache.getWeekData(week, this._userEduType, this._userFac, this._userEdu, group);
+      if (data == null) {
+        try {
+          data = parseLectureList(await _crawler.getWeekData(week, this._userGroups[group]), week);
+          _cache.populateWeekData(
+              week, this._userEduType, this._userFac, this._userEdu, data, group);
+        } catch (RangeError) {
+          print("range error due to inpropper crawler request");
+        }
       }
+      allData.addAll(data);
     }
 
-    return data;
+    return allData;
   }
 
   Future<List<Lecture>> getClassesOfDay(DateTime day) async {
@@ -231,9 +264,11 @@ class InfoHandler {
     // - the current week
     // - all preloaded next weeks
     // - the previous weeks
-    var data = await this._crawler.getWeekData(week);
-    await _cache.populateWeekData(
-        week, this._userEduType, this._userFac, this._userEdu, parseLectureList(data, week));
+    for (String group in this._selectedUserGroups) {
+      var data = await this._crawler.getWeekData(week, this._userGroups[group]);
+      await _cache.populateWeekData(week, this._userEduType, this._userFac, this._userEdu,
+          parseLectureList(data, week), group);
+    }
     //_cache.doForcedCacheUpdate(await this._crawler.getWeekData(week));
   }
 
@@ -249,5 +284,19 @@ class InfoHandler {
       return 1;
     else
       return 0;
+  }
+
+  List<String> getUserGroups() {
+    this._userGroups = this._crawler.getDepartmentGroups();
+    return this._userGroups.keys.toList();
+  }
+
+  void setUserGroups(List<String> val) {
+    this._selectedUserGroups = val;
+    this._cache.saveSelectedGroups(val);
+  }
+
+  List<String> getSelectedUserGroups() {
+    return this._selectedUserGroups;
   }
 }
