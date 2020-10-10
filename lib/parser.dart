@@ -28,23 +28,29 @@ class Lecture {
     this.details = data[1];
     this.professor = data[2];
     this.location = data[3];
-    this.location = data[2];
-    this.remarks = data[3];
-    this.start = DateTime.parse(data[4]);
-    this.end = DateTime.parse(data[5]);
+    this.remarks = fromSavedString(data[4]);
     this.start = DateTime.parse(data[5]);
     this.end = DateTime.parse(data[6]);
   }
+
+  String toSavedString(String t) {
+    return t.split('\n').join("\\n");
+  }
+
+  String fromSavedString(String t) {
+    return t.split("\\n").join("\n");
   }
 
   @override
   String toString() {
+    // TODO: Handle all string data fields like this.remarks
     List<String> data = List();
+
     data.add(this.name);
     data.add(this.details);
     data.add(this.professor);
     data.add(this.location);
-    data.add(this.remarks);
+    data.add(toSavedString(this.remarks));
     data.add(this.start.toString());
     data.add(this.end.toString());
 
