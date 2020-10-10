@@ -149,6 +149,19 @@ class InfoHandler {
     this._userEdu = await _cache.tryToLoadString("userEdu", DefaultUserEdu);
   }
 
+  Future waitFor(Function() test, [Duration interval = Duration.zero]) async {
+    var compl = Completer();
+    check() {
+      if (test())
+        compl.complete();
+      else
+        Timer(interval, check);
+    }
+
+    check();
+    return compl.future;
+  }
+
   Future<List<Lecture>> getWeekData(int week) async {
     if (week == -1) {
       week = calcWeekFromDate(DateTime.now());
