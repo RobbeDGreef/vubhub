@@ -118,6 +118,7 @@ class ClassesToday extends State<MainUi> {
                       (this.classes[i].name.contains("BLAUW") ? "blauw" : "oranje"),
                   style: TextStyle(color: colors[1]))),
           color: colors[0]);
+    }
 
     String policyString = this.classes[i].remarks;
     if (this.classes[i].remarks.toLowerCase().contains("rotatiesysteem"))
