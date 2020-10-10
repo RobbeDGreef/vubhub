@@ -44,6 +44,7 @@ class ClassesToday extends State<MainUi> {
   List<Lecture> classes = new List();
   DateTime selectedDay = DateTime.now();
   int todaysColor = 0;
+  int _selectedNavBarIndex = 0;
 
   ClassesToday(InfoHandler info) {
     this.info = info;
@@ -188,10 +189,60 @@ class ClassesToday extends State<MainUi> {
     ));
   }
 
+  Widget createScreen(int index) {
+    print("ind: $index");
+    switch (index) {
+      case 0:
+        return _buildMainScreen();
+
+      case 1:
+        return Text("map");
+
+      case 2:
+        return Text("places");
+
+      case 3:
+        return Text("help");
+
+      default:
+        return Text("Something went wrong");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bottom = BottomNavigationBar(
+      currentIndex: this._selectedNavBarIndex,
+      selectedItemColor: VubOrange,
+      unselectedItemColor: Colors.grey,
+      onTap: (i) {
+        setState(() {
+          this._selectedNavBarIndex = i;
+        });
+      },
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.view_agenda),
+          label: "classes",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.map),
+          label: "map",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.meeting_room),
+          label: "places",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.help_center),
+          label: "help",
+        ),
+      ],
+    );
+
     return Scaffold(
         drawer: _buildDrawer(),
+        bottomNavigationBar: bottom,
         appBar: AppBar(
           title: Text("Today's classes"),
           actions: [
@@ -201,6 +252,6 @@ class ClassesToday extends State<MainUi> {
                     this.info.forceCacheUpdate(this.info.calcWeekFromDate(this.selectedDay)))
           ],
         ),
-        body: _buildMainScreen());
+        body: createScreen(this._selectedNavBarIndex));
   }
 }
