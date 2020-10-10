@@ -220,8 +220,8 @@ class InfoHandler {
         }
       }
       if (data != null) {
-      allData.addAll(data);
-    }
+        allData.addAll(data);
+      }
     }
 
     return allData;
