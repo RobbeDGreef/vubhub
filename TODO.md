@@ -2,7 +2,6 @@
 - Loading symbol while loading various things
 - Last updated information in app drawer
 - Campus map
-- Clickable class items to see all details and directions to get there
 - Bottom tabs for various new tabs
     - classes tab
     - campus map tab
@@ -10,6 +9,8 @@
 - Reserve space in places like the library
 - Robuster crawler (fix the infinite recursion danger etc etc)
 - Selecting which lectures you actually want to show up in your lecture view
+- Long tap on detail card in lecture details copies text
+- Clickable class items to see all details and directions to get there
 
 # Done
 - Bug in week calculating system.
