@@ -91,6 +91,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
     this.info = info;
     this.dropDownColor = info.colorIntToString(info.getUserColor());
     this.dropDownEduType = info.getUserEduType();
+    this.dropDownFac = info.getUserFac();
+    this.dropDownEdu = info.getUserEdu();
+    this.selectedUserGroups = info.getSelectedUserGroups();
+    this.userGroups = info.getUserGroups();
+  }
+
   Widget _selectionScreen(
       String title, List<String> selection, String selected, Function(String) callback) {
     List<Widget> tiles = List();
@@ -177,7 +183,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
             setState(() {
               this.dropDownEdu = val;
               this.info.setUserEdu(val).then((v) {
-            setState(() {
+                setState(() {
                   this.userGroups = this.info.getUserGroups();
                 });
               });
