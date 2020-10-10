@@ -160,10 +160,18 @@ class ClassesToday extends State<MainUi> {
     return Column(children: [_buildWeekScroller(), Expanded(child: list)]);
   }
 
-  void openSettings() {
+  void openSettings() async {
     print("Settings");
-    Navigator.of(context)
+    var groups = List<String>();
+    groups.addAll(this.info.getSelectedUserGroups());
+    print("groups: $groups");
+    await Navigator.of(context)
         .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this.info)));
+    if (this.info.getSelectedUserGroups() != groups) {
+      print("updfating");
+      this.info.getClassesOfDay(this.selectedDay).then((value) => update(value));
+    }
+    print(this.info.getSelectedUserGroups());
   }
 
   void openAbout() {
