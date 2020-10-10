@@ -37,6 +37,12 @@ class Cache {
     return val;
   }
 
+  Future<File> _getWeekFile(int week, String userEduType, String userFac, String userEdu) async {
+    final dir = await getApplicationDocumentsDirectory();
+    print("get week file for: " + "$userEduType-$userFac-$userEdu-$week".replaceAll(" ", ""));
+    return File("${dir.path}/" + "$userEduType-$userFac-$userEdu-$week".replaceAll(' ', ''));
+  }
+
   Future<List<Lecture>> getWeekData(
       int week, String userEduType, String userFac, String userEdu) async {
     // Retrieve the week data from cache
