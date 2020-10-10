@@ -30,6 +30,35 @@ class _SettingsMenuState extends State<SettingsMenu> {
     this.info = info;
     this.dropDownColor = info.colorIntToString(info.getUserColor());
     this.dropDownEduType = info.getUserEduType();
+  Widget _selectionScreen(
+      String title, List<String> selection, String selected, Function(String) callback) {
+    List<Widget> tiles = List();
+    for (String select in selection) {
+      tiles.add(ListTile(
+          title: Text(select),
+          onTap: () {
+            Navigator.pop(context);
+            callback(select);
+          }));
+      tiles.add(Divider());
+    }
+
+    return Scaffold(appBar: AppBar(title: Text(title)), body: ListView(children: tiles));
+  }
+
+  SettingsTile _settingChoose(
+      String title, String selected, Icon icon, List<String> selection, Function(String) ptr) {
+    return SettingsTile(
+        title: title,
+        subtitle: selected,
+        leading: icon,
+        //trailing: Icon(Icons.arrow_forward_ios),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  _selectionScreen(title, selection, selected, ptr)));
+        });
+  }
   }
 
   SettingsTile _settingDropdown(
@@ -50,32 +79,36 @@ class _SettingsMenuState extends State<SettingsMenu> {
       SettingsSection(
         title: "User",
         tiles: [
-          _settingDropdown("Color", ["blue", "orange"], this.dropDownColor, (String newval) {
+          _settingChoose("Color", this.dropDownColor, Icon(Icons.color_lens), ["blue", "orange"],
+              (String newval) {
             setState(() {
               this.dropDownColor = newval;
               this.info.setUserColor(this.info.colorStringToInt(newval));
             });
           }),
-          _settingDropdown("Level of education", EducationData.keys.toList(), this.dropDownEduType,
-              (String newval) {
+          _settingChoose("Level of education", this.dropDownEduType, Icon(Icons.menu_book),
+              EducationData.keys.toList(), (String newval) {
             setState(() {
               this.dropDownEduType = newval;
               this.info.setUserEduType(newval);
             });
           }),
-          _settingDropdown(
-              "Faculty", EducationData[this.dropDownEduType].keys.toList(), this.dropDownFac,
-              (String newval) {
+          _settingChoose("Faculty", this.dropDownFac, Icon(Icons.domain),
+              EducationData[this.dropDownEduType].keys.toList(), (String newval) {
             setState(() {
               this.dropDownFac = newval;
               this.info.setUserFac(newval);
             });
           }),
-          _settingDropdown("Education type", getEducations(), this.dropDownEdu, (String newval) {
-            print("new: $newval");
+          _settingChoose("Education type", this.dropDownEdu, Icon(Icons.class_), getEducations(),
+              (val) {
             setState(() {
-              this.dropDownEdu = newval;
-              this.info.setUserEdu(newval);
+              this.dropDownEdu = val;
+              this.info.setUserEdu(val).then((v) {
+            setState(() {
+                  this.userGroups = this.info.getUserGroups();
+                });
+              });
             });
           }),
           // TODO
