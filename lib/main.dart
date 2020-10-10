@@ -95,10 +95,11 @@ class ClassesToday extends State<MainUi> {
 
   List<Color> _colorFromRotString(String rotsystem) {
     rotsystem = rotsystem.toLowerCase();
-    if (rotsystem.contains("blauw"))
-      return [Color.fromARGB(0xFF, 0, 52, 154), Colors.white];
-    else if (rotsystem.contains("oranje"))
-      return [Color.fromARGB(0xFF, 251, 106, 16), Colors.white];
+    if (rotsystem.contains("blauw")) {
+      return [VubBlue, Colors.white];
+    } else if (rotsystem.contains("oranje")) {
+      return [VubOrange, Colors.white];
+    }
 
     return [null, null];
   }

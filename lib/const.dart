@@ -1,3 +1,5 @@
+import "package:flutter/material.dart";
+
 final Map<String, Map<String, Map<String, String>>> EducationData = {
   "Bachelor": {
     "Letteren en wijsbegeerde": {"History": "SWS_BA_LW_NL_RS_Geschiedenis_SET"},
@@ -34,3 +36,6 @@ final DefaultUserColor = 0;
 final DefaultUserEduType = "Bachelor";
 final DefaultUserFac = "Science and Bio-engineering Sciences";
 final DefaultUserEdu = "Computer Science";
+
+final VubBlue = Color.fromARGB(0xFF, 0, 52, 154);
+final VubOrange = Color.fromARGB(0xFF, 251, 106, 16);
