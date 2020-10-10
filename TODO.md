@@ -8,6 +8,14 @@
     - campus map tab
     - reserve space in library
 - Reserve space in places like the library
+- Robuster crawler (fix the infinite recursion danger etc etc)
+- Selecting which lectures you actually want to show up in your lecture view
+- update lecture view on group change 
 
 # Done
 - Bug in week calculating system.
+- stop duplicate rotationsystems from being printed
+- save groups to multiple seperate files 
+- load multiple groups
+- load the previously selected education correctly
+- update the selected groups correctly
