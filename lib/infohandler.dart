@@ -14,6 +14,11 @@ class Cache {
     prefs.setString(key, val);
   }
 
+  void storeStringList(String key, List<String> val) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(key, val);
+  }
+
   void storeInt(String key, int val) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt(key, val);
