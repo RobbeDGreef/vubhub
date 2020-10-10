@@ -46,8 +46,6 @@ class Crawler {
         ..headers.addAll(crawlReq.headers)
         ..body = crawlReq.body;
 
-      //print("headers: ${req.headers}");
-
       // Send the request and check if we need to follow this redirection
       final res = await client.send(req);
       if (!followRedirect) return res;
