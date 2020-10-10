@@ -56,13 +56,6 @@ class Lecture {
 
     return data.join('\n');
   }
-
-  void show() {
-    print("name: " + name);
-    print("\tdetails: " + details);
-    print("\tstart: " + start.toIso8601String());
-    print("\tends: " + end.toIso8601String());
-  }
 }
 
 /// The iCalendar parser
