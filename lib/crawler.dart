@@ -89,7 +89,7 @@ class Crawler {
     if (this.content == null) return null;
     var doc = html.parse(this.content);
     List<String> items = List();
-    for (Element e in doc.getElementsByClassName("DepartmentFilter").first.children) {
+    for (var e in doc.getElementsByClassName("DepartmentFilter").first.children) {
       items.add(e.text);
     }
     return items;
