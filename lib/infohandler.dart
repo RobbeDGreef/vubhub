@@ -37,13 +37,28 @@ class Cache {
     return val;
   }
 
-  List<Lecture> getWeekData(int week) {
+  Future<List<Lecture>> getWeekData(
+      int week, String userEduType, String userFac, String userEdu) async {
+    // Retrieve the week data from cache
+
     print("trying to get week data from week $week");
+    print("week $week $userEduType $userFac $userEdu");
+    // TODO: check if the data is already loaded in into the memory cache
+    // TODO: create a memory cache
+
+    final file = await _getWeekFile(week, userEduType, userFac, userEdu);
+
+    // If the file does not exist, return null and tell the InfoHandler that it should be retrieved
+    if (!(await file.exists())) {
+      print("File does not exist");
     return null;
   }
+    print("reading content");
+    List<String> content = await file.readAsLines();
 
-  void populateWeekData(int week, List<Lecture> data) {
-    // Save the week data
+    // TODO: save this to the memory cache first
+    return parseCacheStored(content);
+  }
   }
 
   void doForcedCacheUpdate() {
