@@ -103,7 +103,7 @@ class ClassesToday extends State<MainUi> {
 
     var colors = _colorFromRotString(this.classes[i].name);
 
-    if (this.classes[i].name.toLowerCase().contains("rotatie"))
+    if (this.classes[i].name.toLowerCase().contains("<font color=")) {
       return Card(
           child: ListTile(
               title: Text(
