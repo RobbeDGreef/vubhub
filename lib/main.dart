@@ -53,8 +53,15 @@ class ClassesToday extends State<MainUi> {
   void update(List<Lecture> classes) {
     print("Updating");
     setState(() {
+      bool rotset = false;
       this.classes.clear();
       for (Lecture lec in classes) {
+        // If the rotationsystem is already specified don't add it again
+        if (lec.name.toLowerCase().contains("rotatie")) {
+          if (rotset) continue;
+          rotset = true;
+        }
+
         int i = 0;
         for (Lecture prevLec in this.classes) {
           if (lec.start.compareTo(prevLec.start) < 0) {
