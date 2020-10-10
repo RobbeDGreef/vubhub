@@ -186,7 +186,7 @@ class InfoHandler {
     DateTime toDay = DateTime(day.year, day.month, day.day);
     List<Lecture> list = List();
 
-    for (Lecture lec in await getWeekData(-1)) {
+    for (Lecture lec in await getWeekData(calcWeekFromDate(day))) {
       DateTime classDay = DateTime(lec.start.year, lec.start.month, lec.start.day);
       if (classDay == toDay) {
         list.add(lec);

@@ -8,4 +8,6 @@
     - campus map tab
     - reserve space in library
 - Reserve space in places like the library
+
+# Done
 - Bug in week calculating system.
