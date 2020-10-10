@@ -26,10 +26,15 @@ class Lecture {
   Lecture.fromString(List<String> data) {
     this.name = data[0];
     this.details = data[1];
+    this.professor = data[2];
+    this.location = data[3];
     this.location = data[2];
     this.remarks = data[3];
     this.start = DateTime.parse(data[4]);
     this.end = DateTime.parse(data[5]);
+    this.start = DateTime.parse(data[5]);
+    this.end = DateTime.parse(data[6]);
+  }
   }
 
   @override
@@ -37,6 +42,7 @@ class Lecture {
     List<String> data = List();
     data.add(this.name);
     data.add(this.details);
+    data.add(this.professor);
     data.add(this.location);
     data.add(this.remarks);
     data.add(this.start.toString());
