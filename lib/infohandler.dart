@@ -57,8 +57,8 @@ class Cache {
     // If the file does not exist, return null and tell the InfoHandler that it should be retrieved
     if (!(await file.exists())) {
       print("File does not exist");
-    return null;
-  }
+      return null;
+    }
     print("reading content");
     List<String> content = await file.readAsLines();
 
