@@ -168,9 +168,16 @@ List<Lecture> parseLectureList(String data, int week) {
           toDay.day,
           int.parse(day.children[3].text.split(":")[0]),
           int.parse(day.children[3].text.split(":")[1]));
-      print("lec: ${lec.name} date: ${lec.start}");
       lectures.add(new Lecture.fromObject(lec));
     }
+  }
+  return lectures;
+}
+
+List<Lecture> parseCacheStored(List<String> data) {
+  List<Lecture> lectures = List();
+  for (int i = 0; i < data.length; i += 7) {
+    lectures.add(Lecture.fromString(data.sublist(i, i + 7)));
   }
   return lectures;
 }
