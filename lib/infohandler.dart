@@ -80,7 +80,7 @@ class Cache {
     file.writeAsString(cacheData);
   }
 
-  void doForcedCacheUpdate() {
+  void doForcedCacheUpdate(String data) {
     // Force update everything
   }
 }
@@ -175,8 +175,13 @@ class InfoHandler {
     List<Lecture> data =
         await _cache.getWeekData(week, this._userEduType, this._userFac, this._userEdu);
     if (data == null) {
-      data = parseLectureList(await _crawler.getWeekData(week), week);
-      _cache.populateWeekData(week, this._userEduType, this._userFac, this._userEdu, data);
+      try {
+        data = parseLectureList(await _crawler.getWeekData(week), week);
+        _cache.populateWeekData(week, this._userEduType, this._userFac, this._userEdu, data);
+      } catch (RangeError) {
+        print("range error due to inpropper crawler request");
+        return List();
+      }
     }
 
     return data;
