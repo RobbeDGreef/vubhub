@@ -125,13 +125,16 @@ class InfoHandler {
 
   void initCrawler() async {
     await loadUserInfo();
-    _crawler = Crawler(id: getUserId());
+    print("${this._userEduType} ${this._userFac} ${this._userEdu}");
+    this._crawler.curId = getUserId();
+    await this._crawler.updateConnection();
     this._userGroups = this._crawler.getDepartmentGroups();
+    this._cache.getSelectedGroups().then((groups) => this._selectedUserGroups = groups);
   }
 
   InfoHandler() {
     _cache = Cache();
-    this._cache.getSelectedGroups().then((groups) => this._selectedUserGroups = groups);
+    _crawler = Crawler();
 
     // The crawler initialisation has go be called after loadUserInfo()
     // meaning we have to do this in a seperate async function

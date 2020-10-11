@@ -22,10 +22,7 @@ class Crawler {
   String content;
   CrawlRequest _request;
 
-  Crawler({String id}) {
-    this.curId = id;
-    updateConnection();
-  }
+  Crawler() {}
 
   /// This function basically mimics the browser/server behavior of using redirection
   /// links and set-cookie headers to get a session key and retrieve the correct
