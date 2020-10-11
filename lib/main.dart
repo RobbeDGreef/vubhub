@@ -3,7 +3,9 @@ import 'dart:io';
 
 import "package:flutter/material.dart";
 import "package:calendar_strip/calendar_strip.dart";
+import 'package:flutter/services.dart';
 import "package:intl/intl.dart";
+import "package:flushbar/flushbar.dart";
 
 import "parser.dart";
 import "infohandler.dart";
@@ -107,6 +109,18 @@ class ClassesToday extends State<MainUi> {
     return [null, null];
   }
 
+  Widget _buildLectureDetailTile(String text, Icon icon) {
+    return Card(
+        child: ListTile(
+      title: Text(text),
+      leading: icon,
+      onLongPress: () {
+        Clipboard.setData(ClipboardData(text: text));
+        Flushbar(message: "Copied text to clipboard", duration: Duration(seconds: 2)).show(context);
+      },
+    ));
+  }
+
   Widget _buildLectureDetails(int index) {
     Lecture lec = this.classes[index];
     return Scaffold(
@@ -115,18 +129,17 @@ class ClassesToday extends State<MainUi> {
           Padding(
               padding: EdgeInsets.only(left: 4, right: 4, bottom: 16, top: 16),
               child: Text(lec.name, style: TextStyle(fontSize: 20))),
-          Card(child: ListTile(title: Text(lec.professor), leading: Icon(Icons.person_outline))),
-          Card(child: ListTile(title: Text(lec.details), leading: Icon(Icons.dehaze))),
-          Card(child: ListTile(title: Text(lec.location), leading: Icon(Icons.location_on))),
-          Card(child: ListTile(title: Text(lec.remarks), leading: Icon(Icons.event_note_outlined))),
-          Card(
-              child: ListTile(
-                  title: Text(DateFormat("EEEE d MMMM").format(lec.start) +
-                      " from " +
-                      DateFormat("H:mm").format(lec.start) +
-                      " until " +
-                      DateFormat("H:mm").format(lec.end)),
-                  leading: Icon(Icons.access_time))),
+          _buildLectureDetailTile(lec.professor, Icon(Icons.person_outline)),
+          _buildLectureDetailTile(lec.details, Icon(Icons.dehaze)),
+          _buildLectureDetailTile(lec.location, Icon(Icons.location_on)),
+          _buildLectureDetailTile(lec.remarks, Icon(Icons.event_note_outlined)),
+          _buildLectureDetailTile(
+              DateFormat("EEEE d MMMM").format(lec.start) +
+                  " from " +
+                  DateFormat("H:mm").format(lec.start) +
+                  " until " +
+                  DateFormat("H:mm").format(lec.end),
+              Icon(Icons.access_time)),
         ]));
   }
 

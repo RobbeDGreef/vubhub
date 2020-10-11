@@ -32,8 +32,8 @@ dependencies:
   path_provider: ^1.6.10
   settings_ui: ^0.4.0
   calendar_strip: ^1.0.4
+  flushbar: ^1.10.4
 
-  # Debug maybe
   http: ^0.12.0
   html: ^0.14.0
 
