@@ -130,24 +130,31 @@ class ClassesToday extends State<MainUi> {
 
   Widget _buildLectureDetails(int index) {
     Lecture lec = this.classes[index];
-    return Scaffold(
-        appBar: AppBar(title: Text("Details")),
-        body: ListView(children: [
-          Padding(
-              padding: EdgeInsets.only(left: 4, right: 4, bottom: 16, top: 16),
-              child: Text(lec.name, style: TextStyle(fontSize: 20))),
-          _buildLectureDetailTile(lec.professor, Icon(Icons.person_outline)),
-          _buildLectureDetailTile(lec.details, Icon(Icons.dehaze)),
-          _buildLectureDetailTile(lec.location, Icon(Icons.location_on)),
-          _buildLectureDetailTile(lec.remarks, Icon(Icons.event_note_outlined)),
-          _buildLectureDetailTile(
-              DateFormat("EEEE d MMMM").format(lec.start) +
-                  " from " +
-                  DateFormat("H:mm").format(lec.start) +
-                  " until " +
-                  DateFormat("H:mm").format(lec.end),
-              Icon(Icons.access_time)),
-        ]));
+    final List<List<dynamic>> details = [
+      [lec.professor, Icon(Icons.person_outline)],
+      [lec.details, Icon(Icons.dehaze)],
+      [lec.location, Icon(Icons.location_on)],
+      [lec.remarks, Icon(Icons.event_note_outlined)],
+      [
+        DateFormat("EEEE d MMMM").format(lec.start) +
+            " from " +
+            DateFormat("H:mm").format(lec.start) +
+            " until " +
+            DateFormat("H:mm").format(lec.end),
+        Icon(Icons.access_time)
+      ]
+    ];
+    final List<Widget> children = [
+      Padding(
+          padding: EdgeInsets.only(left: 4, right: 4, bottom: 16, top: 16),
+          child: Text(lec.name, style: TextStyle(fontSize: 20))),
+    ];
+
+    for (List<dynamic> info in details) {
+      if (info[0] != "") children.add(_buildLectureDetailTile(info[0], info[1]));
+    }
+
+    return Scaffold(appBar: AppBar(title: Text("Details")), body: ListView(children: children));
   }
 
   void openLectureDetails(int index) {
