@@ -244,7 +244,7 @@ class ClassesToday extends State<MainUi> {
   Widget build(BuildContext context) {
     final bottom = BottomNavigationBar(
       currentIndex: this._selectedNavBarIndex,
-      selectedItemColor: VubOrange,
+      selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.grey,
       onTap: (i) {
         setState(() {
