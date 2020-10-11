@@ -10,7 +10,6 @@
 - Robuster crawler (fix the infinite recursion danger etc etc)
 - Selecting which lectures you actually want to show up in your lecture view
 - Clickable class items to see all details and directions to get there
-- In the lecture details remove details tabs that are empty
 - lesson counter
 
 # Done
@@ -22,3 +21,4 @@
 - update the selected groups correctly
 - update lecture view on group change 
 - Long tap on detail card in lecture details copies text
+- In the lecture details remove details tabs that are empty
