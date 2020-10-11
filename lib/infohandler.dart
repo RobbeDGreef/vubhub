@@ -29,6 +29,7 @@ class Cache {
     String val = prefs.getString(key);
     if (val == null) {
       storeString(key, defaultValue);
+      return defaultValue;
     }
     return val;
   }
@@ -38,6 +39,7 @@ class Cache {
     int val = prefs.getInt(key);
     if (val == null) {
       storeInt(key, defaultValue);
+      return defaultValue;
     }
     return val;
   }
@@ -45,8 +47,6 @@ class Cache {
   Future<File> _getWeekFile(
       int week, String userEduType, String userFac, String userEdu, String group) async {
     final dir = await getApplicationDocumentsDirectory();
-    print(
-        "get week file for: " + "$userEduType-$userFac-$userEdu-$week-$group".replaceAll(" ", ""));
     return File("${dir.path}/" + "$userEduType-$userFac-$userEdu-$week-$group".replaceAll(' ', ''));
   }
 
