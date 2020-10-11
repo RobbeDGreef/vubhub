@@ -9,8 +9,9 @@
 - Reserve space in places like the library
 - Robuster crawler (fix the infinite recursion danger etc etc)
 - Selecting which lectures you actually want to show up in your lecture view
-- Long tap on detail card in lecture details copies text
 - Clickable class items to see all details and directions to get there
+- In the lecture details remove details tabs that are empty
+- lesson counter
 
 # Done
 - Bug in week calculating system.
@@ -20,3 +21,4 @@
 - load the previously selected education correctly
 - update the selected groups correctly
 - update lecture view on group change 
+- Long tap on detail card in lecture details copies text
