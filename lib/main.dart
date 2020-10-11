@@ -60,6 +60,9 @@ class ClassesToday extends State<MainUi> {
     setState(() {
       bool rotset = false;
       this.classes.clear();
+      if (classes.isEmpty) {
+        this.classes.add(Lecture.onlyName("No classes today"));
+      }
       for (Lecture lec in classes) {
         // If the rotationsystem is already specified don't add it again
         if (lec.name.toLowerCase().contains("rotatie")) {
@@ -165,9 +168,15 @@ class ClassesToday extends State<MainUi> {
   /// Creates a class or lecture tab for the
   Widget _createClassItem(BuildContext context, int i) {
     var icon = Icons.record_voice_over_outlined;
-    if (this.classes[i].name.toLowerCase().contains("wpo")) icon = Icons.subject;
+    if (this.classes[i].name.toLowerCase().contains("wpo")) {
+      icon = Icons.subject;
+    }
 
     var colors = _colorFromRotString(this.classes[i].name);
+
+    if (this.classes[i].name.toLowerCase() == "no classes today") {
+      return ListTile(title: Text("No classes today", textAlign: TextAlign.center));
+    }
 
     if (this.classes[i].name.toLowerCase().contains("<font color=")) {
       return Card(

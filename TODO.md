@@ -22,3 +22,4 @@
 - update lecture view on group change 
 - Long tap on detail card in lecture details copies text
 - In the lecture details remove details tabs that are empty
+- add a "no classes today" text if there are no classes today

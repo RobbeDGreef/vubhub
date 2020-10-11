@@ -13,6 +13,10 @@ class Lecture {
   DateTime end;
 
   Lecture() {}
+
+  Lecture.onlyName(String s) {
+    this.name = s;
+  }
   Lecture.fromObject(Lecture obj) {
     this.name = obj.name;
     this.details = obj.details;
