@@ -117,12 +117,13 @@ class ClassesToday extends State<MainUi> {
       onLongPress: () {
         Clipboard.setData(ClipboardData(text: text));
         Flushbar(
-                margin: EdgeInsets.all(8),
-                borderRadius: 8,
-                message: "Copied text to clipboard",
-                icon: Icon(Icons.info_outline, color: Colors.blue),
-                duration: Duration(seconds: 2))
-            .show(context);
+          margin: EdgeInsets.all(8),
+          borderRadius: 8,
+          message: "Copied text to clipboard",
+          icon: Icon(Icons.info_outline, color: Colors.blue),
+          duration: Duration(seconds: 2),
+          animationDuration: Duration(milliseconds: 500),
+        ).show(context);
       },
     ));
   }
