@@ -42,3 +42,6 @@ final DefaultUserEdu = "Computer Science";
 
 final VubBlue = Color.fromARGB(0xFF, 0, 52, 154);
 final VubOrange = Color.fromARGB(0xFF, 251, 106, 16);
+
+final Pattern emailPattern =
+    r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';

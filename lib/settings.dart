@@ -218,9 +218,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
             trailing: Container(
               width: 200,
               child: Form(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: TextFormField(
                   initialValue: this.info.getUserEmail(),
                   onEditingComplete: () => Form.of(primaryFocus.context).save(),
+                  validator: (String arg) {
+                    RegExp regex = new RegExp(emailPattern);
+                    if (!regex.hasMatch(arg)) {
+                      return "Please enter valid email!";
+                    } else {
+                      return null;
+                    }
+                  },
                   onSaved: (val) {
                     this.info.setUserEmail(val);
                     FocusScopeNode curFocus = FocusScope.of(context);
