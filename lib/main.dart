@@ -257,8 +257,32 @@ class ClassesToday extends State<MainUi> {
     ));
   }
 
+  void openLibraryBooking() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) => LibraryBookingMenu(this.info),
+      ),
+    );
+  }
+
+  Widget _buildPlaceTile(String title, Function() ptr) {
+    return Card(
+      child: ListTile(
+        contentPadding: EdgeInsets.all(5),
+        leading: Icon(Icons.library_books),
+        title: Text(title),
+        onTap: () => ptr(),
+      ),
+    );
+  }
+
+  List<Widget> _getPlaces() {
+    return [
+      _buildPlaceTile("Centrale bibliotheek VUB", openLibraryBooking),
+    ];
+  }
+
   Widget createScreen(int index) {
-    print("ind: $index");
     switch (index) {
       case 0:
         return _buildMainScreen();
@@ -269,7 +293,7 @@ class ClassesToday extends State<MainUi> {
         );
 
       case 2:
-        return Text("places");
+        return ListView(children: _getPlaces());
 
       case 3:
         return Text("help");
