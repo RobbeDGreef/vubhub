@@ -1,7 +1,6 @@
 # The unofficial VUB app
 
-<p float="left">
-    <img src="/screenshots/screenshot.png">
-    <img src="/screenshots/screenshot-2.png">
-</p>
+
+![Screenshot](screenshots/screenshot.png)
+
 @todo: woops
