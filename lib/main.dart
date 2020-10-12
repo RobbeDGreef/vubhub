@@ -41,14 +41,30 @@ class MainUi extends StatefulWidget {
 /// the data is thus mutable.
 class ClassesToday extends State<MainUi> {
   InfoHandler info;
-  List<Lecture> classes = new List();
+  List<Lecture> classes = [Lecture.empty()];
   DateTime selectedDay = DateTime.now();
   int todaysColor = 0;
   int _selectedNavBarIndex = 0;
+  bool _loading = true;
 
   ClassesToday(InfoHandler info) {
     this.info = info;
-    this.info.getClassesOfDay(DateTime.now()).then((list) => update(list));
+    loadNewClassData(DateTime.now(), false);
+  }
+
+  void loadNewClassData(DateTime date, [bool shouldSetState = true]) {
+    if (shouldSetState) {
+      setState(() {
+        this._loading = true;
+        this.classes.clear();
+        this.classes.add(Lecture.empty());
+      });
+    }
+
+    this.info.getClassesOfDay(date).then((list) {
+      this._loading = false;
+      update(list);
+    });
   }
 
   void update(List<Lecture> classes) {
@@ -84,7 +100,7 @@ class ClassesToday extends State<MainUi> {
   Widget _buildWeekScroller() {
     return CalendarStrip(onDateSelected: ((date) {
       this.selectedDay = date;
-      this.info.getClassesOfDay(date).then((list) => update(list));
+      loadNewClassData(date);
     }));
   }
 
@@ -163,6 +179,15 @@ class ClassesToday extends State<MainUi> {
 
   /// Creates a class or lecture tab for the
   Widget _createClassItem(BuildContext context, int i) {
+    if (this._loading) {
+      return Center(
+          child: Container(
+        margin: EdgeInsets.all(8),
+        child: CircularProgressIndicator(),
+        width: 50,
+        height: 50,
+      ));
+    }
     var icon = Icons.record_voice_over_outlined;
     if (this.classes[i].name.toLowerCase().contains("wpo")) {
       icon = Icons.subject;
@@ -233,7 +258,7 @@ class ClassesToday extends State<MainUi> {
         .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this.info)));
 
     if (this.info.getSelectedUserGroups() != groups) {
-      this.info.getClassesOfDay(this.selectedDay).then((value) => update(value));
+      loadNewClassData(this.selectedDay);
     }
   }
 
@@ -339,8 +364,19 @@ class ClassesToday extends State<MainUi> {
           actions: [
             IconButton(
                 icon: Icon(Icons.replay_sharp),
-                onPressed: () =>
-                    this.info.forceCacheUpdate(this.info.calcWeekFromDate(this.selectedDay)))
+                onPressed: () {
+                  setState(() {
+                    this.classes.clear();
+                    this.classes.add(Lecture.empty());
+                    this._loading = true;
+                  });
+                  this
+                      .info
+                      .forceCacheUpdate(this.info.calcWeekFromDate(this.selectedDay))
+                      .then((_) {
+                    loadNewClassData(this.selectedDay, false);
+                  });
+                })
           ],
         ),
         body: createScreen(this._selectedNavBarIndex));
