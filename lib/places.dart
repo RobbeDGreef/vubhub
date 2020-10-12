@@ -108,22 +108,29 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
         !(spot["resource_name"] as String).toLowerCase().contains(this._typedFilter);
   }
 
-  void _maybeAddWidget(SpotItem item) {
-    if (!item.isAvailable && (!this._showUnavailablePlaces || this._typedFilter.isNotEmpty)) return;
-
-    this._showedSpots.add(item);
-  }
-
   void updateList() {
     this._showedSpots.clear();
     int i = 0;
     for (Map<String, dynamic> seat in this._jsonData) {
-      if (_checkName(seat) || !_hasFreeTimeSpot(seat)) {
-        _maybeAddWidget(SpotItem(seat, i, false));
+      bool available = true;
+      // The text filter is not found in the name of the seat, do not add
+      if (_checkName(seat)) {
         i++;
         continue;
       }
-      this._showedSpots.add(SpotItem(seat, i, true));
+
+      // The seat is not available for the selected date, time or duration,
+      // check if it should be added (with unavailable tag) or should be skipped.
+      if (!_hasFreeTimeSpot(seat)) {
+        if (this._showUnavailablePlaces) {
+          available = false;
+        } else {
+          i++;
+          continue;
+        }
+      }
+
+      this._showedSpots.add(SpotItem(seat, i, available));
       i++;
     }
   }
