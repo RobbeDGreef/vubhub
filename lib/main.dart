@@ -6,6 +6,7 @@ import "package:calendar_strip/calendar_strip.dart";
 import 'package:flutter/services.dart';
 import "package:intl/intl.dart";
 import "package:flushbar/flushbar.dart";
+import "package:photo_view/photo_view.dart";
 
 import "parser.dart";
 import "infohandler.dart";
@@ -263,7 +264,9 @@ class ClassesToday extends State<MainUi> {
         return _buildMainScreen();
 
       case 1:
-        return Text("map");
+        return PhotoView(
+          imageProvider: AssetImage("assets/VubMapTemp.jpg"),
+        );
 
       case 2:
         return Text("places");
