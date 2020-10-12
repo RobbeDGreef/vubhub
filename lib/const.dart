@@ -31,7 +31,10 @@ final Map<String, Map<String, Map<String, String>>> EducationData = {
 
 final String VubTimetablesEntryUrl =
     "https://splus.cumulus.vub.ac.be/SWS/v3/evenjr/NL/STUDENTSET/studentset.aspx";
+final String LibraryApiUrl =
+    "https://reservation.affluences.com/api/resources/1625d777-78f9-4085-b276-ce05fe99850f/available?date=";
 
+final String LibraryReserveUrl = "https://reservation.affluences.com/api/reserve/";
 final DefaultUserColor = 0;
 final DefaultUserEduType = "Bachelor";
 final DefaultUserFac = "Science and Bio-engineering Sciences";
