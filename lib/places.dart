@@ -44,7 +44,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
   TimeOfDay _selectedDuration = TimeOfDay(hour: 0, minute: 30);
   List<SpotItem> _showedSpots = [SpotItem.empty()];
   String _typedFilter = "";
-  bool _alwaysShowPlaces = true;
+  bool _showUnavailablePlaces = true;
   InfoHandler info;
   bool _loading = true;
 
@@ -109,7 +109,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
   }
 
   void _maybeAddWidget(SpotItem item) {
-    if (!item.isAvailable && (!this._alwaysShowPlaces || this._typedFilter.isNotEmpty)) return;
+    if (!item.isAvailable && (!this._showUnavailablePlaces || this._typedFilter.isNotEmpty)) return;
 
     this._showedSpots.add(item);
   }
@@ -123,7 +123,6 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
         i++;
         continue;
       }
-      print("added");
       this._showedSpots.add(SpotItem(seat, i, true));
       i++;
     }
