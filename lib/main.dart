@@ -280,7 +280,10 @@ class ClassesToday extends State<MainUi> {
     return Drawer(
         child: ListView(
       children: [
-        DrawerHeader(child: Text("Header"), decoration: BoxDecoration(color: Colors.blue)),
+        DrawerHeader(
+            decoration: BoxDecoration(
+                image: DecorationImage(image: AssetImage("assets/vub-cs.png")),
+                color: Colors.white)),
         ListTile(title: Text("Settings"), onTap: openSettings),
         ListTile(title: Text("About"), onTap: openAbout)
       ],
