@@ -405,7 +405,9 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
                 icon: Icon(Icons.email_outlined),
                 hintText: "Email",
               ),
-              initialValue: this.info.getUserEmail().toLowerCase(),
+              initialValue: (this.info.getUserEmail() != null)
+                  ? this.info.getUserEmail().toLowerCase()
+                  : null,
               onChanged: (val) => email = val,
             ),
             Row(
