@@ -120,6 +120,7 @@ class InfoHandler {
   String _userEduType;
   String _userFac;
   String _userEdu;
+  String _userEmail;
   Map<String, String> _userGroups;
   List<String> _selectedUserGroups = [];
 
@@ -145,6 +146,7 @@ class InfoHandler {
   String getUserEduType() => this._userEduType;
   String getUserFac() => this._userFac;
   String getUserEdu() => this._userEdu;
+  String getUserEmail() => this._userEmail;
 
   int getUserColor() => this._userColor;
 
@@ -182,6 +184,7 @@ class InfoHandler {
     this._userEduType = await _cache.tryToLoadString("userEduType", DefaultUserEduType);
     this._userFac = await _cache.tryToLoadString("userFac", DefaultUserFac);
     this._userEdu = await _cache.tryToLoadString("userEdu", DefaultUserEdu);
+    this._userEmail = await _cache.tryToLoadString("userEmail", null);
   }
 
   Future waitFor(Function() test, [Duration interval = Duration.zero]) async {
@@ -301,5 +304,10 @@ class InfoHandler {
 
   List<String> getSelectedUserGroups() {
     return this._selectedUserGroups;
+  }
+
+  void setUserEmail(String val) {
+    this._userEmail = val;
+    this._cache.storeString("userEmail", val);
   }
 }
