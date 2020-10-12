@@ -29,7 +29,6 @@ that will mess up the super delicate server connection
 - Notify user if their lectures have changed
 - Access their uploaded files from canvas ?
 - Just integrate most of canvas into the app ?
-- Make map view not infinitely zoomable
 - Make proper map view, (select multiple maps for different campuses)
 - Draw own vub maps so that we can mark rooms on that map
 
@@ -44,3 +43,4 @@ that will mess up the super delicate server connection
 - Long tap on detail card in lecture details copies text
 - In the lecture details remove details tabs that are empty
 - add a "no classes today" text if there are no classes today
+- Make map view not infinitely zoomable

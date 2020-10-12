@@ -309,6 +309,8 @@ class ClassesToday extends State<MainUi> {
 
       case 1:
         return PhotoView(
+          minScale: 1.0,
+          maxScale: 8.0,
           imageProvider: AssetImage("assets/VubMapTemp.jpg"),
         );
 
