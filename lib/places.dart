@@ -6,9 +6,22 @@ import 'const.dart';
 import 'infohandler.dart';
 import "package:intl/intl.dart";
 import "package:interval_time_picker/interval_time_picker.dart" as interval;
+import "package:photo_view/photo_view.dart";
 
 // Debugging
 import "package:http/http.dart" as http;
+
+/// Helper
+String _addHalfhourToString(String time) {
+  int hour = int.parse(time.substring(0, 2));
+  int minute = int.parse(time.substring(3, 5)) + 30;
+  if (minute == 60) {
+    hour += 1;
+    minute = 0;
+  }
+
+  return NumberFormat("00").format(hour) + ":" + NumberFormat("00").format(minute);
+}
 
 class SpotItem {
   int index = 0;
@@ -23,6 +36,253 @@ class SpotItem {
     this.index = index;
     this.isAvailable = isAvailable;
     this.details = seat["description"];
+  }
+}
+
+class SpotDetailPage extends StatefulWidget {
+  Map<String, dynamic> _detailData;
+  Function(List<int>) _bookCallback;
+  DateTime _date;
+
+  SpotDetailPage(Map<String, dynamic> detailData, Function(List<int>) bookCallback, DateTime date) {
+    this._detailData = detailData;
+    this._bookCallback = bookCallback;
+    this._date = date;
+  }
+
+  @override
+  _SpotDetailPageState createState() =>
+      _SpotDetailPageState(this._detailData, this._bookCallback, this._date);
+}
+
+class _SpotDetailPageState extends State<SpotDetailPage> {
+  Map<String, dynamic> _detailData;
+  List<int> _selectedButtons = [];
+  Function(List<int>) _bookCallback;
+  DateTime _selectedDate;
+
+  _SpotDetailPageState(
+      Map<String, dynamic> detailData, Function(List<int>) bookCallback, DateTime date) {
+    this._detailData = detailData;
+    this._bookCallback = bookCallback;
+    this._selectedDate = date;
+  }
+
+  void _toggleSelectedButton(int index) {
+    if (this._selectedButtons.contains(index)) {
+      this._selectedButtons.remove(index);
+      return;
+    }
+
+    for (int i = 0; i < this._selectedButtons.length; i++) {
+      if (this._selectedButtons[i] > index) {
+        this._selectedButtons.insert(i, index);
+        return;
+      }
+    }
+    this._selectedButtons.add(index);
+  }
+
+  Widget _buildSpotDetailTimeButton(String hour, int index, bool available, String seat) {
+    List<Color> colors = [Colors.grey, Colors.white];
+
+    if (available) {
+      colors = [Colors.white, Colors.blue];
+    }
+    print(this._selectedButtons);
+    if (this._selectedButtons.contains(index)) {
+      colors = [Colors.blue, Colors.white];
+    }
+
+    return Card(
+      child: TextButton(
+        child: Text(hour,
+            style: TextStyle(
+              fontSize: 20,
+              color: colors[1],
+            )),
+        onPressed: () {
+          if (available) {
+            setState(() {
+              _toggleSelectedButton(index);
+            });
+          } else {
+            Flushbar(
+              message: seat + " is already booked at " + hour,
+              duration: Duration(seconds: 2),
+              margin: EdgeInsets.all(8),
+              borderRadius: 8,
+              animationDuration: Duration(milliseconds: 500),
+            ).show(context);
+          }
+        },
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(colors[0]),
+        ),
+      ),
+    );
+  }
+
+  bool _doSelectedTimerangesMerge() {
+    int prevIndex = this._selectedButtons[0] - 1;
+    for (int index in this._selectedButtons) {
+      if (index != prevIndex + 1) {
+        return false;
+      }
+      prevIndex = index;
+    }
+    return true;
+  }
+
+  Widget build(BuildContext context) {
+    List<Widget> times = List();
+    int buttonIndex = 0;
+    Color buttonColor = Colors.grey;
+    String selectedTimeText;
+    String availableTimeText = "Available times";
+
+    // TODO: i noticed that studyspaces 1 - 58 are not used E.I. plan nummero uno, is never used, but what if they one day are. We need to parse the name and based on that select the correct map
+    String imgPath = "assets/studyspaces2.png";
+
+    if (this._selectedButtons.isEmpty) {
+      selectedTimeText = "No timerange selected";
+    } else if (_doSelectedTimerangesMerge()) {
+      selectedTimeText = "Book from " +
+          this._detailData["hours"][this._selectedButtons[0]]["hour"] +
+          " until " +
+          _addHalfhourToString(this._detailData["hours"][this._selectedButtons.last]["hour"]);
+      buttonColor = Colors.blue;
+    }
+
+    for (Map<String, dynamic> hour in this._detailData["hours"]) {
+      times.add(
+        _buildSpotDetailTimeButton(
+          hour["hour"],
+          buttonIndex,
+          (hour["places_available"] == 1),
+          this._detailData["resource_name"],
+        ),
+      );
+      buttonIndex++;
+    }
+
+    if (times.isEmpty) {
+      availableTimeText = "No available times";
+    }
+
+    availableTimeText += " at " + DateFormat("d MMMM").format(this._selectedDate);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Seat details"),
+      ),
+      body: ListView(
+        //crossAxisAlignment: CrossAxisAlignment.start,
+        padding: EdgeInsets.all(8),
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: 8, top: 5),
+            child: Text(
+              this._detailData["resource_name"],
+              style: TextStyle(fontSize: 30),
+            ),
+          ),
+          SizedBox(height: 10),
+          Padding(
+            padding: EdgeInsets.only(left: 8, bottom: 10),
+            child: Text(this._detailData["description"], style: TextStyle(fontSize: 15)),
+          ),
+          Card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  // TODO: if there are no available times display "no available times here instead"
+                  child: Text(availableTimeText,
+                      style: TextStyle(fontSize: 18, color: Colors.grey[700])),
+                  padding: EdgeInsets.only(left: 10, top: 10),
+                ),
+                LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                  return GridView.count(
+                    primary: false,
+                    padding: EdgeInsets.all(8),
+                    crossAxisSpacing: 2,
+                    shrinkWrap: true,
+                    childAspectRatio: 1.8,
+                    mainAxisSpacing: 2,
+                    children: times,
+                    crossAxisCount: constraints.maxWidth ~/ 80,
+                  );
+                }),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                (selectedTimeText != null)
+                    ? Text(selectedTimeText, style: TextStyle(fontSize: 15))
+                    : Text(
+                        "Selected time ranges do not merge!",
+                        style: TextStyle(color: Colors.red, fontSize: 15),
+                      ),
+                TextButton(
+                  child: Text("Book now", style: TextStyle(color: Colors.white)),
+                  style:
+                      ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(buttonColor)),
+                  onPressed: () {
+                    if (this._selectedButtons.isNotEmpty && selectedTimeText != null) {
+                      this._bookCallback(this._selectedButtons);
+                    } else {
+                      Flushbar(
+                        margin: EdgeInsets.all(8),
+                        borderRadius: 8,
+                        message: "No valid time range is selected",
+                        duration: Duration(seconds: 2),
+                        animationDuration: Duration(milliseconds: 500),
+                      ).show(context);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 8, bottom: 4),
+            child: Text("Library map", style: TextStyle(fontSize: 15)),
+          ),
+          Card(
+            child: ListTile(
+              title: Image(
+                image: AssetImage(imgPath),
+              ),
+              onTap: () {
+                // TODO: this transition is bad, the dismiss takes to long and its not pretty
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return Dismissible(
+                        key: Key("key?"),
+                        onDismissed: (_) => Navigator.pop(context),
+                        background: Container(),
+                        direction: DismissDirection.vertical,
+                        child: PhotoView(
+                          imageProvider: AssetImage(imgPath),
+                          minScale: 0.1,
+                          maxScale: 1.0,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -294,7 +554,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
     );
   }
 
-  void _bookSeat(String email, int index) {
+  void _bookSeat(String email, int index, String from, String until) {
     Navigator.pop(context);
     // These headers are probably not necessairy but it can't hurt to send them anyway
     // I have no way of testing this part of the system because it makes actual requests
@@ -316,10 +576,8 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
     var body = jsonEncode({
       "email": email,
       "date": DateFormat("yyyy-MM-dd").format(this._selectedDate),
-      "start_time": _makeTimeString(this._selectedTime),
-      "end_time": _makeTimeString(TimeOfDay(
-          hour: this._selectedTime.hour + this._selectedDuration.hour,
-          minute: this._selectedTime.minute + this._selectedDuration.minute)),
+      "start_time": from,
+      "end_time": until,
       "note": null,
       "user_firstname": null,
       "user_lastname": null,
@@ -382,15 +640,15 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
     });
   }
 
-  void _bookSeatDialog(int index) {
+  void _bookSeatDialog(int index, String from, String until) {
     String email = this.info.getUserEmail();
     final bookstr = this._showedSpots[index].name +
         " from " +
-        _makeTimeString(this._selectedTime) +
+        from +
         " until " +
-        _makeTimeString(TimeOfDay(
-            hour: this._selectedTime.hour + this._selectedDuration.hour,
-            minute: this._selectedTime.minute + this._selectedDuration.minute));
+        until +
+        " at " +
+        DateFormat("d MMMM").format(this._selectedDate);
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -415,7 +673,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
               children: [
                 TextButton(
                   child: Text("Yes, book now"),
-                  onPressed: () => _bookSeat(email, index),
+                  onPressed: () => _bookSeat(email, index, from, until),
                 ),
                 TextButton(
                   child: Text("No, discard"),
@@ -426,6 +684,15 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
           ],
         );
       },
+    );
+  }
+
+  void _bookDetailed(int index, List<int> range) {
+    return _bookSeatDialog(
+      index,
+      this._jsonData[this._showedSpots[index].index]["hours"][range[0]]["hour"],
+      _addHalfhourToString(
+          this._jsonData[this._showedSpots[index].index]["hours"][range.last]["hour"]),
     );
   }
 
@@ -450,29 +717,52 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
       ));
     }
 
-    Widget button;
-    if (this._showedSpots[index].isAvailable) {
-      button = TextButton(
-        child: Text("Book", style: TextStyle(color: Colors.white)),
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-        ),
-        onPressed: () => _bookSeatDialog(index),
-      );
-    } else {
-      button = TextButton(
-        child: Text("unavailable", style: TextStyle(color: Colors.white)),
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
-        ),
-        onPressed: () => _showUnavailable(index),
-      );
+    Widget _buildBookButton(int index) {
+      Widget button;
+      if (this._showedSpots[index].isAvailable) {
+        button = TextButton(
+          child: Text("Book", style: TextStyle(color: Colors.white)),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+          ),
+          onPressed: () => _bookSeatDialog(
+              index,
+              _makeTimeString(this._selectedTime),
+              _makeTimeString(TimeOfDay(
+                  hour: this._selectedTime.hour + this._selectedDuration.hour,
+                  minute: this._selectedTime.minute + this._selectedDuration.minute))),
+        );
+      } else {
+        button = TextButton(
+          child: Text("unavailable", style: TextStyle(color: Colors.white)),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
+          ),
+          onPressed: () => _showUnavailable(index),
+        );
+      }
+      return button;
     }
+
+    Widget button = _buildBookButton(index);
     return Card(
       child: ListTile(
         title: Text(this._showedSpots[index].name),
         subtitle: Text(this._showedSpots[index].details),
         trailing: button,
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) => SpotDetailPage(
+                this._jsonData[this._showedSpots[index].index],
+                (v) {
+                  _bookDetailed(index, v);
+                },
+                this._selectedDate,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
