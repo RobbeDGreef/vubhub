@@ -251,14 +251,34 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
         Card(
           child: Padding(
             padding: EdgeInsets.only(left: 8, right: 8, bottom: 4),
-            child: TextField(
-              decoration: InputDecoration(labelText: "Filter by name"),
-              onChanged: (val) {
-                setState(() {
-                  this._typedFilter = val;
-                  updateList();
-                });
-              },
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(labelText: "Filter by name"),
+                    onChanged: (val) {
+                      setState(() {
+                        this._typedFilter = val;
+                        updateList();
+                      });
+                    },
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text("Show unavailable seats"),
+                    Checkbox(
+                      value: this._showUnavailablePlaces,
+                      onChanged: (val) {
+                        setState(() {
+                          print("value: $val");
+                          this._showUnavailablePlaces = val;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
