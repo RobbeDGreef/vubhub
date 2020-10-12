@@ -39,6 +39,7 @@ class MainUi extends StatefulWidget {
 
 /// The state object, this object will be regenerated and
 /// the data is thus mutable.
+/// and another one
 class ClassesToday extends State<MainUi> {
   InfoHandler info;
   List<Lecture> classes = [Lecture.empty()];
