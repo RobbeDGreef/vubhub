@@ -151,7 +151,31 @@ class _SettingsMenuState extends State<SettingsMenu> {
             onChanged: ptr));
   }
 
-  String tosay = "hello";
+  Widget _settingAccount() {
+    return SettingsTile(
+      title: "Accounts",
+      leading: Icon(Icons.account_box),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext contetx) {
+              return Scaffold(
+                appBar: AppBar(title: Text("Accounts")),
+                body: SettingsList(
+                  sections: [
+                    SettingsSection(
+                      title: "",
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildSettings() {
     return SettingsList(sections: [
       SettingsSection(
