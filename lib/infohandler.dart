@@ -122,7 +122,7 @@ class InfoHandler {
   String _userEdu;
   String _userEmail;
   Map<String, String> _userGroups;
-  List<String> _selectedUserGroups = [];
+  List<String> _selectedUserGroups;
 
   void initCrawler() async {
     await loadUserInfo();
@@ -208,6 +208,10 @@ class InfoHandler {
     // TODO: this can't be healthy
     await waitFor(() {
       return this._userEdu != null;
+    }, Duration(seconds: 2));
+
+    await waitFor(() {
+      return this._selectedUserGroups != null;
     }, Duration(seconds: 2));
 
     List<Lecture> allData = List();
