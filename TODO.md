@@ -9,23 +9,26 @@
 - YOOOOOOOOOOOOOOOOOOO canvas has AN API yesssssssssssssss this saves me a TONN of web scraping
 - Add timeout to loading symbol 
 - Add reservations tab where you can see your reservations and even cancel them
-- Bug: when app opens it show "no classes today" even if there are
 - autoupdate system
 - check free spaces in infogroup etc
 - Add support for campus jette ? (places, and map)
 - Add support for erasmus (they have a different lecture system (via google sheets),
 places, map)
-- Bug: Library seat viewer does not show unavailable seats in text filter search
 - Lock up the crawler so that multiple requests cannot happen simultaneously because
 that will mess up the super delicate server connection 
-- Library seat expanded view
 - Notify user if their lectures have changed
 - Access their uploaded files from canvas ?
 - Just integrate most of canvas into the app ?
 - Make proper map view, (select multiple maps for different campuses)
 - Draw own vub maps so that we can mark rooms on that map
 - "Get to campus" info (delijn, nmbs etc)
-
+- Redo UI of library reserve view because it's crap
+- in fact we need to theme and fix the UI of this whole app because its not very pretty
+- Create help field to send email to the developers with potential bugs or features 
+- only show loading throbber in lecture view if data is actually being fetched from the web not from the cache
+- setting to send notifications every time a lecture is starting 
+- maybe setting to push notification x amount of time before the first lecture of the day
+- deadlines van taken
 
 # Done
 - Bug in week calculating system.
@@ -46,3 +49,7 @@ that will mess up the super delicate server connection
     - reserve space in library
 - Reserve space in places like the library
 - Make map view not infinitely zoomable
+- Bug: Library seat viewer does not show unavailable seats in text filter search
+- Bug: when app opens it show "no classes today" even if there are
+- Library seat expanded view
+- add dates to library booking
