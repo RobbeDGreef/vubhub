@@ -99,10 +99,19 @@ class ClassesToday extends State<MainUi> {
   }
 
   Widget _buildWeekScroller() {
-    return CalendarStrip(onDateSelected: ((date) {
-      this.selectedDay = date;
-      loadNewClassData(date);
-    }));
+    /// I hate this. This is such a hack but the code from calendar_strip doesn't allow
+    /// for selectedDate to exist without startDate and endDate being specified.
+    /// to be clear, it should, but there are quite a few bugs in that code and I'm pretty
+    /// sure this is one of them.
+    return CalendarStrip(
+        selectedDate: this.selectedDay != null ? this.selectedDay : DateTime.now(),
+        startDate: DateTime(0),
+        endDate: DateTime(3000),
+        addSwipeGesture: true,
+        onDateSelected: ((date) {
+          this.selectedDay = date;
+          loadNewClassData(date);
+        }));
   }
 
   /// Prettify the minutes string to use double digit notation
