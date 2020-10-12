@@ -157,6 +157,26 @@ class _SettingsMenuState extends State<SettingsMenu> {
       SettingsSection(
         title: "User",
         tiles: [
+          SettingsTile(
+            title: "VUB email",
+            leading: Icon(Icons.email),
+            trailing: Container(
+              width: 200,
+              child: Form(
+                child: TextFormField(
+                  initialValue: this.info.getUserEmail(),
+                  onEditingComplete: () => Form.of(primaryFocus.context).save(),
+                  onSaved: (val) {
+                    this.info.setUserEmail(val);
+                    FocusScopeNode curFocus = FocusScope.of(context);
+                    if (!curFocus.hasPrimaryFocus) {
+                      curFocus.unfocus();
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
           _settingChoose("Color", this.dropDownColor, Icon(Icons.color_lens), ["blue", "orange"],
               (String newval) {
             setState(() {
