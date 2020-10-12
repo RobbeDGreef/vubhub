@@ -373,23 +373,25 @@ class ClassesToday extends State<MainUi> {
         bottomNavigationBar: bottom,
         appBar: AppBar(
           title: Text(tabText[this._selectedNavBarIndex]),
-          actions: [
-            IconButton(
-                icon: Icon(Icons.replay_sharp),
-                onPressed: () {
-                  setState(() {
-                    this.classes.clear();
-                    this.classes.add(Lecture.empty());
-                    this._loading = true;
-                  });
-                  this
-                      .info
-                      .forceCacheUpdate(this.info.calcWeekFromDate(this.selectedDay))
-                      .then((_) {
-                    loadNewClassData(this.selectedDay, false);
-                  });
-                })
-          ],
+          actions: (this._selectedNavBarIndex == 0)
+              ? [
+                  IconButton(
+                      icon: Icon(Icons.replay_sharp),
+                      onPressed: () {
+                        setState(() {
+                          this.classes.clear();
+                          this.classes.add(Lecture.empty());
+                          this._loading = true;
+                        });
+                        this
+                            .info
+                            .forceCacheUpdate(this.info.calcWeekFromDate(this.selectedDay))
+                            .then((_) {
+                          loadNewClassData(this.selectedDay, false);
+                        });
+                      })
+                ]
+              : [],
         ),
         body: createScreen(this._selectedNavBarIndex));
   }
