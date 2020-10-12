@@ -334,11 +334,13 @@ class ClassesToday extends State<MainUi> {
       ],
     );
 
+    final tabText = ["Today's classes", "VUB campus map", "places", "help"];
+
     return Scaffold(
         drawer: _buildDrawer(),
         bottomNavigationBar: bottom,
         appBar: AppBar(
-          title: Text("Today's classes"),
+          title: Text(tabText[this._selectedNavBarIndex]),
           actions: [
             IconButton(
                 icon: Icon(Icons.replay_sharp),
