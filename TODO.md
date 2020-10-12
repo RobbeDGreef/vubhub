@@ -1,12 +1,5 @@
 # Yet to implement:
-- Loading symbol while loading various things
 - Last updated information in app drawer
-- Campus map
-- Bottom tabs for various new tabs
-    - classes tab
-    - campus map tab
-    - reserve space in library
-- Reserve space in places like the library
 - Robuster crawler (fix the infinite recursion danger etc etc)
 - Selecting which lectures you actually want to show up in your lecture view
 - Clickable class items to see all details and directions to get there
@@ -31,6 +24,8 @@ that will mess up the super delicate server connection
 - Just integrate most of canvas into the app ?
 - Make proper map view, (select multiple maps for different campuses)
 - Draw own vub maps so that we can mark rooms on that map
+- "Get to campus" info (delijn, nmbs etc)
+
 
 # Done
 - Bug in week calculating system.
@@ -43,4 +38,11 @@ that will mess up the super delicate server connection
 - Long tap on detail card in lecture details copies text
 - In the lecture details remove details tabs that are empty
 - add a "no classes today" text if there are no classes today
+- Loading symbol while loading various things
+- Campus map
+- Bottom tabs for various new tabs
+    - classes tab
+    - campus map tab
+    - reserve space in library
+- Reserve space in places like the library
 - Make map view not infinitely zoomable
