@@ -97,6 +97,37 @@ class _SettingsMenuState extends State<SettingsMenu> {
     this.userGroups = info.getUserGroups();
   }
 
+  void createLoadingSymbol(String text) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(8),
+              width: 60,
+              height: 120,
+              child: Column(
+                children: [
+                  Text(text, style: TextStyle(fontSize: 18)),
+                  Center(
+                    child: Container(
+                      margin: EdgeInsets.all(8),
+                      child: CircularProgressIndicator(),
+                      width: 50,
+                      height: 50,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   Widget _selectionScreen(
       String title, List<String> selection, String selected, Function(String) callback) {
     List<Widget> tiles = List();
@@ -227,9 +258,11 @@ class _SettingsMenuState extends State<SettingsMenu> {
             setState(() {
               this.dropDownEdu = val;
               this.selectedUserGroups = [];
+              createLoadingSymbol("Loading group data");
               this.info.setUserEdu(val).then((v) {
                 setState(() {
                   this.userGroups = this.info.getUserGroups();
+                  Navigator.pop(context);
                 });
               });
             });
