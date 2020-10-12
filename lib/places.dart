@@ -273,6 +273,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
                         setState(() {
                           print("value: $val");
                           this._showUnavailablePlaces = val;
+                          updateList();
                         });
                       },
                     ),
