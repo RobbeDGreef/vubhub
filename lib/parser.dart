@@ -11,7 +11,7 @@ class Lecture {
   DateTime start;
   DateTime end;
 
-  Lecture() {}
+  Lecture.empty() {}
 
   Lecture.onlyName(String s) {
     this.name = s;
@@ -73,7 +73,7 @@ class IcalParser {
 
   /// Parse part of the file into Lecture object (from BEGIN:VEVENT until END:VEVENT)
   Lecture parseEvent() {
-    Lecture event = Lecture();
+    Lecture event = Lecture.empty();
 
     for (; this.index < this.file.length; ++this.index) {
       String line = this.file.elementAt(this.index);
@@ -152,7 +152,7 @@ List<Lecture> parseLectureList(String data, int week) {
   for (var day in doc.getElementsByClassName("TableBody")[0].children[0].children) {
     if (day.children[0].className != "tdCol") continue;
 
-    Lecture lec = Lecture();
+    Lecture lec = Lecture.empty();
     lec.name = day.children[0].text;
     lec.professor = day.children[1].text;
     lec.location = day.children[6].text;
