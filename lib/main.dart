@@ -326,6 +326,9 @@ class ClassesToday extends State<MainUi> {
         );
 
       case 2:
+        return MapView();
+
+      case 3:
         return ListView(children: _getPlaces());
 
       case 3:
