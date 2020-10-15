@@ -121,6 +121,7 @@ class InfoHandler {
   String _userFac;
   String _userEdu;
   String _userEmail;
+  String _userCanvasAuthToken;
   Map<String, String> _userGroups;
   List<String> _selectedUserGroups;
 
@@ -147,6 +148,7 @@ class InfoHandler {
   String getUserFac() => this._userFac;
   String getUserEdu() => this._userEdu;
   String getUserEmail() => this._userEmail;
+  String getUserCanvasAuthToken() => this._userCanvasAuthToken;
 
   int getUserColor() => this._userColor;
 
@@ -185,6 +187,7 @@ class InfoHandler {
     this._userFac = await _cache.tryToLoadString("userFac", DefaultUserFac);
     this._userEdu = await _cache.tryToLoadString("userEdu", DefaultUserEdu);
     this._userEmail = await _cache.tryToLoadString("userEmail", null);
+    this._userCanvasAuthToken = await _cache.tryToLoadString("userCanvasAuthToken", null);
   }
 
   Future waitFor(Function() test, [Duration interval = Duration.zero]) async {
@@ -313,5 +316,10 @@ class InfoHandler {
   void setUserEmail(String val) {
     this._userEmail = val;
     this._cache.storeString("userEmail", val);
+  }
+
+  void setUserCanvasAuthToken(String val) {
+    this._userCanvasAuthToken = val;
+    this._cache.storeString("userCanvasAuthToken", val);
   }
 }
