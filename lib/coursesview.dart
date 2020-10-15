@@ -397,6 +397,8 @@ class _CoursesViewState extends State<CoursesView> {
           ),
         ),
       );
+
+    return Text("You should not be seeing this please contact the developers");
   }
 
   Widget _buildCourseTile(BuildContext context, int index) {
