@@ -251,6 +251,7 @@ class _CoursesViewState extends State<CoursesView> {
   CanvasApi _canvasApi;
   InfoHandler _info;
   int _userId;
+  bool _loading = true;
 
   _CoursesViewState(InfoHandler info) {
     this._info = info;
@@ -311,6 +312,7 @@ class _CoursesViewState extends State<CoursesView> {
   }
 
   void update() async {
+    this._loading = true;
     var res = await this._canvasApi.request(apiUrl: "api/v1/courses");
 
     // We capture the user id for later which apperantly is also passed
@@ -327,9 +329,10 @@ class _CoursesViewState extends State<CoursesView> {
       // But to do so we need to activate the listview.builder and thus we
       // need to add a dummy item.
 
-      if (res is Map<String, dynamic> && res.containsKey("errors"))
-        this._courses = [CourseInfo.empty()];
-      else
+      if (res is Map<String, dynamic> && res.containsKey("errors")) {
+        this._courses = [];
+        this._loading = false;
+      } else
         _parseAndSetCourseInfo(res);
     });
 
@@ -370,9 +373,17 @@ class _CoursesViewState extends State<CoursesView> {
         _addCourseColorInfo(res);
       });
     });
+
+    this._loading = false;
   }
 
   Widget _buildErrorWidget() {
+    if (this._loading)
+      return Center(
+        child: Container(
+            margin: EdgeInsets.all(8), child: CircularProgressIndicator(), width: 50, height: 50),
+      );
+
     if (this._courses.isEmpty)
       return Center(
         child: Padding(
@@ -387,6 +398,7 @@ class _CoursesViewState extends State<CoursesView> {
       );
   }
 
+  Widget _buildCourseTile(BuildContext context, int index) {
     List<Widget> widgets = [Container(color: this._courses[index].color.withAlpha(153))];
     if (this._courses[index].imageUrl != null) {
       widgets.insert(0, Image.network(this._courses[index].imageUrl));
