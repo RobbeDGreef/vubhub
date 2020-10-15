@@ -69,7 +69,7 @@ generating this token is something you COULD do, not something you SHOULD do.
 final WhyAccessTokenText = """
 You may have noticed that you cannot login to Canvas directly from within the app.
 This is because we (the developers) need a 'client key' as they are referred to, 
-issued by the insitution (the VUB in this case) in order for us to be able to use 
+issued by the institution (the VUB in this case) in order for us to be able to use 
 canvas's API's. Since this is an unofficial app, we currently do not have a key like 
 that. The only other option for us was to use what Canvas refers to as an access token.
 These tokens are normally supposed to be used by developers (us) to test features before
@@ -84,3 +84,8 @@ one and paste it in the app under settings > accounts > authentication token. ""
     .replaceAll('\n', '');
 
 final DeveloperEmail = "robbedg@gmail.com";
+
+final WhoAreWeText =
+    "With we I mostly refer to me (Robbe De Greef, currently the lead developer) and more recently also Thomas Vandermotten. We are two first year Computer Science bachelors who (among most of our class) were very annoyed by the VUB's cumbersome class schedule system. So I decided to write an app for it and then thought it would be fun to add some more functionality. If you want to contact us you can do so in the help tab in the main screen of the app. We hope this app can help you in your daily life and please let us know if you want to change something.";
+
+final CurrentAppRelease = "0.0.1 beta";
