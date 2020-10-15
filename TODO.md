@@ -29,6 +29,14 @@ that will mess up the super delicate server connection
 - setting to send notifications every time a lecture is starting 
 - maybe setting to push notification x amount of time before the first lecture of the day
 - deadlines van taken
+- Swipe to change bottom nav bar tab
+- Move bottom nav bar body into page view https://stackoverflow.com/questions/49781227/flutter-update-bottomnavigationbar
+- Instead of always passing around infohandler references just make it global.
+
+## Canvas API specific
+- Implement oAuth2 flow see: https://canvas.instructure.com/doc/api/file.oauth.html in settings
+    for now i have a user generated token check development/ (this note is only for myself since development/ folder is not synced with git)
+
 
 # Done
 - Bug in week calculating system.

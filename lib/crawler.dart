@@ -85,6 +85,7 @@ class Crawler {
 
     var doc = html.parse(this.content);
     Map<String, String> items = Map();
+    // TODO: this has thrown errors since doc is empty sometimes ?
     for (var e in doc.getElementsByClassName("DepartmentFilter").first.children) {
       items.addAll({e.text: e.attributes["value"]});
     }
