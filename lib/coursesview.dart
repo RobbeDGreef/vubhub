@@ -315,9 +315,6 @@ class _CoursesViewState extends State<CoursesView> {
     this._loading = true;
     var res = await this._canvasApi.request(apiUrl: "api/v1/courses");
 
-    // We capture the user id for later which apperantly is also passed
-    this._userId = res[0]["enrollments"][0]["user_id"];
-
     // if the widget is not visible anymore, just return and do not try to update state
     if (!this.mounted) return;
 
@@ -341,6 +338,10 @@ class _CoursesViewState extends State<CoursesView> {
     if (this._courses.isEmpty) {
       return;
     }
+
+    // We capture the user id for later which apperantly is also passed
+    this._userId = res[0]["enrollments"][0]["user_id"];
+
     for (CourseInfo course in this._courses) {
       this
           ._canvasApi
