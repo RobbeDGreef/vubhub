@@ -42,7 +42,7 @@ class MainUi extends StatefulWidget {
 /// the data is thus mutable.
 class ClassesToday extends State<MainUi> {
   InfoHandler _info;
-  List<Lecture> _classes = [Lecture.empty()];
+  List<Lecture> _classes = [];
   DateTime _selectedDay = DateTime.now();
   int _todaysColor = 0;
   int _selectedNavBarIndex = 0;
@@ -60,7 +60,6 @@ class ClassesToday extends State<MainUi> {
       setState(() {
         this._loading = true;
         this._classes.clear();
-        this._classes.add(Lecture.empty());
       });
     }
 
@@ -78,9 +77,7 @@ class ClassesToday extends State<MainUi> {
     setState(() {
       bool rotset = false;
       this._classes.clear();
-      if (classes.isEmpty) {
-        this._classes.add(Lecture.onlyName("No classes today"));
-      }
+
       for (Lecture lec in classes) {
         // If the rotationsystem is already specified don't add it again
         if (lec.name.toLowerCase().contains("rotatie")) {
@@ -199,6 +196,7 @@ class ClassesToday extends State<MainUi> {
 
   /// Creates a class or lecture tab for the
   Widget _buildClassListTile(BuildContext context, int i) {
+    // Display a circular throbber to show the user the system is loading
     if (this._loading) {
       return Center(
           child: Container(
@@ -208,16 +206,19 @@ class ClassesToday extends State<MainUi> {
         height: 50,
       ));
     }
+
+    // Display a widget so the user knows he has no classes and that it is
+    // normal that the list view is empty.
+    if (this._classes.length == 0) {
+      return ListTile(title: Text("No classes today", textAlign: TextAlign.center));
+    }
+
     var icon = Icons.record_voice_over_outlined;
     if (this._classes[i].name.toLowerCase().contains("wpo")) {
       icon = Icons.subject;
     }
 
     var colors = _colorFromRotString(this._classes[i].name);
-
-    if (this._classes[i].name.toLowerCase() == "no classes today") {
-      return ListTile(title: Text("No classes today", textAlign: TextAlign.center));
-    }
 
     if (this._classes[i].name.toLowerCase().contains("<font color=")) {
       return Card(
@@ -342,7 +343,7 @@ class ClassesToday extends State<MainUi> {
   Widget _buildTabScreen(int index) {
     switch (index) {
       case 0:
-        return _buildMainScreen();
+        return _buildLecturesScreen();
 
       case 1:
         return CoursesView(info: this._info);
@@ -404,7 +405,6 @@ class ClassesToday extends State<MainUi> {
           onPressed: () {
             setState(() {
               this._classes.clear();
-              this._classes.add(Lecture.empty());
               this._loading = true;
             });
             this._info.forceCacheUpdate(this._info.calcWeekFromDate(this._selectedDay)).then((_) {
