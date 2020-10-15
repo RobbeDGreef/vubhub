@@ -298,7 +298,32 @@ class ClassesToday extends State<MainUi> {
   }
 
   void _openAbout() {
-    print("About");
+    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(title: Text("About us")),
+        body: Column(
+          children: [
+            ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.all(8),
+              children: [
+                Text(
+                  "About",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                ),
+                Text("Who are we", style: TextStyle(fontSize: 20)),
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(WhoAreWeText, style: TextStyle(fontSize: 16)),
+                ),
+              ],
+            ),
+            Text("Version: $CurrentAppRelease"),
+          ],
+        ),
+      );
+    }));
   }
 
   Widget _buildDrawer() {
@@ -307,7 +332,7 @@ class ClassesToday extends State<MainUi> {
       children: [
         DrawerHeader(
             decoration: BoxDecoration(
-                image: DecorationImage(image: AssetImage("assets/vub-cs.png")),
+                image: DecorationImage(image: AssetImage("assets/vub-cs2.png")),
                 color: Colors.white)),
         ListTile(title: Text("Settings"), onTap: _openSettings),
         ListTile(title: Text("About"), onTap: _openAbout)
