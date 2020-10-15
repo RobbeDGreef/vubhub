@@ -2,14 +2,13 @@ import 'dart:convert';
 
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'const.dart';
-import 'infohandler.dart';
 import "package:intl/intl.dart";
 import "package:interval_time_picker/interval_time_picker.dart" as interval;
 import "package:photo_view/photo_view.dart";
-
-// Debugging
 import "package:http/http.dart" as http;
+
+import 'const.dart';
+import 'infohandler.dart';
 
 /// Helper
 String _addHalfhourToString(String time) {
@@ -57,8 +56,8 @@ class SpotDetailPage extends StatefulWidget {
 
 class _SpotDetailPageState extends State<SpotDetailPage> {
   Map<String, dynamic> _detailData;
-  List<int> _selectedButtons = [];
   Function(List<int>) _bookCallback;
+  List<int> _selectedButtons = [];
   DateTime _selectedDate;
 
   _SpotDetailPageState(
@@ -330,51 +329,51 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
       setState(() {
         this._loading = false;
         this._jsonData = jsonDecode(res.body);
-        updateList();
+        _updateSpotList();
       });
     });
   }
 
-  String _makeTimeString(TimeOfDay time) {
+  String _formatTimeString(TimeOfDay time) {
     return NumberFormat("00").format(time.hour) + ":" + NumberFormat("00").format(time.minute);
   }
 
-  int getMinutes(TimeOfDay time) {
+  int _calcAmountOfMinutes(TimeOfDay time) {
     return time.hour * 60 + time.minute;
   }
 
   bool _hasFreeTimeSpot(Map<String, dynamic> spot) {
     for (int i = 0; i < spot["hours"].length; i++) {
-      if (spot["hours"][i]["hour"] == _makeTimeString(this._selectedTime) &&
+      if (spot["hours"][i]["hour"] == _formatTimeString(this._selectedTime) &&
           spot["hours"][i]["places_available"] == 1) {
         bool fits = true;
-        for (int hourI = 1; hourI < getMinutes(this._selectedDuration) ~/ 30; hourI++) {
+        for (int hourI = 1; hourI < _calcAmountOfMinutes(this._selectedDuration) ~/ 30; hourI++) {
           if (spot["hours"][i + hourI]["places_available"] != 1) {
             fits = false;
             break;
           }
         }
 
-        if (!fits) continue;
-
-        return true;
+        if (fits) {
+          return true;
+        }
       }
     }
     return false;
   }
 
-  bool _checkName(Map<String, dynamic> spot) {
+  bool _doesNameContainFilter(Map<String, dynamic> spot) {
     return this._typedFilter.isNotEmpty &&
         !(spot["resource_name"] as String).toLowerCase().contains(this._typedFilter);
   }
 
-  void updateList() {
+  void _updateSpotList() {
     this._showedSpots.clear();
     int i = 0;
     for (Map<String, dynamic> seat in this._jsonData) {
       bool available = true;
       // The text filter is not found in the name of the seat, do not add
-      if (_checkName(seat)) {
+      if (_doesNameContainFilter(seat)) {
         i++;
         continue;
       }
@@ -395,7 +394,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
     }
   }
 
-  Widget _buildGenPicker(String title, String current, Icon icon, Function() onTap) {
+  Widget _buildPickerGeneric(String title, String current, Icon icon, Function() onTap) {
     return Card(
       child: InkWell(
         onTap: () {
@@ -430,7 +429,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
   }
 
   Widget _buildDatePicker() {
-    return _buildGenPicker(
+    return _buildPickerGeneric(
       "Date",
       DateFormat("dd/M/yyyy").format(this._selectedDate),
       Icon(Icons.event),
@@ -453,7 +452,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
   }
 
   Widget _buildDurationPicker() {
-    return _buildGenPicker(
+    return _buildPickerGeneric(
       "Duration",
       "${this._selectedDuration.hour}:${this._selectedDuration.minute}",
       Icon(Icons.timer),
@@ -470,7 +469,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
           if (value != null) {
             setState(() {
               this._selectedDuration = value;
-              updateList();
+              _updateSpotList();
             });
           }
         });
@@ -479,7 +478,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
   }
 
   Widget _buildTimePicker() {
-    return _buildGenPicker(
+    return _buildPickerGeneric(
       "Time picker",
       "${this._selectedTime.hour}:${this._selectedTime.minute}",
       Icon(Icons.access_time),
@@ -496,7 +495,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
           if (value != null) {
             setState(() {
               this._selectedTime = value;
-              updateList();
+              _updateSpotList();
             });
           }
         });
@@ -526,7 +525,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
                     onChanged: (val) {
                       setState(() {
                         this._typedFilter = val;
-                        updateList();
+                        _updateSpotList();
                       });
                     },
                   ),
@@ -540,7 +539,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
                         setState(() {
                           print("value: $val");
                           this._showUnavailablePlaces = val;
-                          updateList();
+                          _updateSpotList();
                         });
                       },
                     ),
@@ -640,7 +639,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
     });
   }
 
-  void _bookSeatDialog(int index, String from, String until) {
+  void _showBookSeatDialog(int index, String from, String until) {
     String email = this.info.getUserEmail();
     final bookstr = this._showedSpots[index].name +
         " from " +
@@ -687,8 +686,8 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
     );
   }
 
-  void _bookDetailed(int index, List<int> range) {
-    return _bookSeatDialog(
+  void _showBookDetailedDialog(int index, List<int> range) {
+    return _showBookSeatDialog(
       index,
       this._jsonData[this._showedSpots[index].index]["hours"][range[0]]["hour"],
       _addHalfhourToString(
@@ -696,7 +695,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
     );
   }
 
-  void _showUnavailable(int index) {
+  void _showUnavailableDialog(int index) {
     Flushbar(
       margin: EdgeInsets.all(8),
       borderRadius: 8,
@@ -706,7 +705,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
     ).show(context);
   }
 
-  Widget _librarySpotBuilder(BuildContext context, int index) {
+  Widget _buildLibrarySpot(BuildContext context, int index) {
     if (this._loading) {
       return Center(
           child: Container(
@@ -725,10 +724,10 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
           ),
-          onPressed: () => _bookSeatDialog(
+          onPressed: () => _showBookSeatDialog(
               index,
-              _makeTimeString(this._selectedTime),
-              _makeTimeString(TimeOfDay(
+              _formatTimeString(this._selectedTime),
+              _formatTimeString(TimeOfDay(
                   hour: this._selectedTime.hour + this._selectedDuration.hour,
                   minute: this._selectedTime.minute + this._selectedDuration.minute))),
         );
@@ -738,7 +737,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
           ),
-          onPressed: () => _showUnavailable(index),
+          onPressed: () => _showUnavailableDialog(index),
         );
       }
       return button;
@@ -756,7 +755,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
               builder: (BuildContext context) => SpotDetailPage(
                 this._jsonData[this._showedSpots[index].index],
                 (v) {
-                  _bookDetailed(index, v);
+                  _showBookDetailedDialog(index, v);
                 },
                 this._selectedDate,
               ),
@@ -781,7 +780,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
         _buildFilters(),
         Expanded(
           child: ListView.builder(
-            itemBuilder: _librarySpotBuilder,
+            itemBuilder: _buildLibrarySpot,
             itemCount: this._showedSpots.length,
             shrinkWrap: true,
           ),

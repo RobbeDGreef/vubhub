@@ -3,7 +3,6 @@ import "package:calendar_strip/calendar_strip.dart";
 import 'package:flutter/services.dart';
 import "package:intl/intl.dart";
 import "package:flushbar/flushbar.dart";
-import "package:photo_view/photo_view.dart";
 
 import "mapview.dart";
 import "parser.dart";
@@ -41,42 +40,46 @@ class MainUi extends StatefulWidget {
 
 /// The state object, this object will be regenerated and
 /// the data is thus mutable.
-/// and another one
 class ClassesToday extends State<MainUi> {
-  InfoHandler info;
-  List<Lecture> classes = [Lecture.empty()];
-  DateTime selectedDay = DateTime.now();
-  int todaysColor = 0;
+  InfoHandler _info;
+  List<Lecture> _classes = [Lecture.empty()];
+  DateTime _selectedDay = DateTime.now();
+  int _todaysColor = 0;
   int _selectedNavBarIndex = 0;
   bool _loading = true;
 
   ClassesToday(InfoHandler info) {
-    this.info = info;
+    this._info = info;
     loadNewClassData(DateTime.now(), false);
   }
 
+  /// This function will update the this._classes list
+  /// it takes an extra optional flag for handling the loading
   void loadNewClassData(DateTime date, [bool shouldSetState = true]) {
     if (shouldSetState) {
       setState(() {
         this._loading = true;
-        this.classes.clear();
-        this.classes.add(Lecture.empty());
+        this._classes.clear();
+        this._classes.add(Lecture.empty());
       });
     }
 
-    this.info.getClassesOfDay(date).then((list) {
+    this._info.getClassesOfDay(date).then((list) {
       this._loading = false;
       update(list);
     });
   }
 
+  /// This function will update the this._classes list from
+  /// a parsed Lecture object data list. It handles sorting
+  /// and other hacks.
   void update(List<Lecture> classes) {
     print("Updating");
     setState(() {
       bool rotset = false;
-      this.classes.clear();
+      this._classes.clear();
       if (classes.isEmpty) {
-        this.classes.add(Lecture.onlyName("No classes today"));
+        this._classes.add(Lecture.onlyName("No classes today"));
       }
       for (Lecture lec in classes) {
         // If the rotationsystem is already specified don't add it again
@@ -86,15 +89,15 @@ class ClassesToday extends State<MainUi> {
         }
 
         int i = 0;
-        for (Lecture prevLec in this.classes) {
+        for (Lecture prevLec in this._classes) {
           if (lec.start.compareTo(prevLec.start) < 0) {
-            this.classes.insert(i, lec);
+            this._classes.insert(i, lec);
             break;
           }
           ++i;
         }
-        if (this.classes.length == i) {
-          this.classes.add(lec);
+        if (this._classes.length == i) {
+          this._classes.add(lec);
         }
       }
     });
@@ -106,18 +109,18 @@ class ClassesToday extends State<MainUi> {
     /// to be clear, it should, but there are quite a few bugs in that code and I'm pretty
     /// sure this is one of them.
     return CalendarStrip(
-        selectedDate: this.selectedDay != null ? this.selectedDay : DateTime.now(),
+        selectedDate: this._selectedDay != null ? this._selectedDay : DateTime.now(),
         startDate: DateTime(0),
         endDate: DateTime(3000),
         addSwipeGesture: true,
         onDateSelected: ((date) {
-          this.selectedDay = date;
+          this._selectedDay = date;
           loadNewClassData(date);
         }));
   }
 
   /// Prettify the minutes string to use double digit notation
-  String _minutes(int x) {
+  String _prettyMinutes(int x) {
     String s = x.toString();
     if (s.length == 1) {
       s = ['0', s].join("");
@@ -156,7 +159,11 @@ class ClassesToday extends State<MainUi> {
   }
 
   Widget _buildLectureDetails(int index) {
-    Lecture lec = this.classes[index];
+    Lecture lec = this._classes[index];
+
+    // Nothing special going on here, just instead of writing the whole
+    // widget tree every time for theses objects i just added them to a list
+    // to cleanly generate them at the bottom of the function.
     final List<List<dynamic>> details = [
       [lec.professor, Icon(Icons.person_outline)],
       [lec.details, Icon(Icons.dehaze)],
@@ -171,6 +178,7 @@ class ClassesToday extends State<MainUi> {
         Icon(Icons.access_time)
       ]
     ];
+
     final List<Widget> children = [
       Padding(
           padding: EdgeInsets.only(left: 4, right: 4, bottom: 16, top: 16),
@@ -184,13 +192,13 @@ class ClassesToday extends State<MainUi> {
     return Scaffold(appBar: AppBar(title: Text("Details")), body: ListView(children: children));
   }
 
-  void openLectureDetails(int index) {
+  void _openLectureDetails(int index) {
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (BuildContext context) => _buildLectureDetails(index)));
   }
 
   /// Creates a class or lecture tab for the
-  Widget _createClassItem(BuildContext context, int i) {
+  Widget _buildClassListTile(BuildContext context, int i) {
     if (this._loading) {
       return Center(
           child: Container(
@@ -201,39 +209,39 @@ class ClassesToday extends State<MainUi> {
       ));
     }
     var icon = Icons.record_voice_over_outlined;
-    if (this.classes[i].name.toLowerCase().contains("wpo")) {
+    if (this._classes[i].name.toLowerCase().contains("wpo")) {
       icon = Icons.subject;
     }
 
-    var colors = _colorFromRotString(this.classes[i].name);
+    var colors = _colorFromRotString(this._classes[i].name);
 
-    if (this.classes[i].name.toLowerCase() == "no classes today") {
+    if (this._classes[i].name.toLowerCase() == "no classes today") {
       return ListTile(title: Text("No classes today", textAlign: TextAlign.center));
     }
 
-    if (this.classes[i].name.toLowerCase().contains("<font color=")) {
+    if (this._classes[i].name.toLowerCase().contains("<font color=")) {
       return Card(
           child: ListTile(
               title: Text(
                   "Rotatiesysteem: rotatie " +
-                      (this.classes[i].name.contains("BLAUW") ? "blauw" : "oranje"),
+                      (this._classes[i].name.contains("BLAUW") ? "blauw" : "oranje"),
                   style: TextStyle(color: colors[1]))),
           color: colors[0]);
     }
 
-    String policyString = this.classes[i].remarks;
-    if (this.classes[i].remarks.toLowerCase().contains("rotatiesysteem"))
+    String policyString = this._classes[i].remarks;
+    if (this._classes[i].remarks.toLowerCase().contains("rotatiesysteem"))
       policyString = "Rotatiesysteem: " +
-          ((this.info.isUserAllowed(this.todaysColor))
+          ((this._info.isUserAllowed(this._todaysColor))
               ? "you are allowed to come"
               : "you are not allowed to come");
 
     return Card(
         child: ListTile(
             leading: Icon(icon),
-            title: Text(this.classes[i].name),
+            title: Text(this._classes[i].name),
             isThreeLine: false,
-            onTap: () => openLectureDetails(i),
+            onTap: () => _openLectureDetails(i),
             subtitle: Padding(
                 padding: EdgeInsets.all(0),
                 child: Column(children: [
@@ -241,14 +249,15 @@ class ClassesToday extends State<MainUi> {
                       padding: EdgeInsets.only(bottom: 8),
                       child: Row(children: [
                         Expanded(
-                            child: Text(this.classes[i].location, overflow: TextOverflow.ellipsis)),
-                        Text(this.classes[i].start.hour.toString() +
+                            child:
+                                Text(this._classes[i].location, overflow: TextOverflow.ellipsis)),
+                        Text(this._classes[i].start.hour.toString() +
                             ":" +
-                            _minutes(this.classes[i].end.minute) +
+                            _prettyMinutes(this._classes[i].end.minute) +
                             " - " +
-                            this.classes[i].end.hour.toString() +
+                            this._classes[i].end.hour.toString() +
                             ":" +
-                            _minutes(this.classes[i].end.minute))
+                            _prettyMinutes(this._classes[i].end.minute))
                       ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
                   Row(children: [
                     Expanded(child: Text(policyString, overflow: TextOverflow.ellipsis))
@@ -258,23 +267,23 @@ class ClassesToday extends State<MainUi> {
 
   /// Builds the lesson tray (the main screen actually)
   Widget _buildMainScreen() {
-    var list = ListView.builder(itemBuilder: _createClassItem, itemCount: this.classes.length);
+    var list = ListView.builder(itemBuilder: _buildClassListTile, itemCount: this._classes.length);
     return Column(children: [_buildWeekScroller(), Expanded(child: list)]);
   }
 
-  void openSettings() async {
+  void _openSettings() async {
     var groups = List<String>();
-    groups.addAll(this.info.getSelectedUserGroups());
+    groups.addAll(this._info.getSelectedUserGroups());
 
     await Navigator.of(context)
-        .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this.info)));
+        .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this._info)));
 
-    if (this.info.getSelectedUserGroups() != groups) {
-      loadNewClassData(this.selectedDay);
+    if (this._info.getSelectedUserGroups() != groups) {
+      loadNewClassData(this._selectedDay);
     }
   }
 
-  void openAbout() {
+  void _openAbout() {
     print("About");
   }
 
@@ -286,20 +295,21 @@ class ClassesToday extends State<MainUi> {
             decoration: BoxDecoration(
                 image: DecorationImage(image: AssetImage("assets/vub-cs.png")),
                 color: Colors.white)),
-        ListTile(title: Text("Settings"), onTap: openSettings),
-        ListTile(title: Text("About"), onTap: openAbout)
+        ListTile(title: Text("Settings"), onTap: _openSettings),
+        ListTile(title: Text("About"), onTap: _openAbout)
       ],
     ));
   }
 
-  void openLibraryBooking() {
+  void _openLibraryBooking() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (BuildContext context) => LibraryBookingMenu(this.info),
+        builder: (BuildContext context) => LibraryBookingMenu(this._info),
       ),
     );
   }
 
+  // TODO: Move place stuff in to different file
   Widget _buildPlaceTile(String title, Function() ptr) {
     return Card(
       child: ListTile(
@@ -313,17 +323,17 @@ class ClassesToday extends State<MainUi> {
 
   List<Widget> _getPlaces() {
     return [
-      _buildPlaceTile("Centrale bibliotheek VUB", openLibraryBooking),
+      _buildPlaceTile("Centrale bibliotheek VUB", _openLibraryBooking),
     ];
   }
 
-  Widget createScreen(int index) {
+  Widget _buildTabScreen(int index) {
     switch (index) {
       case 0:
         return _buildMainScreen();
 
       case 1:
-        return CoursesView(info: this.info);
+        return CoursesView(info: this._info);
 
       case 2:
         return MapView();
@@ -376,31 +386,27 @@ class ClassesToday extends State<MainUi> {
 
     final tabText = ["Today's classes", "Course information", "VUB campus map", "places", "help"];
 
+    final refreshAction = [
+      IconButton(
+          icon: Icon(Icons.replay_sharp),
+          onPressed: () {
+            setState(() {
+              this._classes.clear();
+              this._classes.add(Lecture.empty());
+              this._loading = true;
+            });
+            this._info.forceCacheUpdate(this._info.calcWeekFromDate(this._selectedDay)).then((_) {
+              loadNewClassData(this._selectedDay, false);
+            });
+          })
+    ];
+
     return Scaffold(
         drawer: _buildDrawer(),
         bottomNavigationBar: bottom,
         appBar: AppBar(
-          title: Text(tabText[this._selectedNavBarIndex]),
-          actions: (this._selectedNavBarIndex == 0)
-              ? [
-                  IconButton(
-                      icon: Icon(Icons.replay_sharp),
-                      onPressed: () {
-                        setState(() {
-                          this.classes.clear();
-                          this.classes.add(Lecture.empty());
-                          this._loading = true;
-                        });
-                        this
-                            .info
-                            .forceCacheUpdate(this.info.calcWeekFromDate(this.selectedDay))
-                            .then((_) {
-                          loadNewClassData(this.selectedDay, false);
-                        });
-                      })
-                ]
-              : [],
-        ),
-        body: createScreen(this._selectedNavBarIndex));
+            title: Text(tabText[this._selectedNavBarIndex]),
+            actions: (this._selectedNavBarIndex == 0) ? refreshAction : []),
+        body: _buildTabScreen(this._selectedNavBarIndex));
   }
 }

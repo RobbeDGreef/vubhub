@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import "package:http/http.dart" as http;
 import "package:html/parser.dart" as html;
 
@@ -22,7 +23,7 @@ class Crawler {
   String content;
   CrawlRequest _request;
 
-  Crawler() {}
+  Crawler();
 
   /// This function basically mimics the browser/server behavior of using redirection
   /// links and set-cookie headers to get a session key and retrieve the correct
@@ -130,7 +131,7 @@ class Crawler {
     }
   }
 
-  Future waitForContent(Duration interval) {
+  Future _waitForContent(Duration interval) {
     var compl = Completer();
     check() {
       if (this.content != null)
@@ -147,7 +148,7 @@ class Crawler {
     // get week data
     // TODO: yuk pls find a better way to do this:
 
-    await waitForContent(Duration(seconds: 2));
+    await _waitForContent(Duration(seconds: 2));
 
     String body = "";
     var doc = html.parse(this.content);

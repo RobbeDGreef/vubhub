@@ -103,16 +103,6 @@ class Cache {
 
 /// Handles information exchange with other objects
 class InfoHandler {
-  // Variables:
-  //   Crawler object
-  //   Cache object
-  // Functions:
-  //   getWeekData(int week)
-  //   getUserEduType()
-  //     ...
-  //   setuserEduType()
-  //     ...
-
   Crawler _crawler;
   Cache _cache;
 
@@ -125,32 +115,34 @@ class InfoHandler {
   Map<String, String> _userGroups;
   List<String> _selectedUserGroups;
 
-  void initCrawler() async {
-    await loadUserInfo();
-    print("${this._userEduType} ${this._userFac} ${this._userEdu}");
-    this._crawler.curId = getUserId();
-    await this._crawler.updateConnection();
-    this._userGroups = this._crawler.getDepartmentGroups();
-    this._cache.getSelectedGroups().then((groups) => this._selectedUserGroups = groups);
-  }
-
-  InfoHandler() {
-    _cache = Cache();
-    _crawler = Crawler();
-
-    // The crawler initialisation has go be called after loadUserInfo()
-    // meaning we have to do this in a seperate async function
-    initCrawler();
-  }
-
   String getUserId() => EducationData[this._userEduType][this._userFac][this._userEdu];
   String getUserEduType() => this._userEduType;
   String getUserFac() => this._userFac;
   String getUserEdu() => this._userEdu;
   String getUserEmail() => this._userEmail;
   String getUserCanvasAuthToken() => this._userCanvasAuthToken;
-
   int getUserColor() => this._userColor;
+  List<String> getSelectedUserGroups() => this._selectedUserGroups;
+
+  List<String> getUserGroups() {
+    this._userGroups = this._crawler.getDepartmentGroups();
+    return this._userGroups.keys.toList();
+  }
+
+  void setUserGroups(List<String> val) {
+    this._selectedUserGroups = val;
+    this._cache.saveSelectedGroups(val);
+  }
+
+  void setUserEmail(String val) {
+    this._userEmail = val;
+    this._cache.storeString("userEmail", val);
+  }
+
+  void setUserCanvasAuthToken(String val) {
+    this._userCanvasAuthToken = val;
+    this._cache.storeString("userCanvasAuthToken", val);
+  }
 
   void setUserColor(int color) {
     this._userColor = color;
@@ -181,7 +173,16 @@ class InfoHandler {
     this._cache.storeString("userFac", fac);
   }
 
-  Future<void> loadUserInfo() async {
+  InfoHandler() {
+    _cache = Cache();
+    _crawler = Crawler();
+
+    // The crawler initialisation has go be called after loadUserInfo()
+    // meaning we have to do this in a seperate async function
+    _initCrawler();
+  }
+
+  Future<void> _loadUserInfo() async {
     this._userColor = await _cache.tryToLoadInt("userColor", DefaultUserColor);
     this._userEduType = await _cache.tryToLoadString("userEduType", DefaultUserEduType);
     this._userFac = await _cache.tryToLoadString("userFac", DefaultUserFac);
@@ -190,7 +191,19 @@ class InfoHandler {
     this._userCanvasAuthToken = await _cache.tryToLoadString("userCanvasAuthToken", null);
   }
 
-  Future waitFor(Function() test, [Duration interval = Duration.zero]) async {
+  void _initCrawler() async {
+    // We have to wait for user data to load before we can initialize
+    // the crawler etc.
+    await _loadUserInfo();
+
+    this._crawler.curId = getUserId();
+    await this._crawler.updateConnection();
+
+    this._userGroups = this._crawler.getDepartmentGroups();
+    this._cache.getSelectedGroups().then((groups) => this._selectedUserGroups = groups);
+  }
+
+  Future _waitFor(Function() test, [Duration interval = Duration.zero]) async {
     var compl = Completer();
     check() {
       if (test())
@@ -209,11 +222,11 @@ class InfoHandler {
     }
 
     // TODO: this can't be healthy
-    await waitFor(() {
+    await _waitFor(() {
       return this._userEdu != null;
     }, Duration(seconds: 2));
 
-    await waitFor(() {
+    await _waitFor(() {
       return this._selectedUserGroups != null;
     }, Duration(seconds: 2));
 
@@ -251,18 +264,18 @@ class InfoHandler {
     return list;
   }
 
-  DateTime calcStartDate() {
+  DateTime _calcStartDate() {
     // TODO: URGENT: we need a way to calculate the year start date because this will
     // change every year.
     return DateTime(2020, 9, 14);
   }
 
-  DateTime calcDateFromWeek(int week) {
-    return calcStartDate().add(Duration(days: 7 * (week - 1)));
+  DateTime _calcDateFromWeek(int week) {
+    return _calcStartDate().add(Duration(days: 7 * (week - 1)));
   }
 
   int calcWeekFromDate(DateTime date) {
-    DateTime start = calcStartDate();
+    DateTime start = _calcStartDate();
     DateTime selectedWeekStart = date.subtract(Duration(days: date.weekday - 1));
     return selectedWeekStart.difference(start).inDays ~/ 7 + 1;
   }
@@ -297,29 +310,5 @@ class InfoHandler {
       return 1;
     else
       return 0;
-  }
-
-  List<String> getUserGroups() {
-    this._userGroups = this._crawler.getDepartmentGroups();
-    return this._userGroups.keys.toList();
-  }
-
-  void setUserGroups(List<String> val) {
-    this._selectedUserGroups = val;
-    this._cache.saveSelectedGroups(val);
-  }
-
-  List<String> getSelectedUserGroups() {
-    return this._selectedUserGroups;
-  }
-
-  void setUserEmail(String val) {
-    this._userEmail = val;
-    this._cache.storeString("userEmail", val);
-  }
-
-  void setUserCanvasAuthToken(String val) {
-    this._userCanvasAuthToken = val;
-    this._cache.storeString("userCanvasAuthToken", val);
   }
 }

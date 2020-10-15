@@ -61,7 +61,9 @@ class Lecture {
   }
 }
 
-/// The iCalendar parser
+/// The iCalendar parser, This is actually obsolete but I leave it in
+/// since there is a chance that we might need this parser again for different
+/// calendar implementations.
 class IcalParser {
   Iterable<String> file;
   int index;

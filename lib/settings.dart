@@ -76,30 +76,30 @@ class SettingsMenu extends StatefulWidget {
 }
 
 class _SettingsMenuState extends State<SettingsMenu> {
-  String dropDownColor;
-  String dropDownEduType = EducationData.keys.first;
-  String dropDownFac = EducationData[EducationData.keys.first].keys.first;
-  String dropDownEdu;
-  String dropDownUserGroup;
-  List<String> userGroups = [];
-  InfoHandler info;
-  List<String> selectedUserGroups;
+  String _dropDownColor;
+  String _dropDownEduType = EducationData.keys.first;
+  String _dropDownFac = EducationData[EducationData.keys.first].keys.first;
+  String _dropDownEdu;
+  String _dropDownUserGroup;
+  List<String> _userGroups = [];
+  InfoHandler _info;
+  List<String> _selectedUserGroups;
 
   List<String> getEducations() {
-    return EducationData[this.dropDownEduType][this.dropDownFac].keys.toList();
+    return EducationData[this._dropDownEduType][this._dropDownFac].keys.toList();
   }
 
   _SettingsMenuState(InfoHandler info) {
-    this.info = info;
-    this.dropDownColor = info.colorIntToString(info.getUserColor());
-    this.dropDownEduType = info.getUserEduType();
-    this.dropDownFac = info.getUserFac();
-    this.dropDownEdu = info.getUserEdu();
-    this.selectedUserGroups = info.getSelectedUserGroups();
-    this.userGroups = info.getUserGroups();
+    this._info = info;
+    this._dropDownColor = info.colorIntToString(info.getUserColor());
+    this._dropDownEduType = info.getUserEduType();
+    this._dropDownFac = info.getUserFac();
+    this._dropDownEdu = info.getUserEdu();
+    this._selectedUserGroups = info.getSelectedUserGroups();
+    this._userGroups = info.getUserGroups();
   }
 
-  void createLoadingSymbol(String text) {
+  void showLoadingDialog(String text) {
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -130,7 +130,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         });
   }
 
-  Widget _selectionScreen(
+  Widget _buildSelectionScreen(
       String title, List<String> selection, String selected, Function(String) callback) {
     List<Widget> tiles = List();
     for (String select in selection) {
@@ -146,7 +146,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
     return Scaffold(appBar: AppBar(title: Text(title)), body: ListView(children: tiles));
   }
 
-  SettingsTile _settingChoose(
+  SettingsTile _buildChooseSettings(
       String title, String selected, Icon icon, List<String> selection, Function(String) ptr) {
     return SettingsTile(
         title: title,
@@ -156,11 +156,11 @@ class _SettingsMenuState extends State<SettingsMenu> {
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (BuildContext context) =>
-                  _selectionScreen(title, selection, selected, ptr)));
+                  _buildSelectionScreen(title, selection, selected, ptr)));
         });
   }
 
-  SettingsTile _settingChooseMulti(String title, List<String> selected, Icon icon,
+  SettingsTile _buildChooseMultiSettings(String title, List<String> selected, Icon icon,
       List<String> selection, Function(bool, String) ptr) {
     return SettingsTile(
         title: title,
@@ -172,19 +172,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         });
   }
 
-  SettingsTile _settingDropdown(
-      String title, List<String> items, String item, Function(String) ptr) {
-    return SettingsTile(
-        title: title,
-        trailing: DropdownButton(
-            items: items.map<DropdownMenuItem<String>>((String item) {
-              return DropdownMenuItem(child: Text(item), value: item);
-            }).toList(),
-            value: item,
-            onChanged: ptr));
-  }
-
-  Widget _settingAccount() {
+  Widget _buildAccountSettings() {
     return SettingsTile(
       title: "Accounts",
       leading: Icon(Icons.account_box),
@@ -207,7 +195,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                             child: Form(
                               autovalidateMode: AutovalidateMode.onUserInteraction,
                               child: TextFormField(
-                                initialValue: this.info.getUserEmail(),
+                                initialValue: this._info.getUserEmail(),
                                 onEditingComplete: () => Form.of(primaryFocus.context).save(),
                                 validator: (String arg) {
                                   RegExp regex = new RegExp(emailPattern);
@@ -218,7 +206,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                                   }
                                 },
                                 onSaved: (val) {
-                                  this.info.setUserEmail(val);
+                                  this._info.setUserEmail(val);
                                   FocusScopeNode curFocus = FocusScope.of(context);
                                   if (!curFocus.hasPrimaryFocus) {
                                     curFocus.unfocus();
@@ -235,7 +223,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                       tiles: [
                         SettingsTile(
                           title: "Authentication token",
-                          subtitle: this.info.getUserCanvasAuthToken() != null
+                          subtitle: this._info.getUserCanvasAuthToken() != null
                               ? "User authentication token set"
                               : "No user authentication token loaded",
                           leading: Icon(Icons.vpn_key),
@@ -269,7 +257,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                                     animationDuration: Duration(milliseconds: 500),
                                   ).show(context);
                                   setState(() {
-                                    this.info.setUserCanvasAuthToken(val.text);
+                                    this._info.setUserCanvasAuthToken(val.text);
                                   });
                                 }
                               });
@@ -293,54 +281,56 @@ class _SettingsMenuState extends State<SettingsMenu> {
       SettingsSection(
         title: "User",
         tiles: [
-          _settingAccount(),
-          _settingChoose("Color", this.dropDownColor, Icon(Icons.color_lens), ["blue", "orange"],
+          _buildAccountSettings(),
+          _buildChooseSettings(
+              "Color", this._dropDownColor, Icon(Icons.color_lens), ["blue", "orange"],
               (String newval) {
             setState(() {
-              this.dropDownColor = newval;
-              this.info.setUserColor(this.info.colorStringToInt(newval));
+              this._dropDownColor = newval;
+              this._info.setUserColor(this._info.colorStringToInt(newval));
             });
           }),
-          _settingChoose("Level of education", this.dropDownEduType, Icon(Icons.menu_book),
+          _buildChooseSettings("Level of education", this._dropDownEduType, Icon(Icons.menu_book),
               EducationData.keys.toList(), (String newval) {
             setState(() {
-              this.dropDownEduType = newval;
-              this.info.setUserEduType(newval);
+              this._dropDownEduType = newval;
+              this._info.setUserEduType(newval);
             });
           }),
-          _settingChoose("Faculty", this.dropDownFac, Icon(Icons.account_balance),
-              EducationData[this.dropDownEduType].keys.toList(), (String newval) {
+          _buildChooseSettings("Faculty", this._dropDownFac, Icon(Icons.account_balance),
+              EducationData[this._dropDownEduType].keys.toList(), (String newval) {
             setState(() {
-              this.dropDownFac = newval;
-              this.info.setUserFac(newval);
+              this._dropDownFac = newval;
+              this._info.setUserFac(newval);
             });
           }),
-          _settingChoose("Education type", this.dropDownEdu, Icon(Icons.class_), getEducations(),
-              (val) {
+          _buildChooseSettings(
+              "Education type", this._dropDownEdu, Icon(Icons.class_), getEducations(), (val) {
             setState(() {
-              this.dropDownEdu = val;
-              this.selectedUserGroups = [];
-              createLoadingSymbol("Loading group data");
-              this.info.setUserEdu(val).then((v) {
+              this._dropDownEdu = val;
+              this._selectedUserGroups = [];
+              showLoadingDialog("Loading group data");
+              this._info.setUserEdu(val).then((v) {
                 setState(() {
-                  this.userGroups = this.info.getUserGroups();
+                  this._userGroups = this._info.getUserGroups();
                   Navigator.pop(context);
                 });
               });
             });
           }),
-          _settingChooseMulti("Groups", this.selectedUserGroups, Icon(Icons.group), this.userGroups,
+          _buildChooseMultiSettings(
+              "Groups", this._selectedUserGroups, Icon(Icons.group), this._userGroups,
               (valueSet, val) {
             setState(() {
               // TODO: maybe use a Set() for this ?
-              if (valueSet && !this.selectedUserGroups.contains(val)) {
-                this.selectedUserGroups.add(val);
+              if (valueSet && !this._selectedUserGroups.contains(val)) {
+                this._selectedUserGroups.add(val);
               } else if (!valueSet) {
-                this.selectedUserGroups.remove(val);
+                this._selectedUserGroups.remove(val);
               }
 
               // TODO: this is probably inefficient
-              this.info.setUserGroups(this.selectedUserGroups);
+              this._info.setUserGroups(this._selectedUserGroups);
             });
           }),
         ],
