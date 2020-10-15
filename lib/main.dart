@@ -266,9 +266,21 @@ class ClassesToday extends State<MainUi> {
   }
 
   /// Builds the lesson tray (the main screen actually)
-  Widget _buildMainScreen() {
-    var list = ListView.builder(itemBuilder: _buildClassListTile, itemCount: this._classes.length);
-    return Column(children: [_buildWeekScroller(), Expanded(child: list)]);
+  Widget _buildLecturesScreen() {
+    // The ternary operator on the item count there is used to aways
+    // at least return 1, so that we can call the listview builder to build
+    // our "You have no classes" and loading symbol widgets.
+    return Column(
+      children: [
+        _buildWeekScroller(),
+        Expanded(
+          child: ListView.builder(
+            itemBuilder: _buildClassListTile,
+            itemCount: this._classes.length == 0 ? 1 : this._classes.length,
+          ),
+        ),
+      ],
+    );
   }
 
   void _openSettings() async {
