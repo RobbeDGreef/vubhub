@@ -57,7 +57,7 @@ class _MapViewState extends State<MapView> {
           var xreal = details.localPosition.dx / imgWidth * VubMapWidth;
           var yreal = (details.localPosition.dy - yStart) / imgHeight * VubMapHeight;
 
-          _onTapped(details.globalPosition, Offset(xreal, yreal));
+          //_onTapped(details.globalPosition, Offset(xreal, yreal));
         });
     return this._photoView;
     /*
