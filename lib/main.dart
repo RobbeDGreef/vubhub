@@ -11,6 +11,7 @@ import "settings.dart";
 import "const.dart";
 import "places.dart";
 import 'coursesview.dart';
+import 'help.dart';
 
 void main() => runApp(Vub());
 
@@ -355,7 +356,7 @@ class ClassesToday extends State<MainUi> {
         return ListView(children: _getPlaces());
 
       case 4:
-        return Text("help");
+        return HelpView();
 
       default:
         return Text("Something went wrong");
