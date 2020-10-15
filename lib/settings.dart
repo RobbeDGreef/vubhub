@@ -1,4 +1,6 @@
+import 'package:flushbar/flushbar.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import 'package:fvub/const.dart';
 import "infohandler.dart";
 import "const.dart";
@@ -195,7 +197,86 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 body: SettingsList(
                   sections: [
                     SettingsSection(
-                      title: "",
+                      title: "Booking information",
+                      tiles: [
+                        SettingsTile(
+                          title: "VUB email",
+                          leading: Icon(Icons.email),
+                          trailing: Container(
+                            width: 200,
+                            child: Form(
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              child: TextFormField(
+                                initialValue: this.info.getUserEmail(),
+                                onEditingComplete: () => Form.of(primaryFocus.context).save(),
+                                validator: (String arg) {
+                                  RegExp regex = new RegExp(emailPattern);
+                                  if (!regex.hasMatch(arg)) {
+                                    return "Please enter valid email!";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                onSaved: (val) {
+                                  this.info.setUserEmail(val);
+                                  FocusScopeNode curFocus = FocusScope.of(context);
+                                  if (!curFocus.hasPrimaryFocus) {
+                                    curFocus.unfocus();
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SettingsSection(
+                      title: "Canvas information",
+                      tiles: [
+                        SettingsTile(
+                          title: "Authentication token",
+                          subtitle: this.info.getUserCanvasAuthToken() != null
+                              ? "User authentication token set"
+                              : "No user authentication token loaded",
+                          leading: Icon(Icons.vpn_key),
+                          trailing: TextButton(
+                            child: Text(
+                              "Paste from\nclipboard",
+                              style: TextStyle(color: Colors.white),
+                              textAlign: TextAlign.center,
+                            ),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue)),
+                            onPressed: () {
+                              Clipboard.getData('text/plain').then((val) {
+                                // TODO: do better checks than this
+                                if (val.text.length != 70) {
+                                  Flushbar(
+                                    title: "Oh oh, that does not seem to be a valid user token.",
+                                    message: val.text,
+                                    duration: Duration(seconds: 2),
+                                    margin: EdgeInsets.all(8),
+                                    borderRadius: 8,
+                                    animationDuration: Duration(milliseconds: 500),
+                                  ).show(context);
+                                } else {
+                                  Flushbar(
+                                    title: "User token set",
+                                    message: val.text,
+                                    duration: Duration(seconds: 2),
+                                    margin: EdgeInsets.all(8),
+                                    borderRadius: 8,
+                                    animationDuration: Duration(milliseconds: 500),
+                                  ).show(context);
+                                  setState(() {
+                                    this.info.setUserCanvasAuthToken(val.text);
+                                  });
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -212,35 +293,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
       SettingsSection(
         title: "User",
         tiles: [
-          SettingsTile(
-            title: "VUB email",
-            leading: Icon(Icons.email),
-            trailing: Container(
-              width: 200,
-              child: Form(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: TextFormField(
-                  initialValue: this.info.getUserEmail(),
-                  onEditingComplete: () => Form.of(primaryFocus.context).save(),
-                  validator: (String arg) {
-                    RegExp regex = new RegExp(emailPattern);
-                    if (!regex.hasMatch(arg)) {
-                      return "Please enter valid email!";
-                    } else {
-                      return null;
-                    }
-                  },
-                  onSaved: (val) {
-                    this.info.setUserEmail(val);
-                    FocusScopeNode curFocus = FocusScope.of(context);
-                    if (!curFocus.hasPrimaryFocus) {
-                      curFocus.unfocus();
-                    }
-                  },
-                ),
-              ),
-            ),
-          ),
+          _settingAccount(),
           _settingChoose("Color", this.dropDownColor, Icon(Icons.color_lens), ["blue", "orange"],
               (String newval) {
             setState(() {
