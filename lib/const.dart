@@ -35,6 +35,7 @@ final String LibraryApiUrl =
     "https://reservation.affluences.com/api/resources/1625d777-78f9-4085-b276-ce05fe99850f/available?date=";
 
 final String LibraryReserveUrl = "https://reservation.affluences.com/api/reserve/";
+final String CanvasUrl = "https://canvas.vub.be/";
 final DefaultUserColor = 0;
 final DefaultUserEduType = "Bachelor";
 final DefaultUserFac = "Science and Bio-engineering Sciences";
