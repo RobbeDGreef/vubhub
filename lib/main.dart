@@ -11,6 +11,7 @@ import "infohandler.dart";
 import "settings.dart";
 import "const.dart";
 import "places.dart";
+import 'coursesview.dart';
 
 void main() => runApp(Vub());
 
@@ -322,9 +323,7 @@ class ClassesToday extends State<MainUi> {
         return _buildMainScreen();
 
       case 1:
-        return PhotoView(
-          imageProvider: AssetImage("assets/VubMapNew.png"),
-        );
+        return CoursesView(info: this.info);
 
       case 2:
         return MapView();
@@ -332,7 +331,7 @@ class ClassesToday extends State<MainUi> {
       case 3:
         return ListView(children: _getPlaces());
 
-      case 3:
+      case 4:
         return Text("help");
 
       default:
@@ -357,6 +356,10 @@ class ClassesToday extends State<MainUi> {
           label: "classes",
         ),
         BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard),
+          label: "courses",
+        ),
+        BottomNavigationBarItem(
           icon: Icon(Icons.map),
           label: "map",
         ),
@@ -371,7 +374,7 @@ class ClassesToday extends State<MainUi> {
       ],
     );
 
-    final tabText = ["Today's classes", "VUB campus map", "places", "help"];
+    final tabText = ["Today's classes", "Course information", "VUB campus map", "places", "help"];
 
     return Scaffold(
         drawer: _buildDrawer(),
