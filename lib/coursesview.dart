@@ -333,6 +333,11 @@ class _CoursesViewState extends State<CoursesView> {
         _parseAndSetCourseInfo(res);
     });
 
+    // If there were no courses found, we assume we had an error.
+    // TODO: it is perfectly possible the user has no courses, valve pls fix
+    if (this._courses.isEmpty) {
+      return;
+    }
     for (CourseInfo course in this._courses) {
       this
           ._canvasApi
@@ -367,8 +372,8 @@ class _CoursesViewState extends State<CoursesView> {
     });
   }
 
-  Widget _buildCourseTile(BuildContext context, int index) {
-    if (this._courses[index].id == null)
+  Widget _buildErrorWidget() {
+    if (this._courses.isEmpty)
       return Center(
         child: Padding(
           padding: EdgeInsets.all(16),
@@ -380,6 +385,7 @@ class _CoursesViewState extends State<CoursesView> {
           ),
         ),
       );
+  }
 
     List<Widget> widgets = [Container(color: this._courses[index].color.withAlpha(153))];
     if (this._courses[index].imageUrl != null) {
@@ -439,6 +445,11 @@ class _CoursesViewState extends State<CoursesView> {
     //  itemBuilder: (BuildContext context, int index) => _buildCourseTile(index),
     //  itemCount: this._courses.length,
     //);
+
+    if (this._courses.length == 0) {
+      return _buildErrorWidget();
+    }
+
     return GridView.builder(
       itemBuilder: (BuildContext context, int index) => _buildCourseTile(context, index),
       itemCount: this._courses.length,
