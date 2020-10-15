@@ -5,6 +5,7 @@ import "package:intl/intl.dart";
 import "package:flushbar/flushbar.dart";
 import "package:photo_view/photo_view.dart";
 
+import "mapview.dart";
 import "parser.dart";
 import "infohandler.dart";
 import "settings.dart";
