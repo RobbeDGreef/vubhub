@@ -1,4 +1,4 @@
-package com.example.fvub
+package com.example.vubhub
 
 import io.flutter.embedding.android.FlutterActivity
 

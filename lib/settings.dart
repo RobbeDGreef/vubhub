@@ -1,10 +1,10 @@
 import 'package:flushbar/flushbar.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
-import 'package:fvub/const.dart';
-import "infohandler.dart";
-import "const.dart";
 import "package:settings_ui/settings_ui.dart";
+
+import "infohandler.dart";
+import 'const.dart';
 
 class SelectMultiMenu extends StatefulWidget {
   String _title;

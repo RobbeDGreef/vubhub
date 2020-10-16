@@ -1,4 +1,4 @@
-# The unofficial VUB app
+# VubHub - The unofficial vub app
 
 <p float="left">
     <img src="/screenshots/screenshot.png" width="30%" heigh="30%" />
