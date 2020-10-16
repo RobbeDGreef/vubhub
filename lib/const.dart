@@ -59,7 +59,7 @@ and paste it manually in the app under settings > accounts > authentication toke
 
 final IsSketchyText = """
 That's because it kinda is, we are currently a bit in legal limbo with Canvas's 
-terms of service because of this but since this is still a beta app, you are not 
+terms of service because of this but since this is still a alpha/beta app, you are not 
 a user, you are a tester. Therefor we can ask you to do this, but we are not, if 
 anyone over at Canvas is reading this :| . We are simply nudging that manually 
 generating this token is something you COULD do, not something you SHOULD do.
@@ -88,4 +88,4 @@ final DeveloperEmail = "robbedg@gmail.com";
 final WhoAreWeText =
     "With we I mostly refer to me (Robbe De Greef, currently the lead developer) and more recently also Thomas Vandermotten. We are two first year Computer Science bachelors who (among most of our class) were very annoyed by the VUB's cumbersome class schedule system. So I decided to write an app for it and then thought it would be fun to add some more functionality. If you want to contact us you can do so in the help tab in the main screen of the app. We hope this app can help you in your daily life and please let us know if you want to change something.";
 
-final CurrentAppRelease = "0.0.1 beta";
+final CurrentAppRelease = "0.0.1 alpha";
