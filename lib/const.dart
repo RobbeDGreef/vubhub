@@ -58,8 +58,8 @@ and paste it manually in the app under settings > accounts > authentication toke
     .replaceAll('\n', '');
 
 final IsSketchyText = """
-That's because it kinda is, we are currently a bit in legal limbo with Canvas's
-terms of service because of this but since this is still a beta app, you are not
+That's because it kinda is, we are currently a bit in legal limbo with Canvas's 
+terms of service because of this but since this is still a beta app, you are not 
 a user, you are a tester. Therefor we can ask you to do this, but we are not, if 
 anyone over at Canvas is reading this :| . We are simply nudging that manually 
 generating this token is something you COULD do, not something you SHOULD do.
@@ -67,13 +67,13 @@ generating this token is something you COULD do, not something you SHOULD do.
     .replaceAll('\n', '');
 
 final WhyAccessTokenText = """
-You may have noticed that you cannot login to Canvas directly from within the app.
+You may have noticed that you cannot login to Canvas directly from within the app. 
 This is because we (the developers) need a 'client key' as they are referred to, 
 issued by the institution (the VUB in this case) in order for us to be able to use 
 canvas's API's. Since this is an unofficial app, we currently do not have a key like 
-that. The only other option for us was to use what Canvas refers to as an access token.
-These tokens are normally supposed to be used by developers (us) to test features before
-they have implemented the user login stuff. However telling your users to generate
+that. The only other option for us was to use what Canvas refers to as an access token. 
+These tokens are normally supposed to be used by developers (us) to test features before 
+they have implemented the user login stuff. However telling your users to generate 
 these keys manually and add them to your application would be a violation of the Canvas's 
 terms of service, so, we are not telling you to do anything. You don't need canvas to 
 use this app and you are most likely a tester for this app and therefor partially a developer. 
