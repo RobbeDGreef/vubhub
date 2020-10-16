@@ -148,6 +148,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   SettingsTile _buildChooseSettings(
       String title, String selected, Icon icon, List<String> selection, Function(String) ptr) {
+    if (selected.length > 20) {
+      selected = selected.substring(0, 20) + "...";
+    }
     return SettingsTile(
         title: title,
         subtitle: selected,
