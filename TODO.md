@@ -33,6 +33,11 @@ that will mess up the super delicate server connection
 - Move bottom nav bar body into page view https://stackoverflow.com/questions/49781227/flutter-update-bottomnavigationbar
 - Instead of always passing around infohandler references just make it global.
 
+- Firebase messaging (project already build, just have to integrate some stuff)
+- https://pub.dev/packages/flutter_local_notifications but I still have to figure out
+  if we want to use this one (i think we do because this would prevent us from routing
+  everything through the server idk)
+
 ## Canvas API specific
 - Implement oAuth2 flow see: https://canvas.instructure.com/doc/api/file.oauth.html in settings
     for now i have a user generated token check development/ (this note is only for myself since development/ folder is not synced with git)
