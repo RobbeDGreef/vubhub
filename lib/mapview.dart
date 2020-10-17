@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:vubhub/theming.dart';
 import 'const.dart';
 
 /// Create an image that is zoomable

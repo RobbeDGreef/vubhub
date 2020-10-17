@@ -9,6 +9,7 @@ import "package:http/http.dart" as http;
 
 import 'const.dart';
 import 'infohandler.dart';
+import 'theming.dart';
 
 /// Helper
 String _addHalfhourToString(String time) {
@@ -172,6 +173,7 @@ class _SpotDetailPageState extends State<SpotDetailPage> {
     availableTimeText += " at " + DateFormat("d MMMM").format(this._selectedDate);
 
     return Scaffold(
+      backgroundColor: AlmostWhite,
       appBar: AppBar(
         title: Text("Seat details"),
       ),
@@ -183,7 +185,7 @@ class _SpotDetailPageState extends State<SpotDetailPage> {
             padding: EdgeInsets.only(left: 8, top: 5),
             child: Text(
               this._detailData["resource_name"],
-              style: TextStyle(fontSize: 30),
+              style: TextStyle(fontSize: 30, color: AlmostDark),
             ),
           ),
           SizedBox(height: 10),
@@ -774,7 +776,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
           child: Text(
             "Centrale bibliotheek VUB",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(fontSize: 25, color: AlmostDark),
           ),
         ),
         _buildFilters(),
@@ -793,6 +795,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Book a spot at the library")),
+      backgroundColor: AlmostWhite,
       body: _buildBooking(),
     );
   }

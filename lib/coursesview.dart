@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'const.dart';
 import 'infohandler.dart';
+import 'theming.dart';
 
 class CanvasApi {
   InfoHandler _infoHandler;
@@ -227,6 +228,7 @@ class _CourseDetailsState extends State<CourseDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AlmostWhite,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: this._details.color,

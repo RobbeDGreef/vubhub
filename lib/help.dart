@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'const.dart';
+import 'theming.dart';
 
 class HelpView extends StatelessWidget {
   String _subject = "";
@@ -10,6 +11,7 @@ class HelpView extends StatelessWidget {
   Widget _openMoreInfo(BuildContext context, String info) {
     Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
       return Scaffold(
+        backgroundColor: AlmostWhite,
         appBar: AppBar(title: Text("More info")),
         body:
             Padding(padding: EdgeInsets.all(12), child: Text(info, style: TextStyle(fontSize: 16))),
@@ -30,9 +32,9 @@ class HelpView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyleHeader = TextStyle(fontSize: 30, fontWeight: FontWeight.w600);
-    final textStyleSub = TextStyle(fontSize: 20);
-    final textStyleText = TextStyle(fontSize: 16);
+    final textStyleHeader = TextStyle(fontSize: 30, fontWeight: FontWeight.w600, color: AlmostDark);
+    final textStyleSub = TextStyle(fontSize: 20, color: AlmostDark);
+    final textStyleText = TextStyle(fontSize: 16, color: AlmostDark);
 
     return ListView(
       padding: EdgeInsets.all(8),

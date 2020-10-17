@@ -12,6 +12,7 @@ import "const.dart";
 import "places.dart";
 import 'coursesview.dart';
 import 'help.dart';
+import 'theming.dart';
 
 void main() => runApp(Vub());
 
@@ -228,14 +229,18 @@ class ClassesToday extends State<MainUi> {
     final List<Widget> children = [
       Padding(
           padding: EdgeInsets.only(left: 4, right: 4, bottom: 16, top: 16),
-          child: Text(lec.name, style: TextStyle(fontSize: 20))),
+          child: Text(lec.name, style: TextStyle(fontSize: 20, color: AlmostDark))),
     ];
 
     for (List<dynamic> info in details) {
       if (info[0] != "") children.add(_buildLectureDetailTile(info[0], info[1]));
     }
 
-    return Scaffold(appBar: AppBar(title: Text("Details")), body: ListView(children: children));
+    return Scaffold(
+      appBar: AppBar(title: Text("Details")),
+      body: ListView(children: children),
+      backgroundColor: AlmostWhite,
+    );
   }
 
   void _openLectureDetails(int index) {
@@ -490,6 +495,7 @@ class ClassesToday extends State<MainUi> {
     return Scaffold(
         drawer: _buildDrawer(),
         bottomNavigationBar: bottom,
+        backgroundColor: AlmostWhite,
         appBar: AppBar(
             title: Text(tabText[this._selectedNavBarIndex]),
             actions: (this._selectedNavBarIndex == 0) ? refreshAction : []),
