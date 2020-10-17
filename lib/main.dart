@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
-import "package:calendar_strip/calendar_strip.dart";
 import 'package:flutter/services.dart';
 import "package:intl/intl.dart";
 import "package:flushbar/flushbar.dart";
 
+import "calendar_strip/calendar_strip.dart";
 import "mapview.dart";
 import "parser.dart";
 import "infohandler.dart";
@@ -45,6 +45,7 @@ class ClassesToday extends State<MainUi> {
   InfoHandler _info;
   List<Lecture> _classes = [];
   DateTime _selectedDay = DateTime.now();
+  DateTime _selectedWeek = DateTime.now();
   int _todaysColor = 0;
   int _selectedNavBarIndex = 0;
   bool _loading = true;
@@ -101,16 +102,63 @@ class ClassesToday extends State<MainUi> {
     });
   }
 
+  DateTime _calcWeekStart(DateTime date) {
+    return date.subtract(Duration(days: date.weekday - 1));
+  }
+
+  Widget _buildMonthNameWidget(String monthString) {
+    /// What we would like to achieve:
+    ///   Month1 / Month2 2020            week x
+    ///
+    /// note that month2 is optional (for weeks that start in a different
+    /// month than they end)
+
+    /*
+    DateTime weekStart = _calcWeekStart(date);
+    DateTime weekEnd = _calcWeekStart(date).add(Duration(days: 6));
+
+    String monthString = DateFormat("MMMM").format(weekStart);
+    if (weekStart.month != weekEnd.month) {
+      monthString += " / " + DateFormat("MMMM").format(weekEnd);
+    }
+    */
+
+    int weekNum = this._info.calcWeekFromDate(this._selectedWeek);
+    String weekString = "week $weekNum";
+
+    // We want to prevent printing week 0 or week -1 etc
+    if (weekNum > 0) {
+      monthString += " - " + weekString;
+    }
+
+    TextStyle style = TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87);
+    return Padding(
+      padding: EdgeInsets.only(top: 7, bottom: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(monthString, style: style),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWeekScroller() {
     /// I hate this. This is such a hack but the code from calendar_strip doesn't allow
     /// for selectedDate to exist without startDate and endDate being specified.
     /// to be clear, it should, but there are quite a few bugs in that code and I'm pretty
     /// sure this is one of them.
+
+    DateTime selected = this._selectedDay != null ? this._selectedDay : DateTime.now();
     return CalendarStrip(
-        selectedDate: this._selectedDay != null ? this._selectedDay : DateTime.now(),
+        monthNameWidget: _buildMonthNameWidget,
+        selectedDate: selected,
         startDate: DateTime(0),
         endDate: DateTime(3000),
         addSwipeGesture: true,
+        onWeekSelected: ((date) {
+          this._selectedWeek = date;
+        }),
         onDateSelected: ((date) {
           this._selectedDay = date;
           loadNewClassData(date);
