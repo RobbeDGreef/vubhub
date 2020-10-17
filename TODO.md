@@ -38,6 +38,8 @@ that will mess up the super delicate server connection
   if we want to use this one (i think we do because this would prevent us from routing
   everything through the server idk)
 
+- Keep canvas data in cache and connect lecturelist to actual lectures
+
 ## Canvas API specific
 - Implement oAuth2 flow see: https://canvas.instructure.com/doc/api/file.oauth.html in settings
     for now i have a user generated token check development/ (this note is only for myself since development/ folder is not synced with git)
@@ -66,3 +68,53 @@ that will mess up the super delicate server connection
 - Bug: when app opens it show "no classes today" even if there are
 - Library seat expanded view
 - add dates to library booking
+
+# Concrete roadmap starting from 17/10
+- More extensive canvas support
+    - [ ] Actual canvas login (auto fill in the users group etc as well)
+        - [-] Steal panopto access token? (PROBABLY ILLEGAL)
+            Did some research and the only way to get the access code is to
+            decrypt it with panopto's client key, which of course, we do not have.
+            This makes sense because otherwise it would be a very insecure connection
+            but it does suck for us.
+        - [ ] Implement proper oAuth2 flow (Need a client key from the VUB)
+
+    - [ ] View extensive assignment information
+    - [ ] View announcements
+    - [ ] Star important announcements
+    - [ ] Quick view unread (and maybe starred) announcements from all lectures
+    - [ ] Cache canvas lecture data into memory (and storage) 
+    - [ ] Connect the lecture view to the cached lectures so when you click a lecture you can view more information about the lecture in general.
+
+- LectureView
+    - [ ] View due assignments in the lectureview
+    - [ ] Filtering lecture view
+
+- Notification support
+    - [ ] Send notification on lecture changes
+    - [ ] Remind user of assignments that are not turned in.
+    - [ ] Give user capability to 'remind me' about when lectures start (not so important)
+
+- Easier campus life (not so important now that we go into code red)
+    - [ ] Interactive campus map
+        - [ ] Show lecture locations
+    - [ ] View current food possibilities
+        - [ ] VUB resto food possibilities
+        - [ ] Third party food places
+    - [ ] (Book) sporting stuff like swimming pool
+    - [ ] View currently unused classrooms
+    - [ ] 'Get to campus' information, delijn, nmbs, ... information
+
+- Student life
+    - [ ] View friends class schedule 
+
+- Backend fixes
+    - [ ] Server to send push notifications
+    - [ ] Rebuster crawler
+    - [ ] Code cleanup
+    - [ ] Code documentation
+    - [ ] Write the readme and code of conduct
+
+- Small fixes
+    - [ ] Swipe to change tabs
+    - [ ] Move help into app drawer
