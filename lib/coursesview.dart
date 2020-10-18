@@ -294,7 +294,7 @@ class _CourseDetailsState extends State<CourseDetails> {
                   onPressed: () => print("Discussions"),
                 ),
                 _buildNotificationButton(
-                  icon: Icon(Icons.people),
+                  icon: Icon(Icons.computer),
                   amount: this._details.curOngoingMeetings,
                   color: this._details.color,
                   onPressed: () => print("Meetings"),
