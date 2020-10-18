@@ -299,6 +299,12 @@ class _CourseDetailsState extends State<CourseDetails> {
                   color: this._details.color,
                   onPressed: () => print("Meetings"),
                 ),
+                _buildNotificationButton(
+                  icon: Icon(Icons.calendar_today),
+                  amount: this._details.curOngoingMeetings,
+                  color: this._details.color,
+                  onPressed: () => print("Calendar"),
+                ),
               ],
             ),
           ),
