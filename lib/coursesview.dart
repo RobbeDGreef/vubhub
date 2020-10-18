@@ -46,7 +46,7 @@ class Assignment {
     this.name = data["name"];
     this.details = data["description"];
     try {
-    this.dueDate = DateTime.parse(data["due_at"]);
+      this.dueDate = DateTime.parse(data["due_at"]);
     } catch (ArgumentError) {
       this.dueDate = null;
     }
@@ -309,6 +309,8 @@ class _CourseDetailsState extends State<CourseDetails> {
             ),
           ),
         ),
+
+        // TODO: these should probably go into a generic _buildCourseSection function
         Padding(
           padding: EdgeInsets.only(left: 8),
           child: Text(
