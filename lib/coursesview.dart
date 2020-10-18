@@ -45,7 +45,11 @@ class Assignment {
   Assignment(Map<String, dynamic> data) {
     this.name = data["name"];
     this.details = data["description"];
+    try {
     this.dueDate = DateTime.parse(data["due_at"]);
+    } catch (ArgumentError) {
+      this.dueDate = null;
+    }
     this.hasSubmitted = data["has_submitted_submissions"];
   }
 }
