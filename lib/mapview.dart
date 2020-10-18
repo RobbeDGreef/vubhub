@@ -77,7 +77,7 @@ class _MapViewState extends State<MapView> {
     */
     /*
     return GestureDetector(
-      //child: Container(height: 500, color: Colors.blue),
+      //child: Container(height: 500, color: Theme.of(context).primaryColor),
       //child: Image(image: AssetImage("assets/VubMapNew.png")),
       child: this._photoView,
       onTapUp: (TapUpDetails details) => _tapped(details.globalPosition),

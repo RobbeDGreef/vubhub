@@ -87,11 +87,11 @@ class _SpotDetailPageState extends State<SpotDetailPage> {
     List<Color> colors = [Colors.grey, Colors.white];
 
     if (available) {
-      colors = [Colors.white, Colors.blue];
+      colors = [Colors.white, Theme.of(context).primaryColor];
     }
     print(this._selectedButtons);
     if (this._selectedButtons.contains(index)) {
-      colors = [Colors.blue, Colors.white];
+      colors = [Theme.of(context).primaryColor, Colors.white];
     }
 
     return Card(
@@ -151,7 +151,7 @@ class _SpotDetailPageState extends State<SpotDetailPage> {
           this._detailData["hours"][this._selectedButtons[0]]["hour"] +
           " until " +
           _addHalfhourToString(this._detailData["hours"][this._selectedButtons.last]["hour"]);
-      buttonColor = Colors.blue;
+      buttonColor = Theme.of(context).primaryColor;
     }
 
     for (Map<String, dynamic> hour in this._detailData["hours"]) {
@@ -724,7 +724,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
         button = TextButton(
           child: Text("Book", style: TextStyle(color: Colors.white)),
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+            backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).primaryColor),
           ),
           onPressed: () => _showBookSeatDialog(
               index,

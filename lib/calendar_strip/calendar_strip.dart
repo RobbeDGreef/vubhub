@@ -40,12 +40,10 @@ class CalendarStrip extends StatefulWidget {
     this.leftIcon,
   });
 
-  State<CalendarStrip> createState() =>
-      CalendarStripState(selectedDate, startDate, endDate);
+  State<CalendarStrip> createState() => CalendarStripState(selectedDate, startDate, endDate);
 }
 
-class CalendarStripState extends State<CalendarStrip>
-    with TickerProviderStateMixin {
+class CalendarStripState extends State<CalendarStrip> with TickerProviderStateMixin {
   DateTime currentDate = DateTime.now();
   DateTime selectedDate;
   String monthLabel;
@@ -53,8 +51,8 @@ class CalendarStripState extends State<CalendarStrip>
   DateTime rowStartingDate;
   double opacity = 0.0;
   DateTime lastDayOfMonth;
-  TextStyle monthLabelStyle = TextStyle(
-      fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87);
+  TextStyle monthLabelStyle =
+      TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87);
   TextStyle selectedDateStyle =
       TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white);
   bool isOnEndingWeek = false, isOnStartingWeek = false;
@@ -78,8 +76,7 @@ class CalendarStripState extends State<CalendarStrip>
 
   List<String> dayLabels = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
 
-  CalendarStripState(
-      DateTime selectedDate, DateTime startDate, DateTime endDate) {
+  CalendarStripState(DateTime selectedDate, DateTime startDate, DateTime endDate) {
     today = getDateOnly(DateTime.now());
     lastDayOfMonth = DateUtils.getLastDayOfMonth(currentDate);
     runPresetsAndExceptions(selectedDate, startDate, endDate);
@@ -87,13 +84,10 @@ class CalendarStripState extends State<CalendarStrip>
   }
 
   runPresetsAndExceptions(selectedDate, startDate, endDate) {
-    if ((startDate == null && endDate != null) ||
-        (startDate != null && endDate == null)) {
-      throw Exception(
-          "Both 'startDate' and 'endDate' are mandatory to specify range");
+    if ((startDate == null && endDate != null) || (startDate != null && endDate == null)) {
+      throw Exception("Both 'startDate' and 'endDate' are mandatory to specify range");
     } else if (selectedDate != null &&
-        (isDateBefore(selectedDate, startDate) ||
-            isDateAfter(selectedDate, endDate))) {
+        (isDateBefore(selectedDate, startDate) || isDateAfter(selectedDate, endDate))) {
       throw Exception("Selected Date is out of range from start and end dates");
     } else if (startDate == null && startDate == null) {
       doesDateRangeExists = false;
@@ -130,9 +124,8 @@ class CalendarStripState extends State<CalendarStrip>
   @override
   void initState() {
     super.initState();
-    int subtractDuration = widget.weekStartsOnSunday == true
-        ? currentDate.weekday
-        : currentDate.weekday - 1;
+    int subtractDuration =
+        widget.weekStartsOnSunday == true ? currentDate.weekday : currentDate.weekday - 1;
     rowStartingDate = rowStartingDate != null
         ? rowStartingDate
         : currentDate.subtract(Duration(days: subtractDuration));
@@ -145,9 +138,7 @@ class CalendarStripState extends State<CalendarStrip>
   }
 
   int getLastDayOfMonth(rowStartingDay) {
-    return DateUtils.getLastDayOfMonth(
-            currentDate.add(Duration(days: rowStartingDay)))
-        .day;
+    return DateUtils.getLastDayOfMonth(currentDate.add(Duration(days: rowStartingDay))).day;
   }
 
   String getMonthName(
@@ -213,8 +204,7 @@ class CalendarStripState extends State<CalendarStrip>
       }
       weekStartingDate = getDateOnly(_nextRowStartingDate);
       weekEndingDate = getDateOnly(_nextRowStartingDate.add(Duration(days: 6)));
-      bool isStartingWeekOnRange =
-          isDateAfter(widget.startDate, weekStartingDate);
+      bool isStartingWeekOnRange = isDateAfter(widget.startDate, weekStartingDate);
       bool isEndingWeekOnRange = isDateBefore(widget.endDate, weekEndingDate);
       return {
         "isEndingWeekOnRange": isEndingWeekOnRange,
@@ -251,8 +241,7 @@ class CalendarStripState extends State<CalendarStrip>
         selectedDate = date;
         widget.onDateSelected(date);
       });
-    } else if (!isDateBefore(date, widget.startDate) &&
-        !isDateAfter(date, widget.endDate)) {
+    } else if (!isDateBefore(date, widget.startDate) && !isDateAfter(date, widget.endDate)) {
       setState(() {
         selectedDate = date;
         widget.onDateSelected(date);
@@ -313,8 +302,7 @@ class CalendarStripState extends State<CalendarStrip>
   checkOutOfRangeStatus(DateTime date) {
     date = DateTime(date.year, date.month, date.day);
     if (widget.startDate != null && widget.endDate != null) {
-      if (!isDateBefore(date, widget.startDate) &&
-          !isDateAfter(date, widget.endDate)) {
+      if (!isDateBefore(date, widget.startDate) && !isDateAfter(date, widget.endDate)) {
         return false;
       } else {
         return true;
@@ -341,8 +329,8 @@ class CalendarStripState extends State<CalendarStrip>
     List<Widget> currentWeekRow = [];
     for (var eachDay = 0; eachDay < 7; eachDay++) {
       var index = eachDay;
-      currentWeekRow.add(dateTileBuilder(
-          rowStartingDate.add(Duration(days: eachDay)), selectedDate, index));
+      currentWeekRow
+          .add(dateTileBuilder(rowStartingDate.add(Duration(days: eachDay)), selectedDate, index));
     }
     monthLabel = getMonthLabel();
     return Column(children: [
@@ -350,8 +338,7 @@ class CalendarStripState extends State<CalendarStrip>
       Container(
           padding: EdgeInsets.all(0),
           child: GestureDetector(
-            onHorizontalDragEnd: (DragEndDetails details) =>
-                onStripDrag(details),
+            onHorizontalDragEnd: (DragEndDetails details) => onStripDrag(details),
             child: Row(children: [
               leftIconWidget(),
               Expanded(child: Row(children: currentWeekRow)),
@@ -374,8 +361,8 @@ class CalendarStripState extends State<CalendarStrip>
             customBorder: CircleBorder(),
             onTap: () => onDateTap(date),
             child: Container(
-              child: widget.dateTileBuilder(date, selectedDate, rowIndex,
-                  dayName, isDateMarked(date), isDateOutOfRange),
+              child: widget.dateTileBuilder(
+                  date, selectedDate, rowIndex, dayName, isDateMarked(date), isDateOutOfRange),
             ),
           ),
         ),
@@ -398,7 +385,7 @@ class CalendarStripState extends State<CalendarStrip>
             alignment: Alignment.center,
             padding: EdgeInsets.only(top: 8, left: 5, right: 5, bottom: 5),
             decoration: BoxDecoration(
-              color: !isSelectedDate ? Colors.transparent : Colors.blue,
+              color: !isSelectedDate ? Colors.transparent : Theme.of(context).primaryColor,
               borderRadius: BorderRadius.all(Radius.circular(60)),
             ),
             child: Column(
@@ -410,8 +397,7 @@ class CalendarStripState extends State<CalendarStrip>
                     color: !isSelectedDate ? Colors.black : Colors.white,
                   ),
                 ),
-                Text(date.day.toString(),
-                    style: !isSelectedDate ? normalStyle : selectedDateStyle),
+                Text(date.day.toString(), style: !isSelectedDate ? normalStyle : selectedDateStyle),
               ],
             ),
           ),
@@ -424,9 +410,7 @@ class CalendarStripState extends State<CalendarStrip>
     return Container(
       height: nullOrDefault(widget.containerHeight, 90.0),
       child: buildDateRow(),
-      decoration: widget.containerDecoration != null
-          ? widget.containerDecoration
-          : BoxDecoration(),
+      decoration: widget.containerDecoration != null ? widget.containerDecoration : BoxDecoration(),
     );
   }
 }
@@ -437,15 +421,13 @@ class SlideFadeTransition extends StatefulWidget {
   final String id;
   final Curve curve;
 
-  SlideFadeTransition(
-      {@required this.child, @required this.id, this.delay, this.curve});
+  SlideFadeTransition({@required this.child, @required this.id, this.delay, this.curve});
 
   @override
   SlideFadeTransitionState createState() => SlideFadeTransitionState();
 }
 
-class SlideFadeTransitionState extends State<SlideFadeTransition>
-    with TickerProviderStateMixin {
+class SlideFadeTransitionState extends State<SlideFadeTransition> with TickerProviderStateMixin {
   AnimationController _animController;
   Animation<Offset> _animOffset;
   bool _disposed = false;
@@ -454,14 +436,10 @@ class SlideFadeTransitionState extends State<SlideFadeTransition>
   void initState() {
     super.initState();
 
-    _animController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
+    _animController = AnimationController(vsync: this, duration: Duration(milliseconds: 400));
     final _curve = CurvedAnimation(
-        curve: widget.curve != null ? widget.curve : Curves.decelerate,
-        parent: _animController);
-    _animOffset =
-        Tween<Offset>(begin: const Offset(0.0, 0.25), end: Offset.zero)
-            .animate(_curve);
+        curve: widget.curve != null ? widget.curve : Curves.decelerate, parent: _animController);
+    _animOffset = Tween<Offset>(begin: const Offset(0.0, 0.25), end: Offset.zero).animate(_curve);
 
     if (widget.delay == null) {
       if (!_disposed) _animController.forward();

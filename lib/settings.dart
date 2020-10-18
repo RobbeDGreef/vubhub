@@ -237,7 +237,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
                               textAlign: TextAlign.center,
                             ),
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue)),
+                                backgroundColor: MaterialStateProperty.all<Color>(
+                                    Theme.of(context).primaryColor)),
                             onPressed: () {
                               Clipboard.getData('text/plain').then((val) {
                                 // TODO: do better checks than this

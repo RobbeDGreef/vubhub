@@ -197,7 +197,7 @@ class ClassesToday extends State<MainUi> {
           margin: EdgeInsets.all(8),
           borderRadius: 8,
           message: "Copied text to clipboard",
-          icon: Icon(Icons.info_outline, color: Colors.blue),
+          icon: Icon(Icons.info_outline, color: Theme.of(context).primaryColor),
           duration: Duration(seconds: 2),
           animationDuration: Duration(milliseconds: 500),
         ).show(context);
@@ -445,7 +445,7 @@ class ClassesToday extends State<MainUi> {
   Widget build(BuildContext context) {
     final bottom = BottomNavigationBar(
       currentIndex: this._selectedNavBarIndex,
-      selectedItemColor: Colors.blue,
+      selectedItemColor: Theme.of(context).primaryColor,
       unselectedItemColor: Colors.grey,
       onTap: (i) {
         setState(() {
