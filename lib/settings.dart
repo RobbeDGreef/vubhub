@@ -308,7 +308,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
             });
           }),
           _buildChooseSettings(
-              "Education type", this._dropDownEdu, Icon(Icons.class_), getEducations(), (val) {
+              "Education type", this._dropDownEdu, Icon(Icons.school), getEducations(), (val) {
             setState(() {
               this._dropDownEdu = val;
               this._selectedUserGroups = [];
