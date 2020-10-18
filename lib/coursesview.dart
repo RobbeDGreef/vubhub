@@ -56,6 +56,27 @@ class Assignment {
 
 class Discussion {}
 
+// TODO: maybe we should generalise the lecture object in parser.dart to use event too.
+class Event {
+  String name;
+  String details;
+  DateTime startDate;
+  DateTime endDate;
+  int courseId;
+
+  Event(Map<String, dynamic> data) {
+    name = data["title"];
+    startDate = DateTime.parse(data["start_at"]);
+    endDate = DateTime.parse(data["end_at"]);
+    details = data["description"];
+
+    if ((data["context_code"] as String).startsWith("course_")) {
+      courseId = int.parse((data["context_code"] as String).substring(7));
+    } else
+      courseId = -1;
+  }
+}
+
 class CourseInfo {
   String name;
   String imageUrl;
@@ -63,6 +84,7 @@ class CourseInfo {
   Color color = Colors.grey;
   List<Assignment> assignments = [];
   List<Discussion> discussions = [];
+  List<Event> events = [];
   int unreadAnnouncements = 0;
   int dueAssignments = 0;
   int unreadDiscussions = 0;
@@ -86,6 +108,14 @@ class _CourseDetailsState extends State<CourseDetails> {
 
   _CourseDetailsState(CourseInfo details) {
     this._details = details;
+  }
+
+  int _calcUpcomingEvents() {
+    // TODO: take the first 5 upcomming events or something.
+    if (this._details.events.length != 0)
+      return this._details.events.length;
+    else
+      return null;
   }
 
   Widget _buildNotificationButton({Icon icon, int amount, Color color, Function() onPressed}) {
@@ -159,6 +189,27 @@ class _CourseDetailsState extends State<CourseDetails> {
       subtitle:
           Text("Due at ${DateFormat("d MMMM y").format(this._details.assignments[index].dueDate)}"),
       trailing: icon,
+    );
+  }
+
+  Widget _buildEventTile(int index) {
+    /// Will return "You have no upcoming events for this course." if
+    /// the event list is empty.
+    if (this._details.events.isEmpty) {
+      return _buildListTile(null, null, "You have no upcoming events for this course.", null);
+    }
+
+    final icon = Icon(Icons.event);
+
+    final startDate = this._details.events[index].startDate;
+    final endDate = this._details.events[index].endDate;
+
+    // TODO: events could be longer then a day
+    return _buildListTile(
+      this._details.events[index].name,
+      "${DateFormat("d MMMM").format(startDate)} from ${DateFormat.Hm().format(startDate)} until ${DateFormat.Hm().format(endDate)}",
+      null,
+      icon,
     );
   }
 
@@ -245,8 +296,21 @@ class _CourseDetailsState extends State<CourseDetails> {
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               itemBuilder: (BuildContext context, int index) => _buildAssignmentTile(index),
-              itemCount:
-                  this._details.assignments.length == 0 ? 1 : this._details.assignments.length,
+        Padding(
+          padding: EdgeInsets.only(left: 8),
+          child: Text(
+            "Upcoming events",
+            style: TextStyle(color: this._details.color, fontSize: 15, fontWeight: FontWeight.w700),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.all(8),
+          child: Card(
+            child: ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int index) => _buildEventTile(index),
+              itemCount: _calcUpcomingEvents() ?? 1,
             ),
           ),
         ),
@@ -393,10 +457,35 @@ class _CoursesViewState extends State<CoursesView> {
       });
     }
 
-    this._canvasApi.request(apiUrl: "api/v1/dashboard/dashboard_cards").then((res) {
+    this._canvasApi.request(apiUrl: "/api/v1/appointment_groups").then((appgroups) {
+      if (!this.mounted) return;
+
+      String url = "/api/v1/calendar_events?start_date=";
+      url += DateTime.now().toIso8601String();
+      url += "&end_date=" + DateTime.now().add(Duration(days: 365)).toIso8601String();
+
+      if (appgroups != null && (appgroups as List<dynamic>).length != 0) {
+        url += "&appointment_group_ids=";
+        for (Map<String, dynamic> group in appgroups) {
+          url += group["id"].toString() + ",";
+        }
+        url = url.substring(0, url.length - 1);
+      }
+
       if (!this.mounted) return;
       setState(() {
-        _addExtraCourseInfo(res);
+        this._canvasApi.request(apiUrl: url).then((calendarData) {
+          for (Map<String, dynamic> eventData in calendarData) {
+            print(eventData);
+            Event event = Event(eventData);
+            for (CourseInfo course in this._courses) {
+              if (course.id == event.courseId) {
+                course.events.add(event);
+                break;
+              }
+            }
+          }
+        });
       });
     });
 
