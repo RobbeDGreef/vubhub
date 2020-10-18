@@ -170,31 +170,22 @@ class _CourseDetailsState extends State<CourseDetails> {
     );
   }
 
-  Widget _buildAssignmentTile(int index) {
-    /// Will return "You currently have no assignments for this course." if
-    /// the assignments list of the coursedetails is empty.
-    /// If not, a widget of the following structure will be returned
-    ///
-    /// ListTile
-    ///   - Text the assignment name
-    if (this._details.assignments.isEmpty) {
+  Widget _buildListTile(String title, String subtitle, String empty, Icon icon) {
+    /// Will return the contents of the empty string if
+    /// the string is not equal to null
+    if (empty != null) {
       return Padding(
         padding: EdgeInsets.all(8),
         child: Text(
-          "You currently have no assignments for this course.",
+          empty,
           textAlign: TextAlign.center,
         ),
       );
     }
 
-    final icon = Icon(this._details.assignments[index].hasSubmitted
-        ? Icons.check
-        : Icons.check_box_outline_blank);
-
     return ListTile(
-      title: Text(this._details.assignments[index].name),
-      subtitle:
-          Text("Due at ${DateFormat("d MMMM y").format(this._details.assignments[index].dueDate)}"),
+      title: Text(title),
+      subtitle: Text(subtitle),
       trailing: icon,
     );
   }
