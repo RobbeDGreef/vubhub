@@ -285,7 +285,7 @@ class _CourseDetailsState extends State<CourseDetails> {
         Padding(
           padding: EdgeInsets.only(left: 8),
           child: Text(
-            "Assignments",
+            "Upcoming due assignments",
             style: TextStyle(color: this._details.color, fontSize: 15, fontWeight: FontWeight.w700),
           ),
         ),
