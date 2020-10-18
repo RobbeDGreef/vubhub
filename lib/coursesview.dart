@@ -50,13 +50,19 @@ class Assignment {
   }
 }
 
+class Discussion {}
+
 class CourseInfo {
   String name;
   String imageUrl;
   int id;
   Color color = Colors.grey;
   List<Assignment> assignments = [];
+  List<Discussion> discussions = [];
   int unreadAnnouncements = 0;
+  int dueAssignments = 0;
+  int unreadDiscussions = 0;
+  int curOngoingMeetings = 0;
 
   CourseInfo.empty();
   CourseInfo({this.name, this.id});
@@ -124,7 +130,7 @@ class _CourseDetailsState extends State<CourseDetails> {
   }
 
   Widget _buildAssignmentTile(int index) {
-    /// Will return "You have no assignments for this course." if
+    /// Will return "You currently have no assignments for this course." if
     /// the assignments list of the coursedetails is empty.
     /// If not, a widget of the following structure will be returned
     ///
@@ -134,7 +140,7 @@ class _CourseDetailsState extends State<CourseDetails> {
       return Padding(
         padding: EdgeInsets.all(8),
         child: Text(
-          "You have no assignments for this course.",
+          "You currently have no assignments for this course.",
           textAlign: TextAlign.center,
         ),
       );
@@ -191,12 +197,31 @@ class _CourseDetailsState extends State<CourseDetails> {
           child: Card(
             elevation: 3.0,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildNotificationButton(
                   icon: Icon(Icons.campaign),
                   amount: this._details.unreadAnnouncements,
                   color: this._details.color,
                   onPressed: () => print("Announcements"),
+                ),
+                _buildNotificationButton(
+                  icon: Icon(Icons.assignment),
+                  amount: this._details.dueAssignments,
+                  color: this._details.color,
+                  onPressed: () => print("Assignments"),
+                ),
+                _buildNotificationButton(
+                  icon: Icon(Icons.question_answer),
+                  amount: this._details.unreadDiscussions,
+                  color: this._details.color,
+                  onPressed: () => print("Discussions"),
+                ),
+                _buildNotificationButton(
+                  icon: Icon(Icons.people),
+                  amount: this._details.curOngoingMeetings,
+                  color: this._details.color,
+                  onPressed: () => print("Meetings"),
                 ),
               ],
             ),
@@ -354,6 +379,8 @@ class _CoursesViewState extends State<CoursesView> {
         setState(() {
           for (Map<String, dynamic> activity in res) {
             if (activity["type"] == "Announcement") {
+              course.unreadAnnouncements = activity["unread_count"];
+            } else if (activity["type"] == "Discussion") {
               course.unreadAnnouncements = activity["unread_count"];
             }
             // TODO: more than just the activities, check discussiontopics and webconferences too.
