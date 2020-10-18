@@ -118,6 +118,13 @@ class _CourseDetailsState extends State<CourseDetails> {
       return null;
   }
 
+  int _calcUpcomingAssignments() {
+    if (this._details.assignments.length != 0)
+      return this._details.assignments.length;
+    else
+      return null;
+  }
+
   Widget _buildNotificationButton({Icon icon, int amount, Color color, Function() onPressed}) {
     /// Structure:
     /// Padding
@@ -189,6 +196,29 @@ class _CourseDetailsState extends State<CourseDetails> {
       subtitle:
           Text("Due at ${DateFormat("d MMMM y").format(this._details.assignments[index].dueDate)}"),
       trailing: icon,
+    );
+  }
+
+  Widget _buildAssignmentTile(int index) {
+    /// Will return "You currently have no assignments for this course." if
+    /// the assignments list of the coursedetails is empty.
+    if (this._details.assignments.isEmpty) {
+      return _buildListTile(null, null, "You currently have no assignments for this course.", null);
+    }
+
+    final icon =
+        Icon(this._details.assignments[index].hasSubmitted ? Icons.check : Icons.pending_actions);
+
+    String dueString = "Could not find the due date.";
+    if (this._details.assignments[index].dueDate != null) {
+      dueString =
+          "Due at ${DateFormat("d MMMM y").format(this._details.assignments[index].dueDate)}";
+    }
+    return _buildListTile(
+      this._details.assignments[index].name,
+      dueString,
+      null,
+      icon,
     );
   }
 
@@ -296,6 +326,10 @@ class _CourseDetailsState extends State<CourseDetails> {
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               itemBuilder: (BuildContext context, int index) => _buildAssignmentTile(index),
+              itemCount: _calcUpcomingAssignments(),
+            ),
+          ),
+        ),
         Padding(
           padding: EdgeInsets.only(left: 8),
           child: Text(
