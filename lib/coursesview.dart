@@ -345,7 +345,6 @@ class _CoursesViewState extends State<CoursesView> {
   List<CourseInfo> _courses = [];
   CanvasApi _canvasApi;
   InfoHandler _info;
-  int _userId;
   bool _loading = true;
 
   _CoursesViewState(InfoHandler info) {
@@ -428,14 +427,11 @@ class _CoursesViewState extends State<CoursesView> {
         _parseAndSetCourseInfo(res);
     });
 
-    // If there were no courses found, we assume we had an error.
+    // If there were no courses found, we assume we had an error and return.
     // TODO: it is perfectly possible the user has no courses, valve pls fix
     if (this._courses.isEmpty) {
       return;
     }
-
-    // We capture the user id for later which apperantly is also passed
-    this._userId = res[0]["enrollments"][0]["user_id"];
 
     for (CourseInfo course in this._courses) {
       this
@@ -489,8 +485,7 @@ class _CoursesViewState extends State<CoursesView> {
       });
     });
 
-    print(this._userId);
-    this._canvasApi.request(apiUrl: "api/v1/users/${this._userId}/colors").then((res) {
+    this._canvasApi.request(apiUrl: "api/v1/users/self/colors").then((res) {
       if (!this.mounted) return;
       setState(() {
         _addCourseColorInfo(res);
