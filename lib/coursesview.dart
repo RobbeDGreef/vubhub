@@ -325,7 +325,7 @@ class _CourseDetailsState extends State<CourseDetails> {
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               itemBuilder: (BuildContext context, int index) => _buildAssignmentTile(index),
-              itemCount: _calcUpcomingAssignments(),
+              itemCount: _calcUpcomingAssignments() ?? 1,
             ),
           ),
         ),
@@ -395,7 +395,6 @@ class _CoursesViewState extends State<CoursesView> {
       if ((course["originalName"] as String).contains(" - ")) {
         String name = (course["originalName"] as String).split(" - ")[0];
         print("$name ${course["id"]}");
-        print(course);
         CourseInfo obj = CourseInfo(name: name, id: course["id"]);
         obj.imageUrl = course["image"];
 
@@ -496,7 +495,6 @@ class _CoursesViewState extends State<CoursesView> {
       setState(() {
         this._canvasApi.request(apiUrl: url).then((calendarData) {
           for (Map<String, dynamic> eventData in calendarData) {
-            print(eventData);
             Event event = Event(eventData);
             for (CourseInfo course in this._courses) {
               if (course.id == event.courseId) {
@@ -545,7 +543,9 @@ class _CoursesViewState extends State<CoursesView> {
   Widget _buildCourseTile(BuildContext context, int index) {
     List<Widget> widgets = [Container(color: this._courses[index].color.withAlpha(153))];
     if (this._courses[index].imageUrl != null) {
-      widgets.insert(0, Image.network(this._courses[index].imageUrl));
+      try {
+        widgets.insert(0, Image.network(this._courses[index].imageUrl));
+      } catch (HttpException) {}
     }
 
     // This here is a hack and there has to be a better way
