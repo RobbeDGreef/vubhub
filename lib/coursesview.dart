@@ -358,11 +358,13 @@ class _CoursesViewState extends State<CoursesView> {
 
     for (Map<String, dynamic> course in data) {
       // This test filters away all the non-course courses like, canvas help etc.
-      if ((course["name"] as String).contains(" - ")) {
-        String name = (course["name"] as String).split(" - ")[0];
+      print(course["originalName"]);
+      if ((course["originalName"] as String).contains(" - ")) {
+        String name = (course["originalName"] as String).split(" - ")[0];
         print("$name ${course["id"]}");
-
+        print(course);
         CourseInfo obj = CourseInfo(name: name, id: course["id"]);
+        obj.imageUrl = course["image"];
 
         // Retrieve the assignment information
         this._canvasApi.request(apiUrl: "api/v1/courses/${course["id"]}/assignments").then((res) {
@@ -373,17 +375,6 @@ class _CoursesViewState extends State<CoursesView> {
         });
 
         this._courses.add(obj);
-      }
-    }
-  }
-
-  void _addExtraCourseInfo(List<dynamic> data) {
-    for (Map<String, dynamic> course in data) {
-      try {
-        CourseInfo info = this._courses.firstWhere((e) => e.id == course["id"]);
-        info.imageUrl = course["image"];
-      } catch (StateError) {
-        continue;
       }
     }
   }
@@ -407,7 +398,7 @@ class _CoursesViewState extends State<CoursesView> {
 
   void update() async {
     this._loading = true;
-    var res = await this._canvasApi.request(apiUrl: "api/v1/courses");
+    var res = await this._canvasApi.request(apiUrl: "api/v1/dashboard/dashboard_cards");
 
     // if the widget is not visible anymore, just return and do not try to update state
     if (!this.mounted) return;
