@@ -188,21 +188,22 @@ class ClassesToday extends State<MainUi> {
 
   Widget _buildLectureDetailTile(String text, Icon icon) {
     return Card(
+        margin: EdgeInsets.only(left: 8, right: 8, bottom: 4, top: 4),
         child: ListTile(
-      title: Text(text),
-      leading: icon,
-      onLongPress: () {
-        Clipboard.setData(ClipboardData(text: text));
-        Flushbar(
-          margin: EdgeInsets.all(8),
-          borderRadius: 8,
-          message: "Copied text to clipboard",
-          icon: Icon(Icons.info_outline, color: Theme.of(context).primaryColor),
-          duration: Duration(seconds: 2),
-          animationDuration: Duration(milliseconds: 500),
-        ).show(context);
-      },
-    ));
+          title: Text(text),
+          leading: icon,
+          onLongPress: () {
+            Clipboard.setData(ClipboardData(text: text));
+            Flushbar(
+              margin: EdgeInsets.all(8),
+              borderRadius: 8,
+              message: "Copied text to clipboard",
+              icon: Icon(Icons.info_outline, color: Theme.of(context).primaryColor),
+              duration: Duration(seconds: 2),
+              animationDuration: Duration(milliseconds: 500),
+            ).show(context);
+          },
+        ));
   }
 
   Widget _buildLectureDetails(int index) {
@@ -229,7 +230,11 @@ class ClassesToday extends State<MainUi> {
     final List<Widget> children = [
       Padding(
           padding: EdgeInsets.only(left: 4, right: 4, bottom: 16, top: 16),
-          child: Text(lec.name, style: TextStyle(fontSize: 20, color: AlmostDark))),
+          child: Text(
+            lec.name,
+            style: TextStyle(fontSize: 20, color: AlmostDark),
+            textAlign: TextAlign.center,
+          )),
     ];
 
     for (List<dynamic> info in details) {
