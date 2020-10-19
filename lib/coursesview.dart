@@ -63,17 +63,32 @@ class Event {
   DateTime startDate;
   DateTime endDate;
   int courseId;
+  String location;
+  String reserveUrl;
+  String url;
+  bool hasAlreadyReserved;
+  Event reservation;
 
   Event(Map<String, dynamic> data) {
-    name = data["title"];
-    startDate = DateTime.parse(data["start_at"]);
-    endDate = DateTime.parse(data["end_at"]);
-    details = data["description"];
+    print(data.keys);
+    this.name = data["title"];
+    this.startDate = DateTime.parse(data["start_at"]);
+    this.endDate = DateTime.parse(data["end_at"]);
+    this.details = data["description"];
+    this.location = data["location_name"];
+    this.reserveUrl = data["reserve_url"];
+    this.hasAlreadyReserved = data["reserved"];
+    this.url = data["url"];
+
+    // TODO: one might have multiple reservations ?
+    if (data["child_events"] != null && (data["child_events"] as List<dynamic>).isNotEmpty) {
+      this.reservation = Event(data["child_events"][0]);
+    }
 
     if ((data["context_code"] as String).startsWith("course_")) {
-      courseId = int.parse((data["context_code"] as String).substring(7));
+      this.courseId = int.parse((data["context_code"] as String).substring(7));
     } else
-      courseId = -1;
+      this.courseId = -1;
   }
 }
 
@@ -96,8 +111,9 @@ class CourseInfo {
 
 class CourseDetails extends StatefulWidget {
   final CourseInfo details;
+  final CanvasApi canvas;
 
-  CourseDetails({this.details});
+  CourseDetails({this.details, this.canvas});
 
   @override
   _CourseDetailsState createState() => _CourseDetailsState(this.details);
@@ -170,7 +186,145 @@ class _CourseDetailsState extends State<CourseDetails> {
     );
   }
 
-  Widget _buildListTile(String title, String subtitle, String empty, Icon icon) {
+  Future<http.Response> _sendPostToEventUrl(String url, String body) {
+    // It's okay for comments to be empty
+    Map<String, String> headers = {
+      "host": "canvas.vub.be",
+      "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "connection": "close",
+      "content-length": body.length.toString(),
+      "authorization": "Bearer " + this.widget.canvas._userCanvasAuthToken,
+    };
+
+    print(url);
+    print(headers);
+    print(body);
+    return http.post(url, headers: headers, body: body);
+  }
+
+  // TODO: this is terrible code reuse (no code reuse)
+  void _cancelEvent(int index, String reason) async {
+    Navigator.pop(context);
+
+    String title = "Success";
+    String subtitle = "Successfully cancelled your reservation.";
+    if (this._details.events[index].reservation == null) {
+      title = "Failure";
+      subtitle = "We cannot find the link to your registration.";
+    } else {
+      var res = await _sendPostToEventUrl(this._details.events[index].reservation.url,
+          "cancel_reason=" + reason + "&_method=DELETE");
+
+      if (res.statusCode != 200) {
+        print(res.statusCode);
+        print(res.body);
+        title = "Failure";
+        subtitle = "Something went wrong while trying to cancel your reservation.";
+      }
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text(title),
+          contentPadding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 8),
+          children: [
+            Text(subtitle),
+            TextButton(
+              child: Text("close"),
+              onPressed: () => Navigator.pop(context),
+            )
+          ],
+        );
+      },
+    );
+
+    // TODO: update the event data on close.
+  }
+
+  void _reserveEvent(int index, String comments) async {
+    Navigator.pop(context);
+
+    var res = await _sendPostToEventUrl(
+        this._details.events[index].reserveUrl, "comments=" + comments + "&_method=POST");
+
+    String title = "Success";
+    String subtitle = "Successfully made a reservation.";
+
+    if (res.statusCode == 400) {
+      title = "Failure";
+      subtitle = "Something went wrong while trying to make a reservation.";
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text(title),
+          contentPadding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 8),
+          children: [
+            Text(subtitle),
+            TextButton(
+              child: Text("close"),
+              onPressed: () => Navigator.pop(context),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void _viewEvent(int index) {
+    String time = DateFormat("d MMMM 'from' hh:mm ").format(this._details.events[index].startDate) +
+        DateFormat("'until' hh:mm").format(this._details.events[index].endDate);
+
+    List<Widget> children = [
+      Text(time),
+      Text("At " + this._details.events[index].location),
+      Divider(),
+      Text(this._details.events[index].details),
+    ];
+
+    Row buttons = Row(
+      children: [
+        TextButton(
+          child: Text("close"),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    );
+    if (this._details.events[index].reserveUrl != null) {
+      if (this._details.events[index].hasAlreadyReserved)
+        buttons.children.add(TextButton(
+          child: Text("cancel reservation"),
+          onPressed: () => _cancelEvent(index, ""),
+        ));
+      else
+        buttons.children.add(TextButton(
+          child: Text("reserve"),
+          onPressed: () => _reserveEvent(index, ""),
+        ));
+    }
+    children.add(buttons);
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text(this._details.events[index].name),
+          contentPadding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 8),
+          children: children,
+        );
+      },
+    );
+  }
+
+  Widget _buildListTile(String title, String subtitle, String empty, Icon icon, Function() onTap) {
     /// Will return the contents of the empty string if
     /// the string is not equal to null
     if (empty != null) {
@@ -187,6 +341,7 @@ class _CourseDetailsState extends State<CourseDetails> {
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: icon,
+      onTap: onTap,
     );
   }
 
@@ -194,7 +349,8 @@ class _CourseDetailsState extends State<CourseDetails> {
     /// Will return "You currently have no assignments for this course." if
     /// the assignments list of the coursedetails is empty.
     if (this._details.assignments.isEmpty) {
-      return _buildListTile(null, null, "You currently have no assignments for this course.", null);
+      return _buildListTile(
+          null, null, "You currently have no assignments for this course.", null, null);
     }
 
     final icon =
@@ -210,6 +366,7 @@ class _CourseDetailsState extends State<CourseDetails> {
       dueString,
       null,
       icon,
+      () => print("assignment $index"),
     );
   }
 
@@ -217,7 +374,7 @@ class _CourseDetailsState extends State<CourseDetails> {
     /// Will return "You have no upcoming events for this course." if
     /// the event list is empty.
     if (this._details.events.isEmpty) {
-      return _buildListTile(null, null, "You have no upcoming events for this course.", null);
+      return _buildListTile(null, null, "You have no upcoming events for this course.", null, null);
     }
 
     final icon = Icon(Icons.event);
@@ -231,6 +388,7 @@ class _CourseDetailsState extends State<CourseDetails> {
       "${DateFormat("d MMMM").format(startDate)} from ${DateFormat.Hm().format(startDate)} until ${DateFormat.Hm().format(endDate)}",
       null,
       icon,
+      () => _viewEvent(index),
     );
   }
 
@@ -589,7 +747,8 @@ class _CoursesViewState extends State<CoursesView> {
       ),
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => CourseDetails(details: this._courses[index]),
+          builder: (context) =>
+              CourseDetails(details: this._courses[index], canvas: this._canvasApi),
         ));
       },
     );
