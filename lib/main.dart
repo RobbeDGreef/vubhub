@@ -12,6 +12,7 @@ import "const.dart";
 import "places.dart";
 import 'coursesview.dart';
 import 'help.dart';
+import 'news.dart';
 import 'theming.dart';
 
 void main() => runApp(Vub());
@@ -446,7 +447,7 @@ class ClassesToday extends State<MainUi> {
         return ListView(children: _getPlaces());
 
       case 4:
-        return HelpView();
+        return NewsView();
 
       default:
         return Text("Something went wrong");
@@ -482,13 +483,13 @@ class ClassesToday extends State<MainUi> {
           label: "places",
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.help_center),
-          label: "help",
+          icon: Icon(Icons.public),
+          label: "News",
         ),
       ],
     );
 
-    final tabText = ["Today's classes", "Course information", "VUB campus map", "places", "help"];
+    final tabText = ["Today's classes", "Course information", "VUB campus map", "Places", "News"];
 
     final refreshAction = [
       IconButton(

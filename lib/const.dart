@@ -89,3 +89,6 @@ final WhoAreWeText =
     "With we I mostly refer to me (Robbe De Greef, currently the lead developer) and more recently also Thomas Vandermotten. We are two first year Computer Science bachelors who (among most of our class) were very annoyed by the VUB's cumbersome class schedule system. So I decided to write an app for it and then thought it would be fun to add some more functionality. If you want to contact us you can do so in the help tab in the main screen of the app. We hope this app can help you in your daily life and please let us know if you want to change something.";
 
 final CurrentAppRelease = "0.0.1 alpha";
+
+final VubNewsUrl = "https://juicer.io/api/feeds/vubrussel";
+final VubNewsPer = 100;
