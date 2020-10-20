@@ -384,6 +384,12 @@ class ClassesToday extends State<MainUi> {
     }));
   }
 
+  void _openHelp() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+      return HelpView();
+    }));
+  }
+
   Widget _buildDrawer() {
     return Drawer(
         child: ListView(
@@ -393,7 +399,8 @@ class ClassesToday extends State<MainUi> {
                 image: DecorationImage(image: AssetImage("assets/vub-cs2.png")),
                 color: Colors.white)),
         ListTile(title: Text("Settings"), onTap: _openSettings),
-        ListTile(title: Text("About"), onTap: _openAbout)
+        ListTile(title: Text("About"), onTap: _openAbout),
+        ListTile(title: Text("Help"), onTap: _openHelp),
       ],
     ));
   }
