@@ -92,6 +92,20 @@ class Event {
   }
 }
 
+class Announcement {
+  String title;
+  String message;
+  DateTime created;
+  bool isRead;
+
+  Announcement(Map<String, dynamic> data) {
+    this.title = data["title"];
+    this.message = data["message"];
+    this.created = DateTime.parse(data["posted_at"]);
+    this.isRead = data["read_state"] == "read";
+  }
+}
+
 class CourseInfo {
   String name;
   String imageUrl;
@@ -100,13 +114,70 @@ class CourseInfo {
   List<Assignment> assignments = [];
   List<Discussion> discussions = [];
   List<Event> events = [];
-  int unreadAnnouncements = 0;
+  int unreadAnnouncementCount = 0;
   int dueAssignments = 0;
   int unreadDiscussions = 0;
   int curOngoingMeetings = 0;
 
   CourseInfo.empty();
   CourseInfo({this.name, this.id});
+}
+
+class PageDetails extends StatefulWidget {
+  String title;
+  Color color;
+  Function() getData;
+  Widget Function(BuildContext, dynamic) buildTile;
+  PageDetails({this.title, this.color, this.getData, this.buildTile});
+
+  _PageDetailsState createState() => _PageDetailsState(getData: getData);
+}
+
+class _PageDetailsState extends State<PageDetails> {
+  List<dynamic> _data = [];
+  Function() getData;
+
+  void update() async {
+    var data = await this.getData();
+    setState(() {
+      this._data = data;
+    });
+  }
+
+  _PageDetailsState({this.getData}) {
+    update();
+  }
+
+  int _calcItemCount() {
+    if (this._data.length == 0) return 1;
+    return this._data.length;
+  }
+
+  Widget _buildTile(BuildContext context, int index) {
+    if (this._data.isEmpty) {
+      return Center(
+          child: Container(
+              margin: EdgeInsets.all(8),
+              child: CircularProgressIndicator(),
+              width: 50,
+              height: 50));
+    }
+    return this.widget.buildTile(context, this._data[index]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(this.widget.title),
+        backgroundColor: this.widget.color,
+      ),
+      body: ListView.builder(
+        itemBuilder: (BuildContext context, int index) => _buildTile(context, index),
+        itemCount: _calcItemCount(),
+      ),
+    );
+  }
 }
 
 class CourseDetails extends StatefulWidget {
@@ -135,6 +206,14 @@ class _CourseDetailsState extends State<CourseDetails> {
   }
 
   int _calcUpcomingAssignments() {
+    if (this._details.assignments.length != 0)
+      return this._details.assignments.length;
+    else
+      return null;
+  }
+
+  int _calcUpcomingAnnouncments() {
+    return null;
     if (this._details.assignments.length != 0)
       return this._details.assignments.length;
     else
@@ -370,6 +449,30 @@ class _CourseDetailsState extends State<CourseDetails> {
     );
   }
 
+  Widget _buildAnnouncementTile(int index) {
+    /// Will return "You currently have no assignments for this course." if
+    /// the assignments list of the coursedetails is empty.
+    if (this._details.assignments.isEmpty) {
+      return _buildListTile(null, null, "You have no unread announcements.", null, null);
+    }
+
+    final icon = Icon(Icons.campaign);
+
+    String dueString = "Could not find the due date.";
+    //if (this._details.announcements[index].dueDate != null) {
+    //  dueString =
+    //      "Due at ${DateFormat("d MMMM y").format(this._details.assignments[index].dueDate)}";
+    //}
+
+    return _buildListTile(
+      this._details.assignments[index].name,
+      dueString,
+      null,
+      icon,
+      () => print("assignment $index"),
+    );
+  }
+
   Widget _buildEventTile(int index) {
     /// Will return "You have no upcoming events for this course." if
     /// the event list is empty.
@@ -389,6 +492,50 @@ class _CourseDetailsState extends State<CourseDetails> {
       null,
       icon,
       () => _viewEvent(index),
+    );
+  }
+
+  void _pushView(Widget Function() builder) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+      return builder();
+    }));
+  }
+
+  void _buildAnnouncements() {
+    _pushView(
+      () => PageDetails(
+        title: "Announcements",
+        color: this._details.color,
+        buildTile: (BuildContext context, dynamic announcement) {
+          Announcement ann = announcement;
+          return Card(
+            child: ListTile(
+              leading: Icon(Icons.campaign),
+              trailing: !ann.isRead
+                  ? Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Icon(Icons.brightness_1, size: 12, color: this._details.color),
+                    )
+                  : null,
+              title: Text(ann.title),
+              subtitle: Text(DateFormat("d MMMM H:mm").format(ann.created)),
+              onTap: () => print(ann.title),
+            ),
+          );
+        },
+        getData: () async {
+          List<Announcement> announcements = [];
+          List<dynamic> res = await this
+              .widget
+              .canvas
+              .request(apiUrl: "api/v1/announcements?context_codes[]=course_${this._details.id}");
+          for (Map<String, dynamic> announcement in res) {
+            announcements.add(Announcement(announcement));
+          }
+
+          return announcements;
+        },
+      ),
     );
   }
 
@@ -435,9 +582,9 @@ class _CourseDetailsState extends State<CourseDetails> {
               children: [
                 _buildNotificationButton(
                   icon: Icon(Icons.campaign),
-                  amount: this._details.unreadAnnouncements,
+                  amount: this._details.unreadAnnouncementCount,
                   color: this._details.color,
-                  onPressed: () => print("Announcements"),
+                  onPressed: _buildAnnouncements,
                 ),
                 _buildNotificationButton(
                   icon: Icon(Icons.assignment),
@@ -484,6 +631,24 @@ class _CourseDetailsState extends State<CourseDetails> {
               shrinkWrap: true,
               itemBuilder: (BuildContext context, int index) => _buildAssignmentTile(index),
               itemCount: _calcUpcomingAssignments() ?? 1,
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 8),
+          child: Text(
+            "Unread announcements",
+            style: TextStyle(color: this._details.color, fontSize: 15, fontWeight: FontWeight.w700),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.all(8),
+          child: Card(
+            child: ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int index) => _buildAnnouncementTile(index),
+              itemCount: _calcUpcomingAnnouncments() ?? 1,
             ),
           ),
         ),
@@ -624,9 +789,9 @@ class _CoursesViewState extends State<CoursesView> {
         setState(() {
           for (Map<String, dynamic> activity in res) {
             if (activity["type"] == "Announcement") {
-              course.unreadAnnouncements = activity["unread_count"];
+              course.unreadAnnouncementCount = activity["unread_count"];
             } else if (activity["type"] == "Discussion") {
-              course.unreadAnnouncements = activity["unread_count"];
+              course.unreadAnnouncementCount = activity["unread_count"];
             }
             // TODO: more than just the activities, check discussiontopics and webconferences too.
           }
