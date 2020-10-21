@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'const.dart';
 import 'infohandler.dart';
 import 'theming.dart';
+import 'course.dart';
 import 'event.dart';
 
 class CanvasApi {
@@ -35,84 +36,6 @@ class CanvasApi {
     var res = await http.get(CanvasUrl + apiUrl, headers: headers);
     return jsonDecode(res.body);
   }
-}
-
-class Assignment {
-  String name;
-  String details;
-  DateTime dueDate;
-  bool hasSubmitted;
-
-  Assignment(Map<String, dynamic> data) {
-    this.name = data["name"];
-    this.details = data["description"];
-    try {
-      this.dueDate = DateTime.parse(data["due_at"]);
-    } catch (ArgumentError) {
-      this.dueDate = null;
-    }
-    this.hasSubmitted = data["has_submitted_submissions"];
-  }
-}
-
-class Discussion {}
-
-class CourseEvent extends Event {
-  String reserveUrl;
-  String url;
-  bool hasAlreadyReserved;
-  CourseEvent reservation;
-
-  CourseEvent(Map<String, dynamic> data) : super.empty() {
-    this.name = data['title'];
-    this.details = data["description"];
-    this.startDate = DateTime.parse(data["start_at"]);
-    this.endDate = DateTime.parse(data["end_at"]);
-    this.location = data["location_name"];
-    this.reserveUrl = data["reserve_url"];
-    this.hasAlreadyReserved = data["reserved"];
-    this.url = data["url"];
-
-    // TODO: one might have multiple reservations ?
-    if (data["child_events"] != null && (data["child_events"] as List<dynamic>).isNotEmpty) {
-      this.reservation = CourseEvent(data["child_events"][0]);
-    }
-
-    if ((data["context_code"] as String).startsWith("course_")) {
-      this.courseId = int.parse((data["context_code"] as String).substring(7));
-    }
-  }
-}
-
-class Announcement {
-  String title;
-  String message;
-  DateTime created;
-  bool isRead;
-
-  Announcement(Map<String, dynamic> data) {
-    this.title = data["title"];
-    this.message = data["message"];
-    this.created = DateTime.parse(data["posted_at"]);
-    this.isRead = data["read_state"] == "read";
-  }
-}
-
-class CourseInfo {
-  String name;
-  String imageUrl;
-  int id;
-  Color color = Colors.grey;
-  List<Assignment> assignments = [];
-  List<Discussion> discussions = [];
-  List<CourseEvent> events = [];
-  int unreadAnnouncementCount = 0;
-  int dueAssignments = 0;
-  int unreadDiscussions = 0;
-  int curOngoingMeetings = 0;
-
-  CourseInfo.empty();
-  CourseInfo({this.name, this.id});
 }
 
 class PageDetails extends StatefulWidget {
@@ -173,7 +96,7 @@ class _PageDetailsState extends State<PageDetails> {
 }
 
 class CourseDetails extends StatefulWidget {
-  final CourseInfo details;
+  final Course details;
   final CanvasApi canvas;
 
   CourseDetails({this.details, this.canvas});
@@ -183,9 +106,9 @@ class CourseDetails extends StatefulWidget {
 }
 
 class _CourseDetailsState extends State<CourseDetails> {
-  CourseInfo _details;
+  Course _details;
 
-  _CourseDetailsState(CourseInfo details) {
+  _CourseDetailsState(Course details) {
     this._details = details;
   }
 
@@ -690,7 +613,7 @@ class CoursesView extends StatefulWidget {
 }
 
 class _CoursesViewState extends State<CoursesView> {
-  List<CourseInfo> _courses = [];
+  List<Course> _courses = [];
   CanvasApi _canvasApi;
   InfoHandler _info;
   bool _loading = true;
@@ -710,7 +633,7 @@ class _CoursesViewState extends State<CoursesView> {
       if ((course["originalName"] as String).contains(" - ")) {
         String name = (course["originalName"] as String).split(" - ")[0];
         print("$name ${course["id"]}");
-        CourseInfo obj = CourseInfo(name: name, id: course["id"]);
+        Course obj = Course(name: name, id: course["id"]);
         obj.imageUrl = course["image"];
 
         // Retrieve the assignment information
@@ -734,7 +657,7 @@ class _CoursesViewState extends State<CoursesView> {
         int id = int.parse(key.substring(key.indexOf("_") + 1));
 
         try {
-          CourseInfo info = this._courses.firstWhere((e) => e.id == id);
+          Course info = this._courses.firstWhere((e) => e.id == id);
           info.color = Color(int.parse('ff' + data["custom_colors"][key].substring(1), radix: 16));
         } catch (StateError) {
           continue;
@@ -771,7 +694,7 @@ class _CoursesViewState extends State<CoursesView> {
       return;
     }
 
-    for (CourseInfo course in this._courses) {
+    for (Course course in this._courses) {
       this
           ._canvasApi
           .request(apiUrl: "api/v1/courses/${course.id}/activity_stream/summary")
@@ -811,7 +734,7 @@ class _CoursesViewState extends State<CoursesView> {
         this._canvasApi.request(apiUrl: url).then((calendarData) {
           for (Map<String, dynamic> eventData in calendarData) {
             CourseEvent event = CourseEvent(eventData);
-            for (CourseInfo course in this._courses) {
+            for (Course course in this._courses) {
               if (course.id == event.courseId) {
                 course.events.add(event);
                 break;
