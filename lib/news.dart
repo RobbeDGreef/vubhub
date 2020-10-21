@@ -266,24 +266,28 @@ class _NewsViewState extends State<NewsView> {
     Widget img = Text("No image provided");
     if (this._articles[index].imageUrl != null) {
       // Load the network image with a nice circular loading bar
-      img = Image.network(
-        this._articles[index].imageUrl,
-        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
-          if (loadingProgress == null) {
-            return child;
-          }
-          return SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.width * 0.677, // Most used aspect ratio
-            child: Center(
-              child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                      : null),
-            ),
-          );
-        },
-      );
+      try {
+        img = Image.network(
+          this._articles[index].imageUrl,
+          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+            if (loadingProgress == null) {
+              return child;
+            }
+            return SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.width * 0.677, // Most used aspect ratio
+              child: Center(
+                child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                        : null),
+              ),
+            );
+          },
+        );
+      } catch (HttpException) {
+        img = Text("An error occurred while loading image");
+      }
     }
 
     // This will change in the future once we load the primary color out of the image
