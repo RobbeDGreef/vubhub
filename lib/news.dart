@@ -83,7 +83,9 @@ class _ArticleViewState extends State<ArticleView> {
               style: TextStyle(fontSize: 12, color: Colors.grey)),
         ),
         Divider(),
-        Image.network(this._article.imageUrl),
+        this._article.imageUrl != null
+            ? Image.network(this._article.imageUrl)
+            : Text("No image provided"),
         Html(
           data: this._article.body,
           onLinkTap: (String url) => launch(url),
@@ -232,8 +234,11 @@ class _NewsViewState extends State<NewsView> {
       );
     }
 
+    // TODO: Nicer handling of no image
+    Widget img = Text("No image provided");
+    if (this._articles[index].imageUrl != null) {
     // Load the network image with a nice circular loading bar
-    Image img = Image.network(
+      img = Image.network(
       this._articles[index].imageUrl,
       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
         if (loadingProgress == null) {
@@ -251,6 +256,7 @@ class _NewsViewState extends State<NewsView> {
         );
       },
     );
+    }
 
     // This will change in the future once we load the primary color out of the image
     final fg = Colors.grey[800];
