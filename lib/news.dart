@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
@@ -133,7 +134,13 @@ class _NewsViewState extends State<NewsView> {
 
     setState(() {
       for (Map<String, dynamic> filter in filters) {
-        int subId = int.parse(filter['url'].substring(filter['url'].indexOf("=") + 1));
+        print(filter['url']);
+        int subId;
+        if (filter['url'].contains('%7C'))
+          subId = int.parse(filter['url'].substring(filter['url'].indexOf("%7C") + 3));
+        else
+          subId = int.parse(filter['url'].substring(filter['url'].indexOf("=") + 1));
+
         this._filters.add([filter['label'] as String, subId]);
       }
       this._selectedFilters = List<bool>.generate(this._filters.length, (index) => false);
@@ -147,8 +154,25 @@ class _NewsViewState extends State<NewsView> {
       });
     }
 
-    print("https://today.vub.be/nl/nieuws?page=${this._articlePage}");
-    var res = await http.get("https://today.vub.be/nl/nieuws?page=${this._articlePage}");
+    var url = VubNewsUrl + "?page=${this._articlePage}";
+
+    bool found = false;
+    int i = 0;
+    for (bool sub in this._selectedFilters) {
+      if (sub) {
+        print("sub selected: $i");
+        if (!found) {
+          url += '&subjects=';
+          found = true;
+        }
+
+        url += this._filters[i][1].toString();
+      }
+      i++;
+    }
+
+    print(url);
+    var res = await http.get(url);
 
     if (res.statusCode != 200) {
       print("News res code: ${res.statusCode}");
@@ -170,7 +194,10 @@ class _NewsViewState extends State<NewsView> {
 
     setState(() {
       for (Map<String, dynamic> article in data) {
-        this._articles.add(Article(article));
+        Article art = Article(article);
+        if (art.articleUrl != null) {
+          this._articles.add(art);
+        }
       }
       this._loading = false;
     });
@@ -179,7 +206,10 @@ class _NewsViewState extends State<NewsView> {
   void _selectFilter(int filter) {
     setState(() {
       this._selectedFilters[filter] = !this._selectedFilters[filter];
+      this._articles.clear();
+      this._articlePage = 0;
     });
+    _loadMoreArticles();
     // TODO: load new data according to filters.
   }
 
@@ -237,25 +267,25 @@ class _NewsViewState extends State<NewsView> {
     // TODO: Nicer handling of no image
     Widget img = Text("No image provided");
     if (this._articles[index].imageUrl != null) {
-    // Load the network image with a nice circular loading bar
+      // Load the network image with a nice circular loading bar
       img = Image.network(
-      this._articles[index].imageUrl,
-      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
-        if (loadingProgress == null) {
-          return child;
-        }
-        return SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.width * 0.677, // Most used aspect ratio
-          child: Center(
-            child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                    : null),
-          ),
-        );
-      },
-    );
+        this._articles[index].imageUrl,
+        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.width * 0.677, // Most used aspect ratio
+            child: Center(
+              child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                      : null),
+            ),
+          );
+        },
+      );
     }
 
     // This will change in the future once we load the primary color out of the image

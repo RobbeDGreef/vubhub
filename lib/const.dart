@@ -90,5 +90,5 @@ final WhoAreWeText =
 
 final CurrentAppRelease = "0.0.1 alpha";
 
-final VubNewsUrl = "https://juicer.io/api/feeds/vubrussel";
+final VubNewsUrl = "https://today.vub.be/nl/nieuws";
 final VubNewsPer = 100;
