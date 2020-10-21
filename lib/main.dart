@@ -33,19 +33,19 @@ class MainUi extends StatefulWidget {
   }
 
   @override
-  ClassesToday createState() {
-    return ClassesToday(this.infoHandler);
+  _MainUiState createState() {
+    return _MainUiState(this.infoHandler);
   }
 }
 
 /// The state object, this object will be regenerated and
 /// the data is thus mutable.
-class ClassesToday extends State<MainUi> {
+class _MainUiState extends State<MainUi> {
   InfoHandler _info;
   int _selectedNavBarIndex = 0;
   dynamic currentPage;
 
-  ClassesToday(InfoHandler info) {
+  _MainUiState(InfoHandler info) {
     this._info = info;
   }
 
