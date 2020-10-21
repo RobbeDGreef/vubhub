@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 // project but I also don't want to implement a html parser myself
 // so yeah this is the quickfix solution rn.
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/style.dart';
 
 import 'const.dart';
 
@@ -86,6 +87,9 @@ class _ArticleViewState extends State<ArticleView> {
         Html(
           data: this._article.body,
           onLinkTap: (String url) => launch(url),
+          style: {
+            'p': Style(fontSize: FontSize(18)),
+          },
         ),
       ],
     );
@@ -117,7 +121,7 @@ class _NewsViewState extends State<NewsView> {
   List<bool> _selectedFilters = [];
 
   _NewsViewState() {
-    getNewArticles();
+    _loadMoreArticles(true);
   }
 
   // Flutter is a real pain in the ass when it comes to importing html as html
@@ -132,13 +136,18 @@ class _NewsViewState extends State<NewsView> {
       }
       this._selectedFilters = List<bool>.generate(this._filters.length, (index) => false);
     });
-    print(this._filters);
   }
 
-  void getNewArticles() async {
-    //var res = await http.get(VubNewsUrl + "?per=$VubNewsPer&page=${this._articlePage}");
+  void _loadMoreArticles([bool isInConstructor = false]) async {
+    if (!isInConstructor) {
+      setState(() {
+        this._loading = true;
+      });
+    }
+
     print("https://today.vub.be/nl/nieuws?page=${this._articlePage}");
     var res = await http.get("https://today.vub.be/nl/nieuws?page=${this._articlePage}");
+
     if (res.statusCode != 200) {
       print("News res code: ${res.statusCode}");
       setState(() {
@@ -148,25 +157,12 @@ class _NewsViewState extends State<NewsView> {
     }
     this._articlePage += 1;
 
-    /*
-    Map<String, dynamic> data = jsonDecode(res.body);
-    setState(() {
-      for (Map<String, dynamic> article in data['posts']['items']) {
-        this._articles.add(Article(article));
-      }
-      this._loading = false;
-    });
-    */
-
-    print(res.body);
     var doc = html.parse(res.body);
-
     var vubArticleOverview = doc.getElementsByTagName("vub-article-overview")[0].attributes;
     var data = jsonDecode(vubArticleOverview[':articles']);
 
     // Filters don't really change so they only have to be loaded once.
     if (this._filters.isEmpty) {
-      print("updating filters");
       _updateFilters(jsonDecode(vubArticleOverview[':filters']));
     }
 
@@ -213,6 +209,7 @@ class _NewsViewState extends State<NewsView> {
       (index) => _buildCategoryTile(index),
     );
 
+    // ListView gave us problems so we implemented it ourselves.
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -224,27 +221,18 @@ class _NewsViewState extends State<NewsView> {
   Widget _buildArticleTile(BuildContext context, int index) {
     if (index == this._articles.length) {
       return Center(
-        child: Container(
-          child: CircularProgressIndicator(),
-          width: 50,
-          height: 50,
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: Container(
+            child: CircularProgressIndicator(),
+            width: 50,
+            height: 50,
+          ),
         ),
       );
     }
-    /*
-    return Card(
-      child: Column(
-        children: [
-          Image.network(
-            this._articles[index].imageUrl,
-            fit: BoxFit.cover,
-          ),
-          Text(this._articles[index].title),
-        ],
-      ),
-    );
-    */
 
+    // Load the network image with a nice circular loading bar
     Image img = Image.network(
       this._articles[index].imageUrl,
       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
@@ -264,6 +252,7 @@ class _NewsViewState extends State<NewsView> {
       },
     );
 
+    // This will change in the future once we load the primary color out of the image
     final fg = Colors.grey[800];
     final fg_darkter = Colors.black54;
     final bg = Colors.white;
@@ -355,7 +344,22 @@ class _NewsViewState extends State<NewsView> {
 
   @override
   Widget build(BuildContext context) {
+    // Create scroll controller to listen for onEdge 'events'
+    // so that we can update and load more articles.
+    ScrollController scrollController = ScrollController();
+    scrollController.addListener(
+      () {
+        if (scrollController.position.atEdge && scrollController.position.pixels != 0) {
+          print(this._loading);
+          if (this._loading == false) {
+            _loadMoreArticles();
+          }
+        }
+      },
+    );
+
     return ListView(
+      controller: scrollController,
       children: [
         _buildCatergories(),
         _buildArticleWidget(),
