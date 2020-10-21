@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import "crawler.dart";
 import "parser.dart";
 import "const.dart";
+import "event.dart";
 
 class Cache {
   void storeString(String key, String val) async {
@@ -50,7 +51,7 @@ class Cache {
     return File("${dir.path}/" + "$userEduType-$userFac-$userEdu-$week-$group".replaceAll(' ', ''));
   }
 
-  Future<List<Lecture>> getWeekData(
+  Future<List<Event>> getWeekData(
       int week, String userEduType, String userFac, String userEdu, String group) async {
     // Retrieve the week data from cache
 
@@ -74,13 +75,13 @@ class Cache {
   }
 
   Future populateWeekData(int week, String userEduType, String userFac, String userEdu,
-      List<Lecture> data, String group) async {
+      List<Event> data, String group) async {
     // Save the week data to cache
     print("saving data");
     // TODO: save the data to the memory cache
     final file = await _getWeekFile(week, userEduType, userFac, userEdu, group);
     String cacheData = "";
-    for (Lecture lec in data) {
+    for (Event lec in data) {
       cacheData += lec.toString() + "\n";
     }
     print(cacheData);
@@ -216,7 +217,7 @@ class InfoHandler {
     return compl.future;
   }
 
-  Future<List<Lecture>> getWeekData(int week) async {
+  Future<List<Event>> getWeekData(int week) async {
     if (week == -1) {
       week = calcWeekFromDate(DateTime.now());
     }
@@ -230,9 +231,9 @@ class InfoHandler {
       return this._selectedUserGroups != null;
     }, Duration(seconds: 2));
 
-    List<Lecture> allData = List();
+    List<Event> allData = [];
     for (String group in this._selectedUserGroups) {
-      List<Lecture> data =
+      List<Event> data =
           await _cache.getWeekData(week, this._userEduType, this._userFac, this._userEdu, group);
       if (data == null) {
         try {
@@ -251,12 +252,12 @@ class InfoHandler {
     return allData;
   }
 
-  Future<List<Lecture>> getClassesOfDay(DateTime day) async {
+  Future<List<Event>> getClassesOfDay(DateTime day) async {
     DateTime toDay = DateTime(day.year, day.month, day.day);
-    List<Lecture> list = List();
+    List<Event> list = [];
 
-    for (Lecture lec in await getWeekData(calcWeekFromDate(day))) {
-      DateTime classDay = DateTime(lec.start.year, lec.start.month, lec.start.day);
+    for (Event lec in await getWeekData(calcWeekFromDate(day))) {
+      DateTime classDay = DateTime(lec.startDate.year, lec.startDate.month, lec.startDate.day);
       if (classDay == toDay) {
         list.add(lec);
       }

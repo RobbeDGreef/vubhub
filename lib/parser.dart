@@ -1,66 +1,7 @@
 import "package:html/parser.dart" as html;
+import "event.dart";
 
-/// The lecture object, used to represent VEvent's from the iCalendar
-/// file
-class Lecture {
-  String name = "";
-  String details = "";
-  String professor = "";
-  String location = "No location specified";
-  String remarks = "";
-  DateTime start;
-  DateTime end;
-
-  Lecture.empty() {}
-
-  Lecture.onlyName(String s) {
-    this.name = s;
-  }
-  Lecture.fromObject(Lecture obj) {
-    this.name = obj.name;
-    this.details = obj.details;
-    this.professor = obj.professor;
-    this.location = obj.location;
-    this.remarks = obj.remarks;
-    this.start = obj.start;
-    this.end = obj.end;
-  }
-
-  Lecture.fromString(List<String> data) {
-    this.name = data[0];
-    this.details = data[1];
-    this.professor = data[2];
-    this.location = data[3];
-    this.remarks = fromSavedString(data[4]);
-    this.start = DateTime.parse(data[5]);
-    this.end = DateTime.parse(data[6]);
-  }
-
-  String toSavedString(String t) {
-    return t.split('\n').join("\\n");
-  }
-
-  String fromSavedString(String t) {
-    return t.split("\\n").join("\n");
-  }
-
-  @override
-  String toString() {
-    // TODO: Handle all string data fields like this.remarks
-    List<String> data = List();
-
-    data.add(this.name);
-    data.add(this.details);
-    data.add(this.professor);
-    data.add(this.location);
-    data.add(toSavedString(this.remarks));
-    data.add(this.start.toString());
-    data.add(this.end.toString());
-
-    return data.join('\n');
-  }
-}
-
+/*
 /// The iCalendar parser, This is actually obsolete but I leave it in
 /// since there is a chance that we might need this parser again for different
 /// calendar implementations.
@@ -145,18 +86,23 @@ class IcalParser {
     return this.parsedList;
   }
 }
+*/
 
-List<Lecture> parseLectureList(String data, int week) {
-  if (data == null) return List();
+List<Event> parseLectureList(String data, int week) {
+  if (data == null) {
+    return [];
+  }
+
   var doc = html.parse(data);
-  List<Lecture> lectures = List();
+
+  List<Event> lectures = [];
   // Iterate over every day in the week
   for (var day in doc.getElementsByClassName("TableBody")[0].children[0].children) {
     if (day.children[0].className != "tdCol") continue;
 
-    Lecture lec = Lecture.empty();
+    Event lec = Event.empty();
     lec.name = day.children[0].text;
-    lec.professor = day.children[1].text;
+    lec.host = day.children[1].text;
     lec.location = day.children[6].text;
     lec.remarks = day.children[8].text;
 
@@ -166,28 +112,28 @@ List<Lecture> parseLectureList(String data, int week) {
       }
       var parts = date.substring(date.indexOf("(") + 1).split("/");
       var toDay = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
-      lec.start = DateTime(
+      lec.startDate = DateTime(
           toDay.year,
           toDay.month,
           toDay.day,
           int.parse(day.children[2].text.split(":")[0]),
           int.parse(day.children[2].text.split(":")[1]));
-      lec.end = DateTime(
+      lec.endDate = DateTime(
           toDay.year,
           toDay.month,
           toDay.day,
           int.parse(day.children[3].text.split(":")[0]),
           int.parse(day.children[3].text.split(":")[1]));
-      lectures.add(new Lecture.fromObject(lec));
+      lectures.add(Event.from(lec));
     }
   }
   return lectures;
 }
 
-List<Lecture> parseCacheStored(List<String> data) {
-  List<Lecture> lectures = List();
-  for (int i = 0; i < data.length; i += 7) {
-    lectures.add(Lecture.fromString(data.sublist(i, i + 7)));
+List<Event> parseCacheStored(List<String> data) {
+  List<Event> lectures = List();
+  for (int i = 0; i < data.length; i += Event.stringListSize) {
+    lectures.add(Event.fromStringList(data.sublist(i, i + Event.stringListSize)));
   }
   return lectures;
 }

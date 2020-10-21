@@ -5,7 +5,7 @@ import "package:flushbar/flushbar.dart";
 
 import "calendar_strip/calendar_strip.dart";
 import "mapview.dart";
-import "parser.dart";
+import "event.dart";
 import "infohandler.dart";
 import "settings.dart";
 import "const.dart";
@@ -45,7 +45,7 @@ class MainUi extends StatefulWidget {
 /// the data is thus mutable.
 class ClassesToday extends State<MainUi> {
   InfoHandler _info;
-  List<Lecture> _classes = [];
+  List<Event> _classes = [];
   DateTime _selectedDay = DateTime.now();
   DateTime _selectedWeek = DateTime.now();
   int _todaysColor = 0;
@@ -76,13 +76,13 @@ class ClassesToday extends State<MainUi> {
   /// This function will update the this._classes list from
   /// a parsed Lecture object data list. It handles sorting
   /// and other hacks.
-  void update(List<Lecture> classes) {
+  void update(List<Event> classes) {
     print("Updating");
     setState(() {
       bool rotset = false;
       this._classes.clear();
 
-      for (Lecture lec in classes) {
+      for (Event lec in classes) {
         // If the rotationsystem is already specified don't add it again
         if (lec.name.toLowerCase().contains("rotatie")) {
           if (rotset) continue;
@@ -90,8 +90,8 @@ class ClassesToday extends State<MainUi> {
         }
 
         int i = 0;
-        for (Lecture prevLec in this._classes) {
-          if (lec.start.compareTo(prevLec.start) < 0) {
+        for (Event prevLec in this._classes) {
+          if (lec.startDate.compareTo(prevLec.startDate) < 0) {
             this._classes.insert(i, lec);
             break;
           }
@@ -208,22 +208,22 @@ class ClassesToday extends State<MainUi> {
   }
 
   Widget _buildLectureDetails(int index) {
-    Lecture lec = this._classes[index];
+    Event lec = this._classes[index];
 
     // Nothing special going on here, just instead of writing the whole
     // widget tree every time for theses objects i just added them to a list
     // to cleanly generate them at the bottom of the function.
     final List<List<dynamic>> details = [
-      [lec.professor, Icon(Icons.person_outline)],
+      [lec.host, Icon(Icons.person_outline)],
       [lec.details, Icon(Icons.dehaze)],
       [lec.location, Icon(Icons.location_on)],
       [lec.remarks, Icon(Icons.event_note_outlined)],
       [
-        DateFormat("EEEE d MMMM").format(lec.start) +
+        DateFormat("EEEE d MMMM").format(lec.startDate) +
             " from " +
-            DateFormat("H:mm").format(lec.start) +
+            DateFormat("H:mm").format(lec.startDate) +
             " until " +
-            DateFormat("H:mm").format(lec.end),
+            DateFormat("H:mm").format(lec.endDate),
         Icon(Icons.access_time)
       ]
     ];
@@ -312,13 +312,13 @@ class ClassesToday extends State<MainUi> {
                         Expanded(
                             child:
                                 Text(this._classes[i].location, overflow: TextOverflow.ellipsis)),
-                        Text(this._classes[i].start.hour.toString() +
+                        Text(this._classes[i].startDate.hour.toString() +
                             ":" +
-                            _prettyMinutes(this._classes[i].end.minute) +
+                            _prettyMinutes(this._classes[i].endDate.minute) +
                             " - " +
-                            this._classes[i].end.hour.toString() +
+                            this._classes[i].endDate.hour.toString() +
                             ":" +
-                            _prettyMinutes(this._classes[i].end.minute))
+                            _prettyMinutes(this._classes[i].endDate.minute))
                       ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
                   Row(children: [
                     Expanded(child: Text(policyString, overflow: TextOverflow.ellipsis))

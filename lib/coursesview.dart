@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'const.dart';
 import 'infohandler.dart';
 import 'theming.dart';
+import 'event.dart';
 
 class CanvasApi {
   InfoHandler _infoHandler;
@@ -56,25 +57,17 @@ class Assignment {
 
 class Discussion {}
 
-// TODO: maybe we should generalise the lecture object in parser.dart to use event too.
-class Event {
-  String name;
-  String details;
-  DateTime startDate;
-  DateTime endDate;
-  int courseId;
-  String location;
+class CourseEvent extends Event {
   String reserveUrl;
   String url;
   bool hasAlreadyReserved;
-  Event reservation;
+  CourseEvent reservation;
 
-  Event(Map<String, dynamic> data) {
-    print(data.keys);
-    this.name = data["title"];
+  CourseEvent(Map<String, dynamic> data) : super.empty() {
+    this.name = data['title'];
+    this.details = data["description"];
     this.startDate = DateTime.parse(data["start_at"]);
     this.endDate = DateTime.parse(data["end_at"]);
-    this.details = data["description"];
     this.location = data["location_name"];
     this.reserveUrl = data["reserve_url"];
     this.hasAlreadyReserved = data["reserved"];
@@ -82,13 +75,12 @@ class Event {
 
     // TODO: one might have multiple reservations ?
     if (data["child_events"] != null && (data["child_events"] as List<dynamic>).isNotEmpty) {
-      this.reservation = Event(data["child_events"][0]);
+      this.reservation = CourseEvent(data["child_events"][0]);
     }
 
     if ((data["context_code"] as String).startsWith("course_")) {
       this.courseId = int.parse((data["context_code"] as String).substring(7));
-    } else
-      this.courseId = -1;
+    }
   }
 }
 
@@ -113,7 +105,7 @@ class CourseInfo {
   Color color = Colors.grey;
   List<Assignment> assignments = [];
   List<Discussion> discussions = [];
-  List<Event> events = [];
+  List<CourseEvent> events = [];
   int unreadAnnouncementCount = 0;
   int dueAssignments = 0;
   int unreadDiscussions = 0;
@@ -818,7 +810,7 @@ class _CoursesViewState extends State<CoursesView> {
       setState(() {
         this._canvasApi.request(apiUrl: url).then((calendarData) {
           for (Map<String, dynamic> eventData in calendarData) {
-            Event event = Event(eventData);
+            CourseEvent event = CourseEvent(eventData);
             for (CourseInfo course in this._courses) {
               if (course.id == event.courseId) {
                 course.events.add(event);
