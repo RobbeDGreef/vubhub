@@ -224,6 +224,8 @@ class _NewsViewState extends State<NewsView> {
       padding: EdgeInsets.only(left: 4, right: 4),
       child: OutlinedButton(
         style: ButtonStyle(
+          shape: MaterialStateProperty.all<OutlinedBorder>(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
           backgroundColor: MaterialStateProperty.all<Color>(bg),
           side: MaterialStateProperty.all<BorderSide>(BorderSide(color: fg)),
         ),
