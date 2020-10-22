@@ -37,7 +37,7 @@ class DayView extends StatefulWidget {
 
 class _DayViewState extends State<DayView> {
   InfoHandler _info;
-  List<Event> _classes = [];
+  List<Event> _events = [];
   DateTime _selectedDay = DateTime.now();
   DateTime _selectedWeek = DateTime.now();
   int _todaysColor = 0;
@@ -51,7 +51,7 @@ class _DayViewState extends State<DayView> {
   void fullUpdate() {
     setState(
       () {
-        this._classes.clear();
+        this._events.clear();
         this._loading = true;
       },
     );
@@ -70,7 +70,7 @@ class _DayViewState extends State<DayView> {
     if (shouldSetState) {
       setState(() {
         this._loading = true;
-        this._classes.clear();
+        this._events.clear();
       });
     }
 
@@ -87,7 +87,7 @@ class _DayViewState extends State<DayView> {
     print("Updating");
     setState(() {
       bool rotset = false;
-      this._classes.clear();
+      this._events.clear();
 
       for (Event lec in classes) {
         // If the rotationsystem is already specified don't add it again
@@ -97,15 +97,15 @@ class _DayViewState extends State<DayView> {
         }
 
         int i = 0;
-        for (Event prevLec in this._classes) {
+        for (Event prevLec in this._events) {
           if (lec.startDate.compareTo(prevLec.startDate) < 0) {
-            this._classes.insert(i, lec);
+            this._events.insert(i, lec);
             break;
           }
           ++i;
         }
-        if (this._classes.length == i) {
-          this._classes.add(lec);
+        if (this._events.length == i) {
+          this._events.add(lec);
         }
       }
     });
@@ -194,7 +194,7 @@ class _DayViewState extends State<DayView> {
     return [null, null];
   }
 
-  Widget _buildLectureDetailTile(String text, Icon icon) {
+  Widget _buildEventDetailTile(String text, Icon icon) {
     return Card(
         margin: EdgeInsets.only(left: 8, right: 8, bottom: 4, top: 4),
         child: ListTile(
@@ -214,8 +214,8 @@ class _DayViewState extends State<DayView> {
         ));
   }
 
-  Widget _buildLectureDetails(int index) {
-    Event lec = this._classes[index];
+  Widget _buildEventDetails(int index) {
+    Event lec = this._events[index];
 
     // Nothing special going on here, just instead of writing the whole
     // widget tree every time for theses objects i just added them to a list
@@ -246,7 +246,7 @@ class _DayViewState extends State<DayView> {
     ];
 
     for (List<dynamic> info in details) {
-      if (info[0] != "") children.add(_buildLectureDetailTile(info[0], info[1]));
+      if (info[0] != "") children.add(_buildEventDetailTile(info[0], info[1]));
     }
 
     return Scaffold(
@@ -256,13 +256,12 @@ class _DayViewState extends State<DayView> {
     );
   }
 
-  void _openLectureDetails(int index) {
+  void _openEventDetails(int index) {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (BuildContext context) => _buildLectureDetails(index)));
+        .push(MaterialPageRoute(builder: (BuildContext context) => _buildEventDetails(index)));
   }
 
-  /// Creates a class or lecture tab for the
-  Widget _buildClassListTile(BuildContext context, int i) {
+  Widget _buildEventTile(BuildContext context, int i) {
     // Display a circular throbber to show the user the system is loading
     if (this._loading) {
       return Center(
@@ -276,29 +275,29 @@ class _DayViewState extends State<DayView> {
 
     // Display a widget so the user knows he has no classes and that it is
     // normal that the list view is empty.
-    if (this._classes.length == 0) {
+    if (this._events.length == 0) {
       return ListTile(title: Text("No classes today", textAlign: TextAlign.center));
     }
 
     var icon = Icons.record_voice_over_outlined;
-    if (this._classes[i].name.toLowerCase().contains("wpo")) {
+    if (this._events[i].name.toLowerCase().contains("wpo")) {
       icon = Icons.subject;
     }
 
-    var colors = _colorFromRotString(this._classes[i].name);
+    var colors = _colorFromRotString(this._events[i].name);
 
-    if (this._classes[i].name.toLowerCase().contains("<font color=")) {
+    if (this._events[i].name.toLowerCase().contains("<font color=")) {
       return Card(
           child: ListTile(
               title: Text(
                   "Rotatiesysteem: rotatie " +
-                      (this._classes[i].name.contains("BLAUW") ? "blauw" : "oranje"),
+                      (this._events[i].name.contains("BLAUW") ? "blauw" : "oranje"),
                   style: TextStyle(color: colors[1]))),
           color: colors[0]);
     }
 
-    String policyString = this._classes[i].remarks;
-    if (this._classes[i].remarks.toLowerCase().contains("rotatiesysteem"))
+    String policyString = this._events[i].remarks;
+    if (this._events[i].remarks.toLowerCase().contains("rotatiesysteem"))
       policyString = "Rotatiesysteem: " +
           ((this._info.isUserAllowed(this._todaysColor))
               ? "you are allowed to come"
@@ -307,9 +306,9 @@ class _DayViewState extends State<DayView> {
     return Card(
         child: ListTile(
             leading: Icon(icon),
-            title: Text(this._classes[i].name),
+            title: Text(this._events[i].name),
             isThreeLine: false,
-            onTap: () => _openLectureDetails(i),
+            onTap: () => _openEventDetails(i),
             subtitle: Padding(
                 padding: EdgeInsets.all(0),
                 child: Column(children: [
@@ -317,15 +316,14 @@ class _DayViewState extends State<DayView> {
                       padding: EdgeInsets.only(bottom: 8),
                       child: Row(children: [
                         Expanded(
-                            child:
-                                Text(this._classes[i].location, overflow: TextOverflow.ellipsis)),
-                        Text(this._classes[i].startDate.hour.toString() +
+                            child: Text(this._events[i].location, overflow: TextOverflow.ellipsis)),
+                        Text(this._events[i].startDate.hour.toString() +
                             ":" +
-                            _prettyMinutes(this._classes[i].endDate.minute) +
+                            _prettyMinutes(this._events[i].endDate.minute) +
                             " - " +
-                            this._classes[i].endDate.hour.toString() +
+                            this._events[i].endDate.hour.toString() +
                             ":" +
-                            _prettyMinutes(this._classes[i].endDate.minute))
+                            _prettyMinutes(this._events[i].endDate.minute))
                       ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
                   Row(children: [
                     Expanded(child: Text(policyString, overflow: TextOverflow.ellipsis))
@@ -343,8 +341,8 @@ class _DayViewState extends State<DayView> {
         _buildWeekScroller(),
         Expanded(
           child: ListView.builder(
-            itemBuilder: _buildClassListTile,
-            itemCount: this._classes.length == 0 ? 1 : this._classes.length,
+            itemBuilder: _buildEventTile,
+            itemCount: this._events.length == 0 ? 1 : this._events.length,
           ),
         ),
       ],

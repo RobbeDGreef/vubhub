@@ -201,7 +201,7 @@ class _MainUiState extends State<MainUi> {
       ],
     );
 
-    final tabText = ["Today's classes", "Course information", "VUB campus map", "Places", "News"];
+    final tabText = ["Today", "Course information", "VUB campus map", "Places", "News"];
 
     final refreshAction = [
       IconButton(
