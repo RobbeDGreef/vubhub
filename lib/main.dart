@@ -57,7 +57,7 @@ class _MainUiState extends State<MainUi> {
         .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this._info)));
 
     if (this._info.getSelectedUserGroups() != groups) {
-      this.currentPage._update();
+      this.currentPage.update();
     }
   }
 
