@@ -266,12 +266,13 @@ class _DayViewState extends State<DayView> {
     // Display a circular throbber to show the user the system is loading
     if (this._loading) {
       return Center(
-          child: Container(
-        margin: EdgeInsets.all(8),
-        child: CircularProgressIndicator(),
-        width: 50,
-        height: 50,
-      ));
+        child: Container(
+          margin: EdgeInsets.all(8),
+          child: CircularProgressIndicator(),
+          width: 50,
+          height: 50,
+        ),
+      );
     }
 
     // Display a widget so the user knows he has no classes and that it is
@@ -305,31 +306,40 @@ class _DayViewState extends State<DayView> {
               : "you are not allowed to come");
 
     return Card(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(5),
         child: ListTile(
-            leading: Icon(icon),
-            title: Text(this._events[i].name),
-            isThreeLine: false,
-            onTap: () => _openEventDetails(i),
-            subtitle: Padding(
-                padding: EdgeInsets.all(0),
-                child: Column(children: [
-                  Padding(
-                      padding: EdgeInsets.only(bottom: 8),
-                      child: Row(children: [
-                        Expanded(
-                            child: Text(this._events[i].location, overflow: TextOverflow.ellipsis)),
-                        Text(this._events[i].startDate.hour.toString() +
-                            ":" +
-                            _prettyMinutes(this._events[i].endDate.minute) +
-                            " - " +
-                            this._events[i].endDate.hour.toString() +
-                            ":" +
-                            _prettyMinutes(this._events[i].endDate.minute))
-                      ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
-                  Row(children: [
-                    Expanded(child: Text(policyString, overflow: TextOverflow.ellipsis))
-                  ], mainAxisAlignment: MainAxisAlignment.start)
-                ]))));
+          tileColor: this._events[i].customColor,
+          leading: Icon(icon),
+          title: Text(this._events[i].name),
+          isThreeLine: false,
+          onTap: () => _openEventDetails(i),
+          subtitle: Padding(
+            padding: EdgeInsets.all(0),
+            child: Column(
+              children: [
+                Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: Row(children: [
+                      Expanded(
+                          child: Text(this._events[i].location, overflow: TextOverflow.ellipsis)),
+                      Text(this._events[i].startDate.hour.toString() +
+                          ":" +
+                          _prettyMinutes(this._events[i].endDate.minute) +
+                          " - " +
+                          this._events[i].endDate.hour.toString() +
+                          ":" +
+                          _prettyMinutes(this._events[i].endDate.minute))
+                    ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
+                Row(children: [
+                  Expanded(child: Text(policyString, overflow: TextOverflow.ellipsis))
+                ], mainAxisAlignment: MainAxisAlignment.start)
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
