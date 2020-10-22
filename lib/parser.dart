@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import "package:html/parser.dart" as html;
 import "event.dart";
 
@@ -105,6 +106,7 @@ List<Event> parseLectureList(String data, int week) {
     lec.host = day.children[1].text;
     lec.location = day.children[6].text;
     lec.remarks = day.children[8].text;
+    lec.customColor = Colors.white;
 
     for (String date in day.children[5].text.split(")")) {
       if (date == "" || int.parse(date.substring(0, date.indexOf(" "))) != week) {
