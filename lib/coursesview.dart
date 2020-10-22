@@ -608,6 +608,10 @@ class CoursesView extends StatefulWidget {
   InfoHandler info;
   CoursesView({@required this.info});
 
+  void update() {
+    // TODO
+  }
+
   @override
   _CoursesViewState createState() => _CoursesViewState(this.info);
 }

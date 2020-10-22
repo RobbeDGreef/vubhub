@@ -5,7 +5,7 @@ import "mapview.dart";
 import "infohandler.dart";
 import "settings.dart";
 import "const.dart";
-import "places.dart";
+import "placesview.dart";
 import 'coursesview.dart';
 import 'help.dart';
 import 'news.dart';
@@ -111,32 +111,6 @@ class _MainUiState extends State<MainUi> {
     ));
   }
 
-  void _openLibraryBooking() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) => LibraryBookingMenu(this._info),
-      ),
-    );
-  }
-
-  // TODO: Move place stuff in to different file
-  Widget _buildPlaceTile(String title, Function() ptr) {
-    return Card(
-      child: ListTile(
-        contentPadding: EdgeInsets.all(5),
-        leading: Icon(Icons.library_books),
-        title: Text(title),
-        onTap: () => ptr(),
-      ),
-    );
-  }
-
-  List<Widget> _getPlaces() {
-    return [
-      _buildPlaceTile("Centrale bibliotheek VUB", _openLibraryBooking),
-    ];
-  }
-
   Widget _buildTabScreen(int index) {
     switch (index) {
       case 0:
@@ -152,7 +126,7 @@ class _MainUiState extends State<MainUi> {
         break;
 
       case 3:
-        this.currentPage = ListView(children: _getPlaces());
+        this.currentPage = PlacesView(this._info);
         break;
 
       case 4:

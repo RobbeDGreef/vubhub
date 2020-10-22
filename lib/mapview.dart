@@ -8,6 +8,10 @@ import 'const.dart';
 /// Create an image that is zoomable
 /// return location of a tap.
 class MapView extends StatefulWidget {
+  void update() {
+    // TODO ? i think it can be left empty
+  }
+
   @override
   _MapViewState createState() => _MapViewState();
 }
