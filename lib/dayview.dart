@@ -93,6 +93,7 @@ class _DayViewState extends State<DayView> {
         // If the rotationsystem is already specified don't add it again
         if (lec.name.toLowerCase().contains("rotatie")) {
           if (rotset) continue;
+          this._todaysColor = lec.name.toLowerCase().contains("blue") ? 0 : 1;
           rotset = true;
         }
 
