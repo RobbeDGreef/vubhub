@@ -81,6 +81,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   String _dropDownFac = EducationData[EducationData.keys.first].keys.first;
   String _dropDownEdu;
   String _dropDownUserGroup;
+  String _userName = "Not logged in";
   List<String> _userGroups = [];
   InfoHandler _info;
   List<String> _selectedUserGroups;
@@ -175,107 +176,64 @@ class _SettingsMenuState extends State<SettingsMenu> {
         });
   }
 
-  Widget _buildAccountSettings() {
-    return SettingsTile(
-      title: "Accounts",
-      leading: Icon(Icons.account_box),
-      onTap: () {
+  void _canvasLogin() {
+    final loginUrl =
+        "https://canvas.vub.be/login/oauth2/auth?client_id=170000000000044&response_type=code&mobile=1&purpose=TestingStuff&redirect_uri=https://canvas.instructure.com/login/oauth2/auth";
+    final tokenUrlBase =
+        "https://canvas.vub.be/login/oauth2/token?&redirect_uri=urn:ietf:wg:oauth:2.0:oob&grant_type=authorization_code&client_id=170000000000044&client_secret=3sxR3NtgXRfT9KdpWGAFQygq6O9RzLN021h2lAzhHUZEeSQ5XGV41Ddi5iutwW6f";
+
+    // Clear cookies so that the user can re-login.
+    CookieManager().clearCookies();
+
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (BuildContext contetx) {
+        builder: (BuildContext context) {
               return Scaffold(
-                appBar: AppBar(title: Text("Accounts")),
-                body: SettingsList(
-                  sections: [
-                    SettingsSection(
-                      title: "Booking information",
-                      tiles: [
-                        SettingsTile(
-                          title: "VUB email",
-                          leading: Icon(Icons.email),
-                          trailing: Container(
-                            width: 200,
-                            child: Form(
-                              autovalidateMode: AutovalidateMode.onUserInteraction,
-                              child: TextFormField(
-                                initialValue: this._info.getUserEmail(),
-                                onEditingComplete: () => Form.of(primaryFocus.context).save(),
-                                validator: (String arg) {
-                                  RegExp regex = new RegExp(emailPattern);
-                                  if (!regex.hasMatch(arg)) {
-                                    return "Please enter valid email!";
-                                  } else {
-                                    return null;
-                                  }
-                                },
-                                onSaved: (val) {
-                                  this._info.setUserEmail(val);
-                                  FocusScopeNode curFocus = FocusScope.of(context);
-                                  if (!curFocus.hasPrimaryFocus) {
-                                    curFocus.unfocus();
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SettingsSection(
-                      title: "Canvas information",
-                      tiles: [
-                        SettingsTile(
-                          title: "Authentication token",
-                          subtitle: this._info.getUserCanvasAuthToken() != null
-                              ? "User authentication token set"
-                              : "No user authentication token loaded",
-                          leading: Icon(Icons.vpn_key),
-                          trailing: TextButton(
-                            child: Text(
-                              "Paste from\nclipboard",
-                              style: TextStyle(color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
-                            style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all<Color>(
-                                    Theme.of(context).primaryColor)),
-                            onPressed: () {
-                              Clipboard.getData('text/plain').then((val) {
-                                // TODO: do better checks than this
-                                if (val.text.length != 70) {
+            appBar: AppBar(title: Text("Login")),
+            body: WebView(
+              initialUrl: loginUrl,
+              javascriptMode: JavascriptMode.unrestricted,
+              onPageFinished: (url) {
+                if (url.startsWith('https://canvas.instructure.com')) {
+                  final code = Uri.parse(url).queryParameters['code'];
+                  String tokenUrl = tokenUrlBase + "&code=" + code;
+                  print(tokenUrl);
+                  http.post(tokenUrl).then((res) {
+                    Navigator.pop(context);
+                    var json = jsonDecode(res.body);
+                    if (json['error'] != null) {
+                      // Display error message
                                   Flushbar(
-                                    title: "Oh oh, that does not seem to be a valid user token.",
-                                    message: val.text,
+                        message: "An error occurred while trying to log in",
                                     duration: Duration(seconds: 2),
                                     margin: EdgeInsets.all(8),
                                     borderRadius: 8,
                                     animationDuration: Duration(milliseconds: 500),
                                   ).show(context);
+                      return;
                                 } else {
-                                  Flushbar(
-                                    title: "User token set",
-                                    message: val.text,
-                                    duration: Duration(seconds: 2),
-                                    margin: EdgeInsets.all(8),
-                                    borderRadius: 8,
-                                    animationDuration: Duration(milliseconds: 500),
-                                  ).show(context);
+                      this._info.userLogin(json['access_token']);
                                   setState(() {
-                                    this._info.setUserCanvasAuthToken(val.text);
+                        this._userName = json['user']['name'];
                                   });
                                 }
                               });
+                }
                             },
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
               );
             },
           ),
         );
+  }
+
+  Widget _buildAccountSettings() {
+    return SettingsTile(
+      title: "Login to canvas",
+      subtitle: this._userName,
+      leading: Icon(Icons.account_box),
+      onTap: () {
+        _canvasLogin();
       },
     );
   }
