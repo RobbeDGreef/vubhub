@@ -1,258 +1,199 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import "crawler.dart";
 import "parser.dart";
 import "const.dart";
 import "event.dart";
 import 'course.dart';
+import 'user.dart';
+import 'canvasapi.dart';
 
-class Cache {
-  void storeString(String key, String val) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(key, val);
-  }
-
-  void storeStringList(String key, List<String> val) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(key, val);
-  }
-
-  void storeInt(String key, int val) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt(key, val);
-  }
-
-  Future<String> tryToLoadString(String key, String defaultValue) async {
-    final prefs = await SharedPreferences.getInstance();
-    String val = prefs.getString(key);
-    if (val == null) {
-      storeString(key, defaultValue);
-      return defaultValue;
-    }
-    return val;
-  }
-
-  Future<int> tryToLoadInt(String key, int defaultValue) async {
-    final prefs = await SharedPreferences.getInstance();
-    int val = prefs.getInt(key);
-    if (val == null) {
-      storeInt(key, defaultValue);
-      return defaultValue;
-    }
-    return val;
-  }
-
-  Future<File> _getWeekFile(
-      int week, String userEduType, String userFac, String userEdu, String group) async {
+// The storage handler
+class Storage {
+  static Future<File> getFile(String filename) async {
     final dir = await getApplicationDocumentsDirectory();
-    return File("${dir.path}/" + "$userEduType-$userFac-$userEdu-$week-$group".replaceAll(' ', ''));
+    return File("${dir.path}/$filename");
   }
 
-  Future<File> _getCourseFile() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File("${dir.path}/courses");
-  }
-
-  Future<List<Event>> getWeekData(
-      int week, String userEduType, String userFac, String userEdu, String group) async {
-    // Retrieve the week data from cache
-
-    print("trying to get week data from week $week");
-    print("week $week $userEduType $userFac $userEdu");
-    // TODO: check if the data is already loaded in into the memory cache
-    // TODO: create a memory cache
-
-    final file = await _getWeekFile(week, userEduType, userFac, userEdu, group);
-
-    // If the file does not exist, return null and tell the InfoHandler that it should be retrieved
-    if (!(await file.exists())) {
-      print("File does not exist");
-      return null;
-    }
-    print("reading content");
-    List<String> content = await file.readAsLines();
-
-    // TODO: save this to the memory cache first
-    return parseCacheStoredEvents(content);
-  }
-
-  Future populateWeekData(int week, String userEduType, String userFac, String userEdu,
-      List<Event> data, String group) async {
-    // Save the week data to cache
-    print("saving data");
-    // TODO: save the data to the memory cache
-    final file = await _getWeekFile(week, userEduType, userFac, userEdu, group);
-    String cacheData = "";
-    for (Event lec in data) {
-      cacheData += lec.toString() + "\n";
-    }
-    print(cacheData);
-    file.writeAsString(cacheData);
-  }
-
-  Future<List<Course>> getCourseInfo() async {
-    final file = await _getCourseFile();
-    if (!(await file.exists())) {
-      print("course file does not exist");
+  /// Reads contents out of file in string format
+  static Future<String> readFile(String filename) async {
+    File f = await getFile(filename);
+    if (!(await f.exists())) {
       return null;
     }
 
-    List<String> content = await file.readAsLines();
-
-    return parseCacheStoredCourses(content);
+    return f.readAsString();
   }
 
-  void storeCourseInfo(List<Course> info) async {
-    final file = await _getCourseFile();
-    String data = "";
-    for (Course course in info) {
-      print("course: ${course.name}");
-      data += course.toString() + "\n";
-    }
-    print(data.split('\n').length);
-    file.writeAsString(data);
-  }
-
-  Future<List<String>> getSelectedGroups() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList("userSelectedGroups") ?? [];
-  }
-
-  void saveSelectedGroups(List<String> val) {
-    storeStringList("userSelectedGroups", val);
-  }
-
-  void doForcedCacheUpdate(String data) {
-    // Force update everything
+  /// Write contents to file
+  /// note: this overwrites previous data in this file.
+  static Future<void> writeFile(String filename, String content) async {
+    File f = await getFile(filename);
+    f.writeAsString(content);
   }
 }
 
-/// Handles information exchange with other objects
+// The actual memory cache
+class Cache {
+  List<Course> courses;
+  Map<String, String> userGroups;
+  User user;
+
+  /// The event data is stored in linked hashmaps, the first hashmap takes the group name
+  /// as a key, the second one the week number.
+  Map<String, Map<int, List<Event>>> _eventData = {};
+
+  void setUser(User user) {
+    this.user = user;
+    Storage.writeFile('user', user.toJson());
+  }
+
+  Future<User> getUser() async {
+    // Check if this.user is set
+    if (this.user != null) {
+      return this.user;
+    }
+
+    // If this.user is unset, check the storage
+    String content = await Storage.readFile('user');
+
+    // If storage does not contain the user file either, return null
+    if (content == null) {
+      return null;
+    }
+
+    // If it does, parse, save and return
+    this.user = User.fromJson(jsonDecode(content));
+    return this.user;
+  }
+
+  String _getEventWeekFile(int week, String group) {
+    return "${this.user.educationType}-${this.user.faculty}-${this.user.education}-$week-$group"
+        .replaceAll(' ', '');
+  }
+
+  Future<List<Event>> getWeekEventData(int week, String group) async {
+    // First try to find the data in the memory cache
+    Map<int, List<Event>> groupData = _eventData[group];
+    if (groupData != null) {
+      List<Event> data = groupData[week];
+      if (data != null) return data;
+    }
+
+    // If the data is not in the memory cache check the storage
+    String eventDataString = await Storage.readFile(_getEventWeekFile(week, group));
+    if (eventDataString == null) {
+      // And if it is not in storage either, return null;
+      return null;
+    }
+
+    // If the storage file was found, parse, save and return.
+    List<Event> data = parseStoredEventData(eventDataString);
+    // TODO: this might throw an exception, won't it.
+    if (this._eventData[group] == null) {
+      this._eventData.addAll({
+        group: {week: data}
+      });
+    } else {
+      this._eventData[group][week] = data;
+    }
+    return data;
+  }
+
+  void populateEvents(int week, String group, List<Event> data) {
+    // Store the data in the memory cache
+    this._eventData[group][week] = data;
+
+    // Store it in storage too
+    String content = "";
+    for (Event ev in data) content += ev.toString() + '\n';
+    Storage.writeFile(_getEventWeekFile(week, group), content);
+  }
+}
+
 class InfoHandler {
+  /// Note that the fields in this.user should never be changed. If you want to change
+  /// the fields, please use the correct setters.
+  User user = User();
+
+  // Holds the group ids. The key is the actual group name.
+  // This data is updated from crawler.getDepartmentGroups()
+  Map<String, String> groupIds;
+
   Crawler _crawler;
   Cache _cache;
+  bool _updatingConnection = false;
 
-  int _userColor;
-  String _userEduType;
-  String _userFac;
-  String _userEdu;
-  String _userEmail;
-  String _userCanvasAuthToken;
-  Map<String, String> _userGroups;
-  List<String> _selectedUserGroups;
-
-  List<Course> _courses;
-
-  String getUserId() => EducationData[this._userEduType][this._userFac][this._userEdu];
-  String getUserEduType() => this._userEduType;
-  String getUserFac() => this._userFac;
-  String getUserEdu() => this._userEdu;
-  String getUserEmail() => this._userEmail;
-  String getUserCanvasAuthToken() => this._userCanvasAuthToken;
-  int getUserColor() => this._userColor;
-  List<String> getSelectedUserGroups() => this._selectedUserGroups;
-  List<Course> getCourses() => this._courses;
-
-  List<String> getUserGroups() {
-    this._userGroups = this._crawler.getDepartmentGroups();
-    return this._userGroups.keys.toList();
+  String getUserId() {
+    return EducationData[this.user.educationType][this.user.faculty][this.user.education];
   }
 
-  void setUserGroups(List<String> val) {
-    this._selectedUserGroups = val;
-    this._cache.saveSelectedGroups(val);
-  }
+  Future<void> setUserEducation(String edu) async {
+    this.user.education = edu;
+    this._cache.setUser(this.user);
 
-  void setUserEmail(String val) {
-    this._userEmail = val;
-    this._cache.storeString("userEmail", val);
-  }
-
-  void setUserCanvasAuthToken(String val) {
-    this._userCanvasAuthToken = val;
-    this._cache.storeString("userCanvasAuthToken", val);
-  }
-
-  void setUserColor(int color) {
-    this._userColor = color;
-    this._cache.storeInt("userColor", this._userColor);
-  }
-
-  void setUserEduType(String edu) {
-    this._userEduType = edu;
-    this._cache.storeString("userEduType", edu);
-  }
-
-  Future<void> setUserEdu(String edu) async {
-    this._userEdu = edu;
-    this._cache.storeString("userEdu", edu);
-
-    // New education type means no more selected user groups
-    // TODO: maybe this needs to be fixed to save previous user groups too
-    setUserGroups([]);
-
-    // When the user education type is set we also want to update the crawler to fetch the
-    // new url
     this._crawler.curId = getUserId();
     await this._crawler.updateConnection();
+    this.groupIds = this._crawler.getDepartmentGroups();
   }
 
-  void setUserFac(String fac) {
-    this._userFac = fac;
-    this._cache.storeString("userFac", fac);
+  void setUserFaculty(String fac) {
+    this.user.faculty = fac;
+    this._cache.setUser(this.user);
   }
 
-  void setCourses(List<Course> courses) {
-    this._courses = courses;
-    this._cache.storeCourseInfo(courses);
+  void setUserEducationType(String eduType) {
+    this.user.educationType = eduType;
+    this._cache.setUser(this.user);
+  }
+
+  void setUserRotationColor(int color) {
+    this.user.rotationColor = color;
+    this._cache.setUser(this.user);
+  }
+
+  void setUserSelectedGroups(List<String> groups) {
+    this.user.selectedGroups = groups;
+    this._cache.setUser(this.user);
+  }
+
+  void setCourses(List<Course> data) {
+    this._cache.courses = data;
   }
 
   InfoHandler() {
-    _cache = Cache();
-    _crawler = Crawler();
+    this._cache = Cache();
+    this._crawler = Crawler();
 
-    // The crawler initialisation has go be called after loadUserInfo()
-    // meaning we have to do this in a seperate async function
-    _initCrawler();
+    this._cache.getUser().then(
+      (user) {
+        if (user != null) this.user = user;
+
+        if (this.user.education != null) {
+          this._updatingConnection = true;
+          this._crawler.curId = getUserId();
+          this._crawler.updateConnection().then(
+            (_) {
+              this.groupIds = this._crawler.getDepartmentGroups();
+            },
+          );
+        }
+      },
+    );
   }
 
-  Future<void> _loadUserInfo() async {
-    this._userColor = await _cache.tryToLoadInt("userColor", DefaultUserColor);
-    this._userEduType = await _cache.tryToLoadString("userEduType", DefaultUserEduType);
-    this._userFac = await _cache.tryToLoadString("userFac", DefaultUserFac);
-    this._userEdu = await _cache.tryToLoadString("userEdu", DefaultUserEdu);
-    this._userEmail = await _cache.tryToLoadString("userEmail", null);
-    this._userCanvasAuthToken = await _cache.tryToLoadString("userCanvasAuthToken", null);
-    this._courses = await _cache.getCourseInfo();
-  }
+  void userLogin(String token) async {
+    this.user.accessToken = token;
+    Map<String, dynamic> data = await CanvasApi(token).get('api/v1/users/self/profile');
+    this.user.name = data['name'];
+    this.user.email = data['primary_email'];
+    this.user.locale = data['locale'];
 
-  void _initCrawler() async {
-    // We have to wait for user data to load before we can initialize
-    // the crawler etc.
-    await _loadUserInfo();
-
-    this._crawler.curId = getUserId();
-    await this._crawler.updateConnection();
-
-    this._userGroups = this._crawler.getDepartmentGroups();
-    this._cache.getSelectedGroups().then((groups) => this._selectedUserGroups = groups);
-  }
-
-  Future _waitFor(Function() test, [Duration interval = Duration.zero]) async {
-    var compl = Completer();
-    check() {
-      if (test())
-        compl.complete();
-      else
-        Timer(interval, check);
-    }
-
-    check();
-    return compl.future;
+    this._cache.setUser(this.user);
   }
 
   Future<List<Event>> getWeekData(int week) async {
@@ -260,136 +201,77 @@ class InfoHandler {
       week = calcWeekFromDate(DateTime.now());
     }
 
-    // TODO: this can't be healthy
-    await _waitFor(() {
-      return this._userEdu != null;
-    }, Duration(seconds: 2));
+    // If the user is null that means no groups have been selected
+    // so we can return
+    if (this.user == null) return [];
 
-    await _waitFor(() {
-      return this._selectedUserGroups != null;
-    }, Duration(seconds: 2));
+    List<Event> allGroupData = [];
+    for (String group in this.user.selectedGroups) {
+      // Check the data in the memory cache and storage
+      List<Event> data = await this._cache.getWeekEventData(week, group);
 
-    List<Event> allData = [];
-    for (String group in this._selectedUserGroups) {
-      List<Event> data =
-          await _cache.getWeekData(week, this._userEduType, this._userFac, this._userEdu, group);
-      if (data == null) {
-        try {
-          data = parseLectureList(await _crawler.getWeekData(week, this._userGroups[group]), week);
-          _cache.populateWeekData(
-              week, this._userEduType, this._userFac, this._userEdu, data, group);
-        } catch (RangeError) {
-          print("range error due to inpropper crawler request");
-        }
-      }
+      // If the data was found in the cache or storage add it to all the group data.
       if (data != null) {
-        allData.addAll(data);
+        allGroupData.addAll(data);
+        continue;
       }
+      // Otherwise try to fetch it with the crawler
+
+      try {
+        print("try to get");
+        data = parseLectureList(await this._crawler.getWeekData(week, this.groupIds[group]), week);
+        print(data);
+      } catch (RangeError) {
+        print("range error ?");
+      }
+
+      // If the data is null again, just skip this group and show error
+      if (data == null) {
+        print("ERROR: crawler could not fetch data for week $week and group $group");
+        continue;
+      }
+
+      // Otherwise, populate the cache and add it to all the group data.
+      this._cache.populateEvents(week, group, data);
+      allGroupData.addAll(data);
     }
 
-    if (this._courses == null) return allData;
-
-    bool nameMatch(String event, String course) {
-      // The way we are going to do this is ugly but thats okay
-      if (event.contains('(')) {
-        event = event.substring(0, event.indexOf('(') - 1);
-      }
-
-      List<String> eventWords = event.split(' ');
-      eventWords.removeWhere(
-        (String e) {
-          if (e == '' || e == ':') return true;
-          return false;
-        },
-      );
-
-      for (int i = 0; i < eventWords.length; i++) {
-        if (eventWords[i] == 'I') eventWords[i] = '1';
-        if (eventWords[i] == 'II') eventWords[i] = '2';
-        if (eventWords[i] == 'III') eventWords[i] = '3';
-      }
-
-      List<String> courseWords = course.split(' ');
-
-      if (eventWords.length != courseWords.length) {
-        return false;
-      }
-
-      for (int i = 0; i < eventWords.length; i++) {
-        if (eventWords[i] != courseWords[i]) return false;
-      }
-      return true;
-    }
-
-    for (int i = 0; i < allData.length; i++) {
-      for (Course course in this._courses) {
-        if (nameMatch(allData[i].name, course.name)) {
-          allData[i].courseId = course.id;
-          allData[i].customColor = course.color;
-        }
-      }
-    }
-    return allData;
+    // TODO: match coursedata etc.
+    return allGroupData;
   }
 
-  Future<List<Event>> getClassesOfDay(DateTime day) async {
-    DateTime toDay = DateTime(day.year, day.month, day.day);
-    List<Event> list = [];
+  Future<List<Event>> getTodaysEvents(DateTime day) async {
+    DateTime today = DateTime(day.year, day.month, day.day);
 
-    for (Event lec in await getWeekData(calcWeekFromDate(day))) {
-      DateTime classDay = DateTime(lec.startDate.year, lec.startDate.month, lec.startDate.day);
-      if (classDay == toDay) {
-        list.add(lec);
+    List<Event> events = [];
+    for (Event ev in await getWeekData(calcWeekFromDate(day))) {
+      DateTime evDay = DateTime(ev.startDate.year, ev.startDate.month, ev.startDate.day);
+      if (evDay == today) {
+        events.add(ev);
       }
     }
-    return list;
+    return events;
   }
 
   DateTime _calcStartDate() {
-    // TODO: URGENT: we need a way to calculate the year start date because this will
-    // change every year.
     return DateTime(2020, 9, 14);
   }
 
-  DateTime _calcDateFromWeek(int week) {
-    return _calcStartDate().add(Duration(days: 7 * (week - 1)));
-  }
-
+  /// The reason this function is inside this class and not a helper is because
+  /// we need to calculate the year start date and we will probably need to
+  /// fetch that from somehwere online, for now we just hard coded it.
   int calcWeekFromDate(DateTime date) {
     DateTime start = _calcStartDate();
     DateTime selectedWeekStart = date.subtract(Duration(days: date.weekday - 1));
     return selectedWeekStart.difference(start).inDays ~/ 7 + 1;
   }
 
-  bool isUserAllowed(int color) {
-    return color == this._userColor;
-  }
-
-  Future forceCacheUpdate(int week) async {
-    // TODO: update all weeks instead of just the currently selected one
-    // Also when we implement that maybe update them in the following order:
-    // - the current week
-    // - all preloaded next weeks
-    // - the previous weeks
-    for (String group in this._selectedUserGroups) {
-      var data = await this._crawler.getWeekData(week, this._userGroups[group]);
-      await _cache.populateWeekData(week, this._userEduType, this._userFac, this._userEdu,
-          parseLectureList(data, week), group);
+  Future<void> forceCrawlerFetch(int week) async {
+    if (this.groupIds == null) return;
+    for (String group in this.user.selectedGroups) {
+      var data = await this._crawler.getWeekData(week, this.groupIds[group]);
+      print(data);
+      await this._cache.populateEvents(week, this.groupIds[group], parseLectureList(data, week));
     }
-    //_cache.doForcedCacheUpdate(await this._crawler.getWeekData(week));
-  }
-
-  String colorIntToString(int color) {
-    if (color == 1)
-      return "orange";
-    else
-      return "blue";
-  }
-
-  int colorStringToInt(String color) {
-    if (color == "orange")
-      return 1;
-    else
-      return 0;
   }
 }
