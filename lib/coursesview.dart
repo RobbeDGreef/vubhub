@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-import 'const.dart';
 import 'infohandler.dart';
 import 'theming.dart';
 import 'course.dart';
@@ -154,13 +151,14 @@ class _CourseDetailsState extends State<CourseDetails> {
   }
 
   Future<http.Response> _sendPostToEventUrl(String url, String body) {
+    // TODO: implement this using canvas api
     // It's okay for comments to be empty
     Map<String, String> headers = {
       "host": "canvas.vub.be",
       "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
       "connection": "close",
       "content-length": body.length.toString(),
-      "authorization": "Bearer " + this.widget.canvas._userCanvasAuthToken,
+      "authorization": "Bearer " + this.widget.canvas.accessToken,
     };
 
     print(url);
@@ -416,7 +414,7 @@ class _CourseDetailsState extends State<CourseDetails> {
           List<dynamic> res = await this
               .widget
               .canvas
-              .request(apiUrl: "api/v1/announcements?context_codes[]=course_${this._details.id}");
+              .get("api/v1/announcements?context_codes[]=course_${this._details.id}");
           for (Map<String, dynamic> announcement in res) {
             announcements.add(Announcement(announcement));
           }
@@ -597,8 +595,11 @@ class _CoursesViewState extends State<CoursesView> {
 
   _CoursesViewState(InfoHandler info) {
     this._info = info;
-    _canvasApi = CanvasApi(info);
-    update();
+    if (info.user.accessToken != null) {
+      _canvasApi = CanvasApi(info.user.accessToken);
+      update();
+    } else
+      this._loading = false;
   }
 
   void _parseAndSetCourseInfo(List<dynamic> data) {
@@ -614,7 +615,7 @@ class _CoursesViewState extends State<CoursesView> {
         obj.imageUrl = course["image"];
 
         // Retrieve the assignment information
-        this._canvasApi.request(apiUrl: "api/v1/courses/${course["id"]}/assignments").then((res) {
+        this._canvasApi.get("api/v1/courses/${course["id"]}/assignments").then((res) {
           for (Map<String, dynamic> assignment in res) {
             // Note that the assignment object does it's own parsing
             obj.assignments.add(Assignment(assignment));
@@ -647,7 +648,7 @@ class _CoursesViewState extends State<CoursesView> {
 
   void update() async {
     this._loading = true;
-    var res = await this._canvasApi.request(apiUrl: "api/v1/dashboard/dashboard_cards");
+    var res = await this._canvasApi.get("api/v1/dashboard/dashboard_cards");
 
     // if the widget is not visible anymore, just return and do not try to update state
     if (!this.mounted) return;
@@ -674,10 +675,7 @@ class _CoursesViewState extends State<CoursesView> {
     }
 
     for (Course course in this._courses) {
-      this
-          ._canvasApi
-          .request(apiUrl: "api/v1/courses/${course.id}/activity_stream/summary")
-          .then((res) {
+      this._canvasApi.get("api/v1/courses/${course.id}/activity_stream/summary").then((res) {
         if (!this.mounted) return;
 
         setState(() {
@@ -693,7 +691,7 @@ class _CoursesViewState extends State<CoursesView> {
       });
     }
 
-    this._canvasApi.request(apiUrl: "/api/v1/appointment_groups").then((appgroups) {
+    this._canvasApi.get("/api/v1/appointment_groups").then((appgroups) {
       if (!this.mounted) return;
 
       String url = "/api/v1/calendar_events?start_date=";
@@ -710,7 +708,7 @@ class _CoursesViewState extends State<CoursesView> {
 
       if (!this.mounted) return;
       setState(() {
-        this._canvasApi.request(apiUrl: url).then((calendarData) {
+        this._canvasApi.get(url).then((calendarData) {
           for (Map<String, dynamic> eventData in calendarData) {
             CourseEvent event = CourseEvent(eventData);
             for (Course course in this._courses) {
@@ -724,7 +722,7 @@ class _CoursesViewState extends State<CoursesView> {
       });
     });
 
-    this._canvasApi.request(apiUrl: "api/v1/users/self/colors").then((res) {
+    this._canvasApi.get("api/v1/users/self/colors").then((res) {
       if (!this.mounted) return;
       setState(() {
         _addCourseColorInfo(res);
