@@ -94,7 +94,8 @@ class Crawler {
     return items;
   }
 
-  Future<void> updateConnection() async {
+  Future<bool> updateConnection() async {
+    print(this.curId);
     var postBody = "__EVENTTARGET=tTagClicked&__EVENTARGUMENT=${this.curId}";
     var headers = {
       "host": "",
@@ -125,9 +126,10 @@ class Crawler {
       this._request.body = "";
       r = await makeRequest(this._request);
       this.content = await r.stream.bytesToString();
+      return true;
     } else {
       // :(
-      print("failure");
+      return false;
     }
   }
 
@@ -146,9 +148,12 @@ class Crawler {
 
   Future<String> getWeekData(int week, String group) async {
     // get week data
-    // TODO: yuk pls find a better way to do this:
-
-    await _waitForContent(Duration(seconds: 2));
+    if (this.content == null) {
+      bool success = await this.updateConnection();
+      if (!success) {
+        return null;
+      }
+    }
 
     String body = "";
     var doc = html.parse(this.content);
@@ -175,8 +180,7 @@ class Crawler {
     print("status1: ${r.statusCode}");
     if (r.statusCode != 200) {
       // Retry with new connection
-      // @TODO: URGENT: this could deadlock and cause infinite recursion and thus
-      // stackoverflows and thus crashes
+      // TODO: URGENT: this could deadlock and cause infinite recursion and thus stackoverflows and thus crashes and unresponsiveness
       await updateConnection();
       return getWeekData(week, group);
     }
