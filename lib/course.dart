@@ -64,9 +64,9 @@ class Announcement {
 }
 
 class Course {
-  String name;
-  String imageUrl;
-  int id;
+  String name = '';
+  String imageUrl = '';
+  int id = -1;
   Color color = Colors.grey;
   List<Assignment> assignments = [];
   List<Discussion> discussions = [];
@@ -78,4 +78,30 @@ class Course {
 
   Course.empty();
   Course({this.name, this.id});
+
+  static final int stringListSize = 4;
+
+  String toString() {
+    List<String> data = [];
+    print("name: $name, imageurl: $imageUrl, id: $id, color: ${color.value}");
+    data.add(this.name);
+    data.add(this.imageUrl.toString());
+    data.add(this.id.toString());
+    data.add(this.color.value.toString());
+
+    for (int i = 0; i < data.length; i++) {
+      data[i] = data[i].split('\n').join('\\n');
+    }
+
+    return data.join('\n');
+  }
+
+  Course.fromStringList(List<String> data) {
+    this.name = data[0];
+    this.imageUrl = data[1];
+    this.id = int.parse(data[2]);
+    this.color = Color(int.parse(data[3]));
+
+    // The rest of the data is currently not stored to disk.
+  }
 }
