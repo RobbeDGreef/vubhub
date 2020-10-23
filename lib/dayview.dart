@@ -305,13 +305,17 @@ class _DayViewState extends State<DayView> {
               ? "you are allowed to come"
               : "you are not allowed to come");
 
+    Color tileColor = Colors.white;
+    Color textColor = Colors.black;
+    Color textColor2 = Colors.black54;
+
     return Card(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5),
         child: ListTile(
-          tileColor: this._events[i].customColor,
-          leading: Icon(icon),
-          title: Text(this._events[i].name),
+          tileColor: tileColor,
+          leading: Icon(icon, color: textColor2),
+          title: Text(this._events[i].name, style: TextStyle(color: textColor)),
           isThreeLine: false,
           onTap: () => _openEventDetails(i),
           subtitle: Padding(
@@ -322,17 +326,27 @@ class _DayViewState extends State<DayView> {
                     padding: EdgeInsets.only(bottom: 8),
                     child: Row(children: [
                       Expanded(
-                          child: Text(this._events[i].location, overflow: TextOverflow.ellipsis)),
-                      Text(this._events[i].startDate.hour.toString() +
-                          ":" +
-                          _prettyMinutes(this._events[i].endDate.minute) +
-                          " - " +
-                          this._events[i].endDate.hour.toString() +
-                          ":" +
-                          _prettyMinutes(this._events[i].endDate.minute))
+                          child: Text(this._events[i].location,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: textColor2))),
+                      Text(
+                        this._events[i].startDate.hour.toString() +
+                            ":" +
+                            _prettyMinutes(this._events[i].endDate.minute) +
+                            " - " +
+                            this._events[i].endDate.hour.toString() +
+                            ":" +
+                            _prettyMinutes(this._events[i].endDate.minute),
+                        style: TextStyle(color: textColor2),
+                      )
                     ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
                 Row(children: [
-                  Expanded(child: Text(policyString, overflow: TextOverflow.ellipsis))
+                  Expanded(
+                      child: Text(
+                    policyString,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: textColor2),
+                  ))
                 ], mainAxisAlignment: MainAxisAlignment.start)
               ],
             ),
