@@ -149,3 +149,21 @@ List<Course> parseCacheStoredCourses(List<String> data) {
   }
   return courses;
 }
+
+List<Event> parseStoredEventData(String data) {
+  List<Event> events = [];
+
+  List<String> lines = data.split('\n');
+
+  print(lines.length);
+  // Strip last line since it will be empty
+  lines = lines.sublist(0, lines.length - 1);
+  print(lines.length);
+
+  for (int i = 0; i < lines.length; i += Event.stringListSize) {
+    print(i);
+    events.add(Event.fromStringList(lines.sublist(i, i + Event.stringListSize)));
+  }
+
+  return events;
+}
