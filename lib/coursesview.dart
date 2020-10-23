@@ -651,6 +651,8 @@ class _CoursesViewState extends State<CoursesView> {
         this._courses.add(obj);
       }
     }
+
+    this._info.setCourses(this._courses);
   }
 
   void _addCourseColorInfo(Map<String, dynamic> data) {
