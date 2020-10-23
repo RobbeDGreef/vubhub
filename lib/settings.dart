@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flushbar/flushbar.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import "package:settings_ui/settings_ui.dart";
+import 'package:http/http.dart' as http;
 
 import "infohandler.dart";
 import 'const.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class SelectMultiMenu extends StatefulWidget {
   String _title;
@@ -92,12 +96,20 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   _SettingsMenuState(InfoHandler info) {
     this._info = info;
-    this._dropDownColor = info.colorIntToString(info.getUserColor());
-    this._dropDownEduType = info.getUserEduType();
-    this._dropDownFac = info.getUserFac();
-    this._dropDownEdu = info.getUserEdu();
-    this._selectedUserGroups = info.getSelectedUserGroups();
-    this._userGroups = info.getUserGroups();
+    this._dropDownColor = info.user.rotationColor == 1 ? 'orange' : 'blue';
+
+    if (info.user.educationType != null) {
+      this._dropDownEduType = info.user.educationType;
+      this._dropDownFac = info.user.faculty;
+      this._dropDownEdu = info.user.education;
+      this._selectedUserGroups = info.user.selectedGroups;
+    }
+
+    if (info.user.name != '') {
+      this._userName = info.user.name;
+    }
+
+    if (info.groupIds != null) this._userGroups = info.groupIds.keys.toList();
   }
 
   void showLoadingDialog(String text) {
@@ -149,7 +161,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   SettingsTile _buildChooseSettings(
       String title, String selected, Icon icon, List<String> selection, Function(String) ptr) {
-    if (selected.length > 20) {
+    if (selected != null && selected.length > 20) {
       selected = selected.substring(0, 20) + "...";
     }
     return SettingsTile(
@@ -185,10 +197,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
     // Clear cookies so that the user can re-login.
     CookieManager().clearCookies();
 
-        Navigator.of(context).push(
-          MaterialPageRoute(
+    Navigator.of(context).push(
+      MaterialPageRoute(
         builder: (BuildContext context) {
-              return Scaffold(
+          return Scaffold(
             appBar: AppBar(title: Text("Login")),
             body: WebView(
               initialUrl: loginUrl,
@@ -203,28 +215,28 @@ class _SettingsMenuState extends State<SettingsMenu> {
                     var json = jsonDecode(res.body);
                     if (json['error'] != null) {
                       // Display error message
-                                  Flushbar(
+                      Flushbar(
                         message: "An error occurred while trying to log in",
-                                    duration: Duration(seconds: 2),
-                                    margin: EdgeInsets.all(8),
-                                    borderRadius: 8,
-                                    animationDuration: Duration(milliseconds: 500),
-                                  ).show(context);
+                        duration: Duration(seconds: 2),
+                        margin: EdgeInsets.all(8),
+                        borderRadius: 8,
+                        animationDuration: Duration(milliseconds: 500),
+                      ).show(context);
                       return;
-                                } else {
+                    } else {
                       this._info.userLogin(json['access_token']);
-                                  setState(() {
+                      setState(() {
                         this._userName = json['user']['name'];
-                                  });
-                                }
-                              });
+                      });
+                    }
+                  });
                 }
-                            },
-                          ),
-              );
-            },
-          ),
-        );
+              },
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildAccountSettings() {
@@ -249,21 +261,21 @@ class _SettingsMenuState extends State<SettingsMenu> {
               (String newval) {
             setState(() {
               this._dropDownColor = newval;
-              this._info.setUserColor(this._info.colorStringToInt(newval));
+              this._info.setUserRotationColor(newval == 'blue' ? 0 : 1);
             });
           }),
           _buildChooseSettings("Level of education", this._dropDownEduType, Icon(Icons.menu_book),
               EducationData.keys.toList(), (String newval) {
             setState(() {
               this._dropDownEduType = newval;
-              this._info.setUserEduType(newval);
+              this._info.setUserEducationType(newval);
             });
           }),
           _buildChooseSettings("Faculty", this._dropDownFac, Icon(Icons.account_balance),
               EducationData[this._dropDownEduType].keys.toList(), (String newval) {
             setState(() {
               this._dropDownFac = newval;
-              this._info.setUserFac(newval);
+              this._info.setUserFaculty(newval);
             });
           }),
           _buildChooseSettings(
@@ -272,9 +284,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
               this._dropDownEdu = val;
               this._selectedUserGroups = [];
               showLoadingDialog("Loading group data");
-              this._info.setUserEdu(val).then((v) {
+              this._info.setUserEducation(val).then((v) {
                 setState(() {
-                  this._userGroups = this._info.getUserGroups();
+                  this._userGroups = this._info.groupIds.keys.toList();
                   Navigator.pop(context);
                 });
               });
@@ -292,7 +304,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               }
 
               // TODO: this is probably inefficient
-              this._info.setUserGroups(this._selectedUserGroups);
+              this._info.setUserSelectedGroups(this._selectedUserGroups);
             });
           }),
         ],
