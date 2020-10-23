@@ -642,7 +642,11 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
   }
 
   void _showBookSeatDialog(int index, String from, String until) {
-    String email = this.info.getUserEmail();
+    String email = "";
+    if (this.info.user.email != null) {
+      email = this.info.user.email;
+    }
+
     final bookstr = this._showedSpots[index].name +
         " from " +
         from +
@@ -664,9 +668,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
                 icon: Icon(Icons.email_outlined),
                 hintText: "Email",
               ),
-              initialValue: (this.info.getUserEmail() != null)
-                  ? this.info.getUserEmail().toLowerCase()
-                  : null,
+              initialValue: (email != null) ? email.toLowerCase() : null,
               onChanged: (val) => email = val,
             ),
             Row(

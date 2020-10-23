@@ -50,13 +50,13 @@ class _MainUiState extends State<MainUi> {
   }
 
   void _openSettings() async {
-    var groups = List<String>();
-    groups.addAll(this._info.getSelectedUserGroups());
+    List<String> groups = [];
+    groups.addAll(this._info.user.selectedGroups);
 
     await Navigator.of(context)
         .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this._info)));
 
-    if (this._info.getSelectedUserGroups() != groups) {
+    if (this._info.user.selectedGroups != groups) {
       this.currentPage.update();
     }
   }

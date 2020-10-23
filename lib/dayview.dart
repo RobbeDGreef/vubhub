@@ -55,7 +55,7 @@ class _DayViewState extends State<DayView> {
         this._loading = true;
       },
     );
-    this._info.forceCacheUpdate(this._info.calcWeekFromDate(this._selectedDay)).then((_) {
+    this._info.forceCrawlerFetch(this._info.calcWeekFromDate(this._selectedDay)).then((_) {
       _loadNewClassData(this._selectedDay, false);
     });
   }
@@ -74,7 +74,7 @@ class _DayViewState extends State<DayView> {
       });
     }
 
-    this._info.getClassesOfDay(date).then((list) {
+    this._info.getTodaysEvents(date).then((list) {
       this._loading = false;
       _update(list);
     });
@@ -301,7 +301,7 @@ class _DayViewState extends State<DayView> {
     String policyString = this._events[i].remarks;
     if (this._events[i].remarks.toLowerCase().contains("rotatiesysteem"))
       policyString = "Rotatiesysteem: " +
-          ((this._info.isUserAllowed(this._todaysColor))
+          ((this._info.user.rotationColor == this._todaysColor)
               ? "you are allowed to come"
               : "you are not allowed to come");
 
