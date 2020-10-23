@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:html/parser.dart" as html;
 import "event.dart";
+import 'course.dart';
 
 /*
 /// The iCalendar parser, This is actually obsolete but I leave it in
@@ -132,10 +133,19 @@ List<Event> parseLectureList(String data, int week) {
   return lectures;
 }
 
-List<Event> parseCacheStored(List<String> data) {
-  List<Event> lectures = List();
+List<Event> parseCacheStoredEvents(List<String> data) {
+  List<Event> lectures = [];
   for (int i = 0; i < data.length; i += Event.stringListSize) {
     lectures.add(Event.fromStringList(data.sublist(i, i + Event.stringListSize)));
   }
   return lectures;
+}
+
+List<Course> parseCacheStoredCourses(List<String> data) {
+  List<Course> courses = [];
+
+  for (int i = 0; i < data.length; i += Course.stringListSize) {
+    courses.add(Course.fromStringList(data.sublist(i, i + Course.stringListSize)));
+  }
+  return courses;
 }
