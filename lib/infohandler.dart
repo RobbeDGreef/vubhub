@@ -8,6 +8,7 @@ import "crawler.dart";
 import "parser.dart";
 import "const.dart";
 import "event.dart";
+import 'course.dart';
 
 class Cache {
   void storeString(String key, String val) async {
@@ -51,6 +52,11 @@ class Cache {
     return File("${dir.path}/" + "$userEduType-$userFac-$userEdu-$week-$group".replaceAll(' ', ''));
   }
 
+  Future<File> _getCourseFile() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return File("${dir.path}/courses");
+  }
+
   Future<List<Event>> getWeekData(
       int week, String userEduType, String userFac, String userEdu, String group) async {
     // Retrieve the week data from cache
@@ -71,7 +77,7 @@ class Cache {
     List<String> content = await file.readAsLines();
 
     // TODO: save this to the memory cache first
-    return parseCacheStored(content);
+    return parseCacheStoredEvents(content);
   }
 
   Future populateWeekData(int week, String userEduType, String userFac, String userEdu,
@@ -86,6 +92,29 @@ class Cache {
     }
     print(cacheData);
     file.writeAsString(cacheData);
+  }
+
+  Future<List<Course>> getCourseInfo() async {
+    final file = await _getCourseFile();
+    if (!(await file.exists())) {
+      print("course file does not exist");
+      return null;
+    }
+
+    List<String> content = await file.readAsLines();
+
+    return parseCacheStoredCourses(content);
+  }
+
+  void storeCourseInfo(List<Course> info) async {
+    final file = await _getCourseFile();
+    String data = "";
+    for (Course course in info) {
+      print("course: ${course.name}");
+      data += course.toString() + "\n";
+    }
+    print(data.split('\n').length);
+    file.writeAsString(data);
   }
 
   Future<List<String>> getSelectedGroups() async {
@@ -116,6 +145,8 @@ class InfoHandler {
   Map<String, String> _userGroups;
   List<String> _selectedUserGroups;
 
+  List<Course> _courses;
+
   String getUserId() => EducationData[this._userEduType][this._userFac][this._userEdu];
   String getUserEduType() => this._userEduType;
   String getUserFac() => this._userFac;
@@ -124,6 +155,7 @@ class InfoHandler {
   String getUserCanvasAuthToken() => this._userCanvasAuthToken;
   int getUserColor() => this._userColor;
   List<String> getSelectedUserGroups() => this._selectedUserGroups;
+  List<Course> getCourses() => this._courses;
 
   List<String> getUserGroups() {
     this._userGroups = this._crawler.getDepartmentGroups();
@@ -174,6 +206,11 @@ class InfoHandler {
     this._cache.storeString("userFac", fac);
   }
 
+  void setCourses(List<Course> courses) {
+    this._courses = courses;
+    this._cache.storeCourseInfo(courses);
+  }
+
   InfoHandler() {
     _cache = Cache();
     _crawler = Crawler();
@@ -190,6 +227,7 @@ class InfoHandler {
     this._userEdu = await _cache.tryToLoadString("userEdu", DefaultUserEdu);
     this._userEmail = await _cache.tryToLoadString("userEmail", null);
     this._userCanvasAuthToken = await _cache.tryToLoadString("userCanvasAuthToken", null);
+    this._courses = await _cache.getCourseInfo();
   }
 
   void _initCrawler() async {
@@ -249,6 +287,48 @@ class InfoHandler {
       }
     }
 
+    if (this._courses == null) return allData;
+
+    bool nameMatch(String event, String course) {
+      // The way we are going to do this is ugly but thats okay
+      if (event.contains('(')) {
+        event = event.substring(0, event.indexOf('(') - 1);
+      }
+
+      List<String> eventWords = event.split(' ');
+      eventWords.removeWhere(
+        (String e) {
+          if (e == '' || e == ':') return true;
+          return false;
+        },
+      );
+
+      for (int i = 0; i < eventWords.length; i++) {
+        if (eventWords[i] == 'I') eventWords[i] = '1';
+        if (eventWords[i] == 'II') eventWords[i] = '2';
+        if (eventWords[i] == 'III') eventWords[i] = '3';
+      }
+
+      List<String> courseWords = course.split(' ');
+
+      if (eventWords.length != courseWords.length) {
+        return false;
+      }
+
+      for (int i = 0; i < eventWords.length; i++) {
+        if (eventWords[i] != courseWords[i]) return false;
+      }
+      return true;
+    }
+
+    for (int i = 0; i < allData.length; i++) {
+      for (Course course in this._courses) {
+        if (nameMatch(allData[i].name, course.name)) {
+          allData[i].courseId = course.id;
+          allData[i].customColor = course.color;
+        }
+      }
+    }
     return allData;
   }
 
