@@ -9,34 +9,7 @@ import 'const.dart';
 import 'infohandler.dart';
 import 'theming.dart';
 import 'course.dart';
-import 'event.dart';
-
-class CanvasApi {
-  InfoHandler _infoHandler;
-  // TODO: isn't this like a huge secret lol, shouldn't this be like... encrypted????
-  String _userCanvasAuthToken;
-
-  CanvasApi(InfoHandler infoHandler) {
-    this._infoHandler = infoHandler;
-    this._userCanvasAuthToken = this._infoHandler.getUserCanvasAuthToken();
-  }
-
-  Future<dynamic> request({@required String apiUrl, Map<String, String> optionalHeaders}) async {
-    if (_userCanvasAuthToken == null) {
-      print("'$_userCanvasAuthToken'");
-      return {"errors": true};
-    }
-    Map<String, String> headers = {
-      "Authorization": "Bearer " + _userCanvasAuthToken,
-    };
-
-    if (optionalHeaders != null) {
-      headers.addAll(optionalHeaders);
-    }
-    var res = await http.get(CanvasUrl + apiUrl, headers: headers);
-    return jsonDecode(res.body);
-  }
-}
+import 'canvasapi.dart';
 
 class PageDetails extends StatefulWidget {
   String title;
