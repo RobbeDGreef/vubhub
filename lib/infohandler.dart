@@ -106,7 +106,11 @@ class Cache {
 
   void populateEvents(int week, String group, List<Event> data) {
     // Store the data in the memory cache
-    this._eventData[group][week] = data;
+
+    if (!this._eventData.containsKey(group)) {
+      this._eventData[group] = {week: data};
+    } else
+      this._eventData[group][week] = data;
 
     // Store it in storage too
     String content = "";
