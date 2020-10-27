@@ -69,6 +69,10 @@ that will mess up the super delicate server connection
 - Library seat expanded view
 - add dates to library booking
 
+# Bugs
+- [ ] If the email is left empty in the library booking menu, it will not show an error. 
+- [ ] Trying to book a spot at the library fails with 'unavailable_slot' error
+
 # Concrete roadmap starting from 17/10
 - More extensive canvas support
     - [ ] Actual canvas login (auto fill in the users group etc as well)
@@ -89,6 +93,7 @@ that will mess up the super delicate server connection
 - LectureView
     - [ ] View due assignments in the lectureview
     - [ ] Filtering lecture view
+    - [ ] Link lectureview and course details
 
 - Notification support
     - [ ] Send notification on lecture changes
