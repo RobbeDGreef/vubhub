@@ -16,6 +16,10 @@ class User {
 
   User.empty();
   User({this.accessToken});
+  User.defaults() {
+    this.educationType = EducationData.keys.first;
+    this.faculty = EducationData[this.educationType].keys.first;
+  }
 
   static final int stringListSize = 5;
 

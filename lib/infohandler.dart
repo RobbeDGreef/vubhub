@@ -63,7 +63,8 @@ class Cache {
 
     // If storage does not contain the user file either, return null
     if (content == null) {
-      return null;
+      setUser(User.defaults());
+      return this.user;
     }
 
     // If it does, parse, save and return
