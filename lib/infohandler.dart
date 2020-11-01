@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import "crawler.dart";
 import "parser.dart";
-import "const.dart";
+import "educationdata.dart";
 import "event.dart";
 import 'course.dart';
 import 'user.dart';

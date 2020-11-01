@@ -1,34 +1,5 @@
 import "package:flutter/material.dart";
 
-final Map<String, Map<String, Map<String, String>>> EducationData = {
-  "Bachelor": {
-    "Letteren en wijsbegeerde": {"History": "SWS_BA_LW_NL_RS_Geschiedenis_SET"},
-    "Recht en criminiologie": {},
-    "Psychologie": {},
-    "Sociale wetenschappen": {},
-    "Ingenieurswetenschappen": {},
-    "Science and Bio-engineering Sciences": {
-      "Bio-engeneering": "",
-      "Biology": "",
-      "Chemistry": "",
-      "Computer Science": "SWS_BA_WE_NL_RS_Computerwetenschappen_SET"
-    }
-  },
-  "Master": {
-    "Letteren en wijsbegeerde": {"Gender en diversiteit": ""},
-    "Recht en criminiologie": {},
-    "Psychologie": {},
-    "Sociale wetenschappen": {},
-    "Ingenieurswetenschappen": {},
-    "Science and Bio-engineering Sciences": {
-      "Bio-engeneering": "",
-      "Biology": "",
-      "Chemistry": "",
-      "Computer Science": ""
-    }
-  }
-};
-
 final String VubTimetablesEntryUrl =
     "https://splus.cumulus.vub.ac.be/SWS/v3/evenjr/NL/STUDENTSET/studentset.aspx";
 final String LibraryApiUrl =
@@ -86,9 +57,14 @@ one and paste it in the app under settings > accounts > authentication token. ""
 final DeveloperEmail = "robbedg@gmail.com";
 
 final WhoAreWeText =
-    "With we I mostly refer to me (Robbe De Greef, currently the lead developer) and more recently also Thomas Vandermotten. We are two first year Computer Science bachelors who (among most of our class) were very annoyed by the VUB's cumbersome class schedule system. So I decided to write an app for it and then thought it would be fun to add some more functionality. If you want to contact us you can do so in the help tab in the main screen of the app. We hope this app can help you in your daily life and please let us know if you want to change something.";
+    "With we I mostly refer to me (Robbe De Greef, currently the lead developer) and more recently also Thomas Vandermotten. We are two first year Computer Science bachelors who (among most of our class) were very annoyed by the VUB's cumbersome class schedule system. So I decided to write an app for it and then thought it would be fun to add some more functionality. If you want to contact us you can do so in the help tab, which you can find in the app drawer. We hope this app can help you in your daily life and please let us know if you want to change something.";
 
 final CurrentAppRelease = "0.0.1 alpha";
 
 final VubNewsUrl = "https://today.vub.be/nl/nieuws";
 final VubNewsPer = 100;
+
+final CanvasLoginUrl =
+    "https://canvas.vub.be/login/oauth2/auth?client_id=170000000000044&response_type=code&mobile=1&purpose=TestingStuff&redirect_uri=https://canvas.instructure.com/login/oauth2/auth";
+final CanvasTokenUrlBase =
+    "https://canvas.vub.be/login/oauth2/token?&redirect_uri=urn:ietf:wg:oauth:2.0:oob&grant_type=authorization_code&client_id=170000000000044&client_secret=3sxR3NtgXRfT9KdpWGAFQygq6O9RzLN021h2lAzhHUZEeSQ5XGV41Ddi5iutwW6f";

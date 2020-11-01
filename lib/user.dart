@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'educationdata.dart';
+
 class User {
   String name;
   int id;

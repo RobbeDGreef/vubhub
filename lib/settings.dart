@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 import "infohandler.dart";
 import 'const.dart';
+import 'educationdata.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class SelectMultiMenu extends StatefulWidget {
