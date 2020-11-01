@@ -8,7 +8,7 @@
 
 # Info
 This app hopes to make any VUB students life easier by concentrating all the information and VUB features into a single app.
-VubHub currently supports an easy to read class schedule, news feed, partial Canvas functionality and a library seat registration
+VubHub currently supports an easy to read class schedule, news feed, partial Canvas functionality, a library seat registration
 system and more, however that's not all because additional features are soon to come. If you like the idea and want to contribute
 feel free to play around with the code and make some pull requests. If you are not a programmer, don't worry you can still
 help us by just using the app and giving us feedback and new ideas. You can contact me (the lead developer) via the help
