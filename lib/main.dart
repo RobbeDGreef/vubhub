@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:vubhub/dayview.dart';
+import 'package:package_info/package_info.dart';
 
 import "mapview.dart";
 import "infohandler.dart";
@@ -44,8 +45,11 @@ class _MainUiState extends State<MainUi> {
   InfoHandler _info;
   int _selectedNavBarIndex = 0;
   dynamic currentPage;
+  PackageInfo packageInfo;
 
   _MainUiState(InfoHandler info) {
+    // We are going to assume that this returns fast enough
+    PackageInfo.fromPlatform().then((v) => this.packageInfo = v);
     this._info = info;
   }
 

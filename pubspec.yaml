@@ -43,6 +43,7 @@ dependencies:
       url: https://github.com/Sub6Resources/flutter_html
       ref: dab9923ad94cff9efa08203a27d30bbb92f985f6
   webview_flutter: ^1.0.5
+  package_info: ^0.4.3
 
   http: ^0.12.0
   html: ^0.14.0
