@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "82687590390",
+    "firebase_url": "https://vubhub-41cc1.firebaseio.com",
+    "project_id": "vubhub-41cc1",
+    "storage_bucket": "vubhub-41cc1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:82687590390:android:4a8547ad2bd415804251d7",
+        "android_client_info": {
+          "package_name": "com.misunderstoodproductions.vubhub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "82687590390-2al6snisj1u9m466naht0ualjopa24da.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5Ln6Hfs1bFwlaXz22kZcm84I_2cwrihQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "82687590390-2al6snisj1u9m466naht0ualjopa24da.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

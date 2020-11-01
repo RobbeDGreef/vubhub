@@ -12,12 +12,19 @@ import 'help.dart';
 import 'news.dart';
 import 'theming.dart';
 import 'dayview.dart';
+import 'push_notifications.dart';
 
-void main() => runApp(Vub());
+void main() async {
+  final PushNotificationManager man = PushNotificationManager();
+  WidgetsFlutterBinding.ensureInitialized();
+  await man.init();
+  runApp(Vub());
+}
 
 /// The main app
 class Vub extends StatelessWidget {
   final theme = ThemeData(primaryColor: Color.fromARGB(0xFF, 0, 52, 154));
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(title: "VUB class schedules", home: MainUi());
