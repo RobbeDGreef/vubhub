@@ -67,9 +67,12 @@ class _MainUiState extends State<MainUi> {
     await Navigator.of(context)
         .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this._info)));
 
-    if (this._info.user.selectedGroups != groups) {
-      this.currentPage.update();
+    if (this._selectedNavBarIndex == 0 && this._info.user.selectedGroups == groups) {
+      return;
     }
+    try {
+      this.currentPage.update();
+    } catch (e) {}
   }
 
   void _openAbout() {
