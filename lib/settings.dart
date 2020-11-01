@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flushbar/flushbar.dart';
 import "package:flutter/material.dart";
@@ -87,6 +88,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
   String _dropDownEdu;
   String _dropDownUserGroup;
   String _userName = "Not logged in";
+  String _email = "";
+  String _password = "";
   List<String> _userGroups = [];
   InfoHandler _info;
   List<String> _selectedUserGroups;
@@ -189,12 +192,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         });
   }
 
-  void _canvasLogin() {
-    final loginUrl =
-        "https://canvas.vub.be/login/oauth2/auth?client_id=170000000000044&response_type=code&mobile=1&purpose=TestingStuff&redirect_uri=https://canvas.instructure.com/login/oauth2/auth";
-    final tokenUrlBase =
-        "https://canvas.vub.be/login/oauth2/token?&redirect_uri=urn:ietf:wg:oauth:2.0:oob&grant_type=authorization_code&client_id=170000000000044&client_secret=3sxR3NtgXRfT9KdpWGAFQygq6O9RzLN021h2lAzhHUZEeSQ5XGV41Ddi5iutwW6f";
-
+  void _popupMobile() {
     // Clear cookies so that the user can re-login.
     CookieManager().clearCookies();
 
@@ -204,12 +202,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
           return Scaffold(
             appBar: AppBar(title: Text("Login")),
             body: WebView(
-              initialUrl: loginUrl,
+              initialUrl: CanvasLoginUrl,
               javascriptMode: JavascriptMode.unrestricted,
               onPageFinished: (url) {
                 if (url.startsWith('https://canvas.instructure.com')) {
                   final code = Uri.parse(url).queryParameters['code'];
-                  String tokenUrl = tokenUrlBase + "&code=" + code;
+                  String tokenUrl = CanvasTokenUrlBase + "&code=" + code;
                   print(tokenUrl);
                   http.post(tokenUrl).then((res) {
                     Navigator.pop(context);
@@ -238,6 +236,75 @@ class _SettingsMenuState extends State<SettingsMenu> {
         },
       ),
     );
+  }
+
+  void _desktopLogin() {}
+
+  void _popupDesktop() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Login")),
+            body: Center(
+              child: Container(
+                width: 300,
+                height: 500,
+                child: ListView(
+                  padding: EdgeInsets.all(8),
+                  children: [
+                    Row(
+                      children: [
+                        Image(
+                          image: AssetImage("assets/canvasLogo.png"),
+                          fit: BoxFit.cover,
+                          width: 140,
+                        ),
+                        Image(
+                          image: AssetImage("assets/vub-logo.png"),
+                          fit: BoxFit.cover,
+                          width: 140,
+                        ),
+                      ],
+                    ),
+                    Text("E-mail"),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onChanged: (s) => this._email = s,
+                    ),
+                    Text("Password"),
+                    TextFormField(
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onChanged: (s) => this._password = s,
+                    ),
+                    TextButton(
+                      child: Text("Login"),
+                      onPressed: () => _desktopLogin(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _canvasLogin() {
+    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows)
+      _popupDesktop();
+    else
+      _popupMobile();
   }
 
   Widget _buildAccountSettings() {
