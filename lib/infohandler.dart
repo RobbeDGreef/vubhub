@@ -4,13 +4,14 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+import 'canvas/canvasobjects.dart';
+import 'canvas/canvasapi.dart';
+
 import "crawler.dart";
 import "parser.dart";
 import "educationdata.dart";
 import "event.dart";
-import 'course.dart';
 import 'user.dart';
-import 'canvasapi.dart';
 
 // The storage handler
 class Storage {
@@ -173,22 +174,22 @@ class InfoHandler {
   InfoHandler() {
     this._cache = Cache();
     this._crawler = Crawler();
+  }
 
-    this._cache.getUser().then(
-      (user) {
-        if (user != null) this.user = user;
+  Future init() async {
+    User user = await this._cache.getUser();
 
-        if (this.user.education != null) {
-          this._updatingConnection = true;
-          this._crawler.curId = getUserId();
-          this._crawler.updateConnection().then(
-            (_) {
-              this.groupIds = this._crawler.getDepartmentGroups();
-            },
-          );
-        }
-      },
-    );
+    if (user != null) this.user = user;
+
+    if (this.user.education != null) {
+      this._updatingConnection = true;
+      this._crawler.curId = getUserId();
+      this._crawler.updateConnection().then(
+        (_) {
+          this.groupIds = this._crawler.getDepartmentGroups();
+        },
+      );
+    }
   }
 
   void userLogin(String token) async {
@@ -205,10 +206,6 @@ class InfoHandler {
     if (week == -1) {
       week = calcWeekFromDate(DateTime.now());
     }
-
-    // If the user is null that means no groups have been selected
-    // so we can return
-    if (this.user == null) return [];
 
     List<Event> allGroupData = [];
     for (String group in this.user.selectedGroups) {

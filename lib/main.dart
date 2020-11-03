@@ -18,12 +18,19 @@ void main() async {
   final PushNotificationManager man = PushNotificationManager();
   WidgetsFlutterBinding.ensureInitialized();
   await man.init();
-  runApp(Vub());
+
+  InfoHandler infoHandler = InfoHandler();
+  await infoHandler.init();
 }
 
 /// The main app
 class Vub extends StatelessWidget {
   final theme = ThemeData(primaryColor: Color.fromARGB(0xFF, 0, 52, 154));
+  InfoHandler infoHandler;
+
+  Vub(InfoHandler infoHandler) {
+    this.infoHandler = infoHandler;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +43,8 @@ class Vub extends StatelessWidget {
 class MainUi extends StatefulWidget {
   InfoHandler infoHandler;
 
-  MainUi() {
-    infoHandler = InfoHandler();
+  MainUi(InfoHandler info) {
+    this.infoHandler = info;
   }
 
   @override
