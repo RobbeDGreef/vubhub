@@ -14,6 +14,8 @@ import 'theming.dart';
 import 'dayview.dart';
 import 'push_notifications.dart';
 
+FirebaseAnalytics analytics = FirebaseAnalytics();
+
 void main() async {
   final PushNotificationManager man = PushNotificationManager();
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +36,11 @@ class Vub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: "VUB class schedules", home: MainUi());
+    return MaterialApp(
+      title: "VUB class schedules",
+      home: MainUi(this.infoHandler),
+      navigatorObservers: [FirebaseAnalyticsObserver(analytics: analytics)],
+    );
   }
 }
 
