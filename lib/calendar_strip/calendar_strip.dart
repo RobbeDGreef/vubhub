@@ -52,8 +52,7 @@ class CalendarStripState extends State<CalendarStrip> with TickerProviderStateMi
   DateTime rowStartingDate;
   double opacity = 0.0;
   DateTime lastDayOfMonth;
-  TextStyle monthLabelStyle =
-      TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87);
+  TextStyle monthLabelStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.w600);
   TextStyle selectedDateStyle =
       TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white);
   bool isOnEndingWeek = false, isOnStartingWeek = false;
@@ -374,7 +373,7 @@ class CalendarStripState extends State<CalendarStrip> with TickerProviderStateMi
     var normalStyle = TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w800,
-        color: isDateOutOfRange ? Colors.black26 : Colors.black54);
+        color: isDateOutOfRange ? Theme.of(context).primaryColorDark : null);
     return Expanded(
       child: SlideFadeTransition(
         delay: 30 + (30 * rowIndex),
@@ -395,7 +394,9 @@ class CalendarStripState extends State<CalendarStrip> with TickerProviderStateMi
                   dayLabels[date.weekday - 1],
                   style: TextStyle(
                     fontSize: 14.5,
-                    color: !isSelectedDate ? Colors.black : Colors.white,
+                    color: !isSelectedDate
+                        ? Theme.of(context).textTheme.bodyText1.color
+                        : Colors.white,
                   ),
                 ),
                 Text(date.day.toString(), style: !isSelectedDate ? normalStyle : selectedDateStyle),
