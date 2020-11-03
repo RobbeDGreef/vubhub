@@ -1,69 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-import 'infohandler.dart';
-import 'theming.dart';
-import 'course.dart';
-import 'canvasapi.dart';
+import '../canvas/canvasapi.dart';
+import '../canvas/canvasobjects.dart';
 
-class PageDetails extends StatefulWidget {
-  String title;
-  Color color;
-  Function() getData;
-  Widget Function(BuildContext, dynamic) buildTile;
-  PageDetails({this.title, this.color, this.getData, this.buildTile});
+import '../infohandler.dart';
+import '../theming.dart';
+import '../htmlParser.dart';
+import '../const.dart';
 
-  _PageDetailsState createState() => _PageDetailsState(getData: getData);
-}
+import 'fileview.dart';
+import 'meetings.dart';
+import 'pagedetails.dart';
 
-class _PageDetailsState extends State<PageDetails> {
-  List<dynamic> _data = [];
-  Function() getData;
-
-  void update() async {
-    var data = await this.getData();
-    setState(() {
-      this._data = data;
-    });
-  }
-
-  _PageDetailsState({this.getData}) {
-    update();
-  }
-
-  int _calcItemCount() {
-    if (this._data.length == 0) return 1;
-    return this._data.length;
-  }
-
-  Widget _buildTile(BuildContext context, int index) {
-    if (this._data.isEmpty) {
-      return Center(
-          child: Container(
-              margin: EdgeInsets.all(8),
-              child: CircularProgressIndicator(),
-              width: 50,
-              height: 50));
-    }
-    return this.widget.buildTile(context, this._data[index]);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(this.widget.title),
-        backgroundColor: this.widget.color,
-      ),
-      body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) => _buildTile(context, index),
-        itemCount: _calcItemCount(),
-      ),
-    );
-  }
-}
+// TODO: this file is too large, CourseDetails class is too large, split up stuff like PageView() into seperate classes and files
 
 class CourseDetails extends StatefulWidget {
   final Course details;
@@ -72,14 +24,31 @@ class CourseDetails extends StatefulWidget {
   CourseDetails({this.details, this.canvas});
 
   @override
-  _CourseDetailsState createState() => _CourseDetailsState(this.details);
+  _CourseDetailsState createState() => _CourseDetailsState(this.details, this.canvas);
 }
 
 class _CourseDetailsState extends State<CourseDetails> {
   Course _details;
+  List<Announcement> _unreadAnnouncements = [];
+  bool _loadingUnreadAnnouncements = true;
 
-  _CourseDetailsState(Course details) {
+  _CourseDetailsState(Course details, canvas) {
     this._details = details;
+
+    canvas
+        .get(
+            'api/v1/courses/${this._details.id}/discussion_topics?only_announcements=true&per_page=99999&filter_by=unread')
+        .then((ret) {
+      setState(() {
+        for (var data in ret) {
+          var ann = Announcement(data);
+          if (ann.created != null) {
+            this._unreadAnnouncements.add(ann);
+          }
+        }
+        this._loadingUnreadAnnouncements = false;
+      });
+    });
   }
 
   int _calcUpcomingEvents() {
@@ -97,10 +66,9 @@ class _CourseDetailsState extends State<CourseDetails> {
       return null;
   }
 
-  int _calcUpcomingAnnouncments() {
-    return null;
-    if (this._details.assignments.length != 0)
-      return this._details.assignments.length;
+  int _calcUpcomingAnnouncements() {
+    if (this._unreadAnnouncements.length != 0)
+      return this._unreadAnnouncements.length;
     else
       return null;
   }
@@ -318,8 +286,9 @@ class _CourseDetailsState extends State<CourseDetails> {
           null, null, "You currently have no assignments for this course.", null, null);
     }
 
-    final icon =
-        Icon(this._details.assignments[index].hasSubmitted ? Icons.check : Icons.pending_actions);
+    final icon = this._details.assignments[index].hasSubmitted
+        ? Icon(Icons.check_circle, color: Colors.green)
+        : Icon(Icons.clear, color: Colors.red);
 
     String dueString = "Could not find the due date.";
     if (this._details.assignments[index].dueDate != null) {
@@ -331,31 +300,41 @@ class _CourseDetailsState extends State<CourseDetails> {
       dueString,
       null,
       icon,
-      () => print("assignment $index"),
+      () => _pushView(() => _buildAssignmentView(this._details.assignments[index])),
     );
   }
 
   Widget _buildAnnouncementTile(int index) {
+    print("build build");
+    if (this._loadingUnreadAnnouncements) {
+      return Center(
+        child: Container(
+          margin: EdgeInsets.all(8),
+          child: CircularProgressIndicator(),
+          width: 50,
+          height: 50,
+        ),
+      );
+    }
+
     /// Will return "You currently have no assignments for this course." if
     /// the assignments list of the coursedetails is empty.
-    if (this._details.assignments.isEmpty) {
+    if (this._unreadAnnouncements.isEmpty) {
       return _buildListTile(null, null, "You have no unread announcements.", null, null);
     }
 
+    Announcement ann = this._unreadAnnouncements[index];
     final icon = Icon(Icons.campaign);
-
-    String dueString = "Could not find the due date.";
-    //if (this._details.announcements[index].dueDate != null) {
-    //  dueString =
-    //      "Due at ${DateFormat("d MMMM y").format(this._details.assignments[index].dueDate)}";
-    //}
-
+    String date = "Could not find the posted date";
+    if (ann.created != null) {
+      date = DateFormat("d MMMM H:mm").format(ann.created);
+    }
     return _buildListTile(
-      this._details.assignments[index].name,
-      dueString,
+      ann.title,
+      date,
       null,
       icon,
-      () => print("assignment $index"),
+      () => _pushView(() => _buildAnnouncementView(ann)),
     );
   }
 
@@ -387,6 +366,116 @@ class _CourseDetailsState extends State<CourseDetails> {
     }));
   }
 
+  Widget _buildAnnouncementView(Announcement ann) {
+    this
+        .widget
+        .canvas
+        .put('api/v1/courses/${this._details.id}/discussion_topics/${ann.id}/read')
+        .then((_) {
+      setState(() {
+        ann.isRead = true;
+      });
+    });
+
+    Image avatar = Image.network(ann.author.avatarUrl);
+    //print(ann.message);
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: this._details.color,
+        title: Text(
+          ann.title,
+          overflow: TextOverflow.fade,
+        ),
+      ),
+      body: ListView(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: Row(
+              children: [
+                Container(
+                  clipBehavior: Clip.hardEdge,
+                  child: avatar,
+                  decoration: BoxDecoration(shape: BoxShape.circle),
+                  width: 50,
+                  height: 50,
+                ),
+                SizedBox(width: 5),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(ann.author.name, style: TextStyle(fontSize: 18)),
+                    Text(DateFormat("d MMMM H:mm").format(ann.created)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(5),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(width: 1, color: Colors.grey),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: htmlParse(ann.message),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAssignmentView(Assignment assignment) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(assignment.name),
+        backgroundColor: this._details.color,
+      ),
+      body: ListView(
+        padding: EdgeInsets.only(left: 16, right: 16, top: 20),
+        children: [
+          Text(assignment.name, style: TextStyle(fontSize: 25)),
+          Row(
+            children: [
+              assignment.hasSubmitted
+                  ? Icon(Icons.check_circle, color: Colors.green)
+                  : Icon(Icons.clear, color: Colors.red),
+              SizedBox(width: 5),
+              assignment.hasSubmitted
+                  ? Text("Submitted", style: TextStyle(color: Colors.green))
+                  : Text("Nothing submitted", style: TextStyle(color: Colors.red)),
+              SizedBox(width: 10),
+              Text('${assignment.gradeLimit.truncate()} marks')
+            ],
+          ),
+          Divider(),
+          Row(children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Due at", style: TextStyle(fontSize: 17)),
+                Text("Submission types", style: TextStyle(fontSize: 17)),
+              ],
+            ),
+            SizedBox(width: 25),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(DateFormat("d MMMM H:mm").format(assignment.dueDate),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                Text(assignment.submissionTypes.join(', '),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+              ],
+            ),
+          ]),
+          Divider(),
+          htmlParse(assignment.details),
+        ],
+      ),
+    );
+  }
+
   void _buildAnnouncements() {
     _pushView(
       () => PageDetails(
@@ -405,22 +494,161 @@ class _CourseDetailsState extends State<CourseDetails> {
                   : null,
               title: Text(ann.title),
               subtitle: Text(DateFormat("d MMMM H:mm").format(ann.created)),
-              onTap: () => print(ann.title),
+              onTap: () {
+                _pushView(() => _buildAnnouncementView(ann));
+              },
             ),
           );
         },
         getData: () async {
           List<Announcement> announcements = [];
-          List<dynamic> res = await this
-              .widget
-              .canvas
-              .get("api/v1/announcements?context_codes[]=course_${this._details.id}");
+          List<dynamic> res = await this.widget.canvas.get(
+              "api/v1/courses/${this._details.id}/discussion_topics?only_announcements=true&per_page=99999");
           for (Map<String, dynamic> announcement in res) {
-            announcements.add(Announcement(announcement));
+            var ann = Announcement(announcement);
+
+            // Canvas for some reason shows the announcements of the previous year but sets the
+            // dates to null.
+            if (ann.created != null) {
+              announcements.add(ann);
+            }
           }
 
           return announcements;
         },
+        noDataText: "There are currently no announcements for this course",
+      ),
+    );
+  }
+
+  void _buildAssignments() {
+    _pushView(
+      () => PageDetails(
+        title: "Assignments",
+        color: this._details.color,
+        buildTile: (BuildContext context, dynamic assignment) {
+          Assignment assign = assignment;
+          return Card(
+            child: ListTile(
+              leading: Icon(Icons.campaign),
+              trailing: Padding(
+                padding: EdgeInsets.all(8),
+                child: assign.hasSubmitted
+                    ? Icon(Icons.check_circle, color: Colors.green)
+                    : Icon(Icons.clear, color: Colors.red),
+              ),
+              title: Text(assign.name),
+              subtitle: Text(DateFormat("d MMMM H:mm").format(assign.dueDate)),
+              onTap: () => _pushView(() => _buildAssignmentView(assign)),
+            ),
+          );
+        },
+        getData: () => this._details.assignments,
+        noDataText: "There are currently no assignments for this course",
+      ),
+    );
+  }
+
+  void _buildMeetings() {
+    _pushView(() => Meetings(details: this._details, canvas: this.widget.canvas));
+  }
+
+  void _launchChat() {
+    _pushView(() {
+      return Scaffold(
+        appBar: AppBar(title: Text("Chat"), backgroundColor: this._details.color),
+        body: WebView(
+          initialUrl: CanvasUrl + "courses/${this._details.id}/external_tools/6",
+          javascriptMode: JavascriptMode.unrestricted,
+        ),
+      );
+    });
+  }
+
+  Future<List<dynamic>> _getAllModuleItems() async {
+    List<dynamic> modules = [];
+
+    int i = 1;
+    while (true) {
+      print(i);
+      List<dynamic> mods = await this
+          .widget
+          .canvas
+          .get('api/v1/courses/${this._details.id}/modules?page=$i&include=items');
+
+      modules.addAll(mods);
+
+      if (mods.isEmpty) break;
+      i++;
+    }
+
+    return modules;
+  }
+
+  void _buildModules() {
+    _pushView(
+      () => PageDetails(
+        title: "Modules",
+        color: this._details.color,
+        getData: () async {
+          List<Module> modules = [];
+          print("${this._details.id} ${this.widget.canvas.accessToken}");
+
+          var resp = await _getAllModuleItems();
+
+          for (var mod in resp) {
+            modules.add(Module(mod));
+          }
+
+          return modules;
+        },
+        buildTile: (_, mod) {
+          Module module = mod;
+          return Theme(
+            data: ThemeData(accentColor: this._details.color),
+            child: ExpansionTile(
+              title: Text(module.title),
+              initiallyExpanded: true,
+              children: module.items.map((e) {
+                return Column(
+                  children: [
+                    Divider(),
+                    Row(
+                      children: [
+                        SizedBox(width: e.indent * 30.0),
+                        Expanded(
+                          child: ListTile(
+                            title: Text(e.title),
+                            leading: e.icon,
+                            onTap: () {
+                              Widget widget;
+                              if (e.type == 'File') {
+                                widget = FileView(e.url, this.widget.canvas);
+                              } else {
+                                widget = WebView(
+                                    initialUrl: e.url, javascriptMode: JavascriptMode.unrestricted);
+                              }
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => Scaffold(
+                                      appBar: AppBar(
+                                          title: Text(e.title),
+                                          backgroundColor: this._details.color),
+                                      body: widget),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          );
+        },
+        noDataText: "There are no modules for this course",
       ),
     );
   }
@@ -444,18 +672,21 @@ class _CourseDetailsState extends State<CourseDetails> {
     ///        - AssignmentTile (custom)
     ///          ...
     /// ...
+
+    Widget img;
+    try {
+      if (this._details.imageUrl != null) {
+        img = Image.network(this._details.imageUrl, fit: BoxFit.fitWidth);
+      }
+    } catch (HttpException) {}
+
     return ListView(
       children: [
         Stack(children: [
           SizedBox(
             width: width,
             height: height,
-            child: (this._details.imageUrl != null)
-                ? Image.network(
-                    this._details.imageUrl,
-                    fit: BoxFit.fitWidth,
-                  )
-                : null,
+            child: img,
           ),
           Container(color: this._details.color.withAlpha(153), width: width, height: height),
         ]),
@@ -476,25 +707,25 @@ class _CourseDetailsState extends State<CourseDetails> {
                   icon: Icon(Icons.assignment),
                   amount: this._details.dueAssignments,
                   color: this._details.color,
-                  onPressed: () => print("Assignments"),
+                  onPressed: _buildAssignments,
                 ),
                 _buildNotificationButton(
                   icon: Icon(Icons.question_answer),
-                  amount: this._details.unreadDiscussions,
+                  amount: 0,
                   color: this._details.color,
-                  onPressed: () => print("Discussions"),
+                  onPressed: _launchChat,
                 ),
                 _buildNotificationButton(
                   icon: Icon(Icons.computer),
                   amount: this._details.curOngoingMeetings,
                   color: this._details.color,
-                  onPressed: () => print("Meetings"),
+                  onPressed: _buildMeetings,
                 ),
                 _buildNotificationButton(
-                  icon: Icon(Icons.calendar_today),
-                  amount: this._details.curOngoingMeetings,
+                  icon: Icon(Icons.view_list),
+                  amount: 0,
                   color: this._details.color,
-                  onPressed: () => print("Calendar"),
+                  onPressed: _buildModules,
                 ),
               ],
             ),
@@ -534,7 +765,7 @@ class _CourseDetailsState extends State<CourseDetails> {
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               itemBuilder: (BuildContext context, int index) => _buildAnnouncementTile(index),
-              itemCount: _calcUpcomingAnnouncments() ?? 1,
+              itemCount: _calcUpcomingAnnouncements() ?? 1,
             ),
           ),
         ),
@@ -615,10 +846,16 @@ class _CoursesViewState extends State<CoursesView> {
         obj.imageUrl = course["image"];
 
         // Retrieve the assignment information
-        this._canvasApi.get("api/v1/courses/${course["id"]}/assignments").then((res) {
-          for (Map<String, dynamic> assignment in res) {
+        this
+            ._canvasApi
+            .get("api/v1/courses/${course["id"]}/assignments?include[]=submission")
+            .then((res) {
+          for (Map<String, dynamic> data in res) {
             // Note that the assignment object does it's own parsing
-            obj.assignments.add(Assignment(assignment));
+            var assignment = Assignment(data);
+            if (assignment.dueDate != null) {
+              obj.assignments.add(assignment);
+            }
           }
         });
 
@@ -759,7 +996,11 @@ class _CoursesViewState extends State<CoursesView> {
     List<Widget> widgets = [Container(color: this._courses[index].color.withAlpha(153))];
     if (this._courses[index].imageUrl != null) {
       try {
-        widgets.insert(0, Image.network(this._courses[index].imageUrl));
+        widgets.insert(
+            0,
+            Image.network(
+              this._courses[index].imageUrl,
+            ));
       } catch (HttpException) {}
     }
 
