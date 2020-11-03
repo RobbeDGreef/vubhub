@@ -13,6 +13,7 @@ class User {
   String faculty;
   String education;
   List<String> selectedGroups = [];
+  bool theme = true;
 
   User.empty();
   User({this.accessToken});
@@ -34,6 +35,7 @@ class User {
     this.faculty = data['faculty'];
     this.education = data['education'];
     this.selectedGroups = [];
+    this.theme = data['theme'] ?? true;
     for (String s in data['selectedGroups']) {
       this.selectedGroups.add(s);
     }
@@ -51,6 +53,7 @@ class User {
       'faculty': this.faculty,
       'education': this.education,
       'selectedGroups': this.selectedGroups,
+      'theme': this.theme,
     };
 
     return jsonEncode(json);
