@@ -68,3 +68,55 @@ final CanvasLoginUrl =
     "https://canvas.vub.be/login/oauth2/auth?client_id=170000000000044&response_type=code&mobile=1&purpose=TestingStuff&redirect_uri=https://canvas.instructure.com/login/oauth2/auth";
 final CanvasTokenUrlBase =
     "https://canvas.vub.be/login/oauth2/token?&redirect_uri=urn:ietf:wg:oauth:2.0:oob&grant_type=authorization_code&client_id=170000000000044&client_secret=3sxR3NtgXRfT9KdpWGAFQygq6O9RzLN021h2lAzhHUZEeSQ5XGV41Ddi5iutwW6f";
+
+final FileTypeNames = {
+  // Programing
+  'rkt': 'Dr racket (scheme) source code',
+  'c': 'C source code file',
+  'cpp': 'C++ source code file',
+  'cc': 'C/C++ source code file',
+  'h': 'C/C++ header file',
+  'java': 'Java source code file',
+  'class': 'Java class file',
+  'kt': 'Kotlin source code file',
+  'py': 'Python script file',
+  'js': 'JavaScript source file',
+  'php': 'PHP source file',
+  'html': 'HTML file',
+  'htm': 'HTML file',
+  'css': 'Cascading Style Sheet (CSS)',
+
+  'zip': 'Zip compressed file',
+  'tar.gz': 'Tarball compressed file',
+  'rar': 'RAR file',
+  'pkg': 'Package file',
+  'deb': 'Debian file',
+  '7z': '7-Zip compressed file',
+
+  // Regular documents
+  'txt': 'Plain text',
+  'tex': 'LaTeX document',
+  'doc': 'Microsoft Word document',
+  'docx': 'Microsoft Word document',
+  'odt': 'OpenOffice Writer document',
+  'pdf': 'Portable Document Format file (pdf)',
+
+  'ppt': 'PowerPoint presentation',
+  'pps': 'PowerPoint slideshow',
+  'pptx': 'PowerPoint Open XML presentation',
+  'odp': 'OpenOffice Impress presentation',
+  'key': 'Keynote presentation',
+
+  // Spreadsheets
+  'ods': 'OpenOffice Calc spreadsheet',
+  'xls': 'Microsoft Excel file',
+  'xlsm': 'Microsoft Excel file with macros',
+  'xlsx': 'Microsoft Excel Open XML spreadsheet',
+
+  // Video and audio
+  'mp3': 'MP3 Audio file',
+  'mp4': 'MP4 Video file',
+};
+
+final FileTypes = FileTypeNames.keys.toList();
+final LastPlainTextFileType = FileTypes.indexOf('txt');
