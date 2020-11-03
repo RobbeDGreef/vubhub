@@ -287,7 +287,7 @@ class _NewsViewState extends State<NewsView> {
             );
           },
         );
-      } catch (HttpException) {
+      } catch (e) {
         img = Text("An error occurred while loading image");
       }
     }
