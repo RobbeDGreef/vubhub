@@ -44,8 +44,7 @@ void main() async {
 }
 
 /// The main app
-class Vub extends StatelessWidget {
-  final theme = ThemeData(primaryColor: Color.fromARGB(0xFF, 0, 52, 154));
+class Vub extends StatefulWidget {
   InfoHandler infoHandler;
 
   Vub(InfoHandler infoHandler) {
@@ -53,8 +52,25 @@ class Vub extends StatelessWidget {
   }
 
   @override
+  VubState createState() => VubState(this.infoHandler);
+}
+
+class VubState extends State<Vub> {
+  final theme = ThemeData(primaryColor: Color.fromARGB(0xFF, 0, 52, 154));
+  InfoHandler infoHandler;
+
+  VubState(InfoHandler infoHandler) {
+    this.infoHandler = infoHandler;
+  }
+
+  void updateTheme(bool light) {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: buildTheme(this.infoHandler.user.theme ?? true),
       title: "VUB class schedules",
       home: MainUi(this.infoHandler),
       navigatorObservers: [FirebaseAnalyticsObserver(analytics: analytics)],
@@ -235,7 +251,6 @@ class _MainUiState extends State<MainUi> {
     return Scaffold(
         drawer: _buildDrawer(),
         bottomNavigationBar: bottom,
-        backgroundColor: AlmostWhite,
         appBar: AppBar(
             title: Text(tabText[this._selectedNavBarIndex]),
             actions: (this._selectedNavBarIndex == 0) ? refreshAction : []),
