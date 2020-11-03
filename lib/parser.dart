@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:html/parser.dart" as html;
 import "event.dart";
-import 'course.dart';
+import 'canvas/canvasobjects.dart';
 
 /*
 /// The iCalendar parser, This is actually obsolete but I leave it in
