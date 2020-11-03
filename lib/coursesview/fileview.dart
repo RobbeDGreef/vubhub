@@ -54,7 +54,7 @@ class FileView extends StatelessWidget {
     var res = await http.get(file.url);
 
     //TODO: Change path_provider etc etc u know
-    if (path == null) path = "/storage/0/emulated/download/${file.name}";
+    if (path == null) path = "/storage/emulated/0/Download/${file.name}";
 
     File f = File(path);
     if (await f.exists()) {

@@ -242,7 +242,7 @@ class _DayViewState extends State<DayView> {
           padding: EdgeInsets.only(left: 4, right: 4, bottom: 16, top: 16),
           child: Text(
             lec.name,
-            style: TextStyle(fontSize: 20, color: AlmostDark),
+            style: TextStyle(fontSize: 20, color: Theme.of(context).textTheme.bodyText1.color),
             textAlign: TextAlign.center,
           )),
     ];

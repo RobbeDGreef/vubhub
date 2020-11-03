@@ -608,7 +608,7 @@ class _CourseDetailsState extends State<CourseDetails> {
         buildTile: (_, mod) {
           Module module = mod;
           return Theme(
-            data: ThemeData(accentColor: this._details.color),
+            data: Theme.of(context),
             child: ExpansionTile(
               title: Text(module.title),
               initiallyExpanded: true,

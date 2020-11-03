@@ -777,7 +777,7 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
           child: Text(
             "Centrale bibliotheek VUB",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 25, color: AlmostDark),
+            style: TextStyle(fontSize: 25, color: Theme.of(context).textTheme.bodyText1.color),
           ),
         ),
         _buildFilters(),
