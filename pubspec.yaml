@@ -30,7 +30,6 @@ dependencies:
   cupertino_icons: ^1.0.0
   shared_preferences: '>=0.5.0'
   path_provider: ^1.6.10
-  downloads_path_provider: ^0.1.0
   settings_ui: ^0.4.0
   calendar_strip: ^1.0.4
   flushbar: ^1.10.4
@@ -55,7 +54,8 @@ dependencies:
   html: ^0.14.0
 
   f_logs: ^1.2.2
-  advance_pdf_viewer: ^1.2.0
+  advance_pdf_viewer: #^1.2.0
+    path: ../pdf_viewer
   open_file: ^3.0.3
 
 dev_dependencies:

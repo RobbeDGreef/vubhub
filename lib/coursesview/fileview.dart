@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:open_file/open_file.dart';
 
 import '../canvas/canvasobjects.dart';
@@ -54,8 +53,8 @@ class FileView extends StatelessWidget {
   Future<String> _download({String path}) async {
     var res = await http.get(file.url);
 
-    if (path == null)
-      path = "${(await DownloadsPathProvider.downloadsDirectory).path}/${file.name}";
+    //TODO: Change path_provider etc etc u know
+    if (path == null) path = "/storage/0/emulated/download/${file.name}";
 
     File f = File(path);
     if (await f.exists()) {

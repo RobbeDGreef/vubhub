@@ -4,9 +4,9 @@ packages:
   advance_pdf_viewer:
     dependency: "direct main"
     description:
-      name: advance_pdf_viewer
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../pdf_viewer"
+      relative: true
+    source: path
     version: "1.2.0"
   archive:
     dependency: transitive
@@ -120,13 +120,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
-  downloads_path_provider:
-    dependency: "direct main"
-    description:
-      name: downloads_path_provider
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.0"
   f_logs:
     dependency: "direct main"
     description:
