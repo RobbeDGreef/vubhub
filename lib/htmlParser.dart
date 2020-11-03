@@ -40,6 +40,7 @@ Widget htmlParse(String data) {
     },
     style: {
       'div': Style(display: Display.BLOCK, fontSize: FontSize(18)),
+      'li': Style(fontSize: FontSize(18)),
     },
   );
 }
