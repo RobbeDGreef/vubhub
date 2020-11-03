@@ -21,3 +21,9 @@ section in the app or by create an issue in this repository.
 - [ ] Further desktop development
 - [ ] More 'places' in the places tab, e.i. food places, free rooms etc.
 - [ ] Additional student news section where students can share information
+
+# Help me!
+## I don't see any lectures
+Check if you have selected the correct education type, faculty, education and groups. If there are
+still no lectures, try the reload button on the top right. And if all else fails try to 
+remove the app's storage and retry.
