@@ -794,7 +794,6 @@ class _CourseDetailsState extends State<CourseDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AlmostWhite,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: this._details.color,

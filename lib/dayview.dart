@@ -141,7 +141,7 @@ class _DayViewState extends State<DayView> {
       monthString += " - " + weekString;
     }
 
-    TextStyle style = TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87);
+    TextStyle style = TextStyle(fontSize: 17, fontWeight: FontWeight.w600);
     return Padding(
       padding: EdgeInsets.only(top: 7, bottom: 3),
       child: Row(
@@ -162,6 +162,7 @@ class _DayViewState extends State<DayView> {
     DateTime selected = this._selectedDay != null ? this._selectedDay : DateTime.now();
     return CalendarStrip(
         monthNameWidget: _buildMonthNameWidget,
+        iconColor: Theme.of(context).textTheme.bodyText1.color,
         selectedDate: selected,
         startDate: DateTime(0),
         endDate: DateTime(3000),
@@ -253,7 +254,6 @@ class _DayViewState extends State<DayView> {
     return Scaffold(
       appBar: AppBar(title: Text("Details")),
       body: ListView(children: children),
-      backgroundColor: AlmostWhite,
     );
   }
 
@@ -313,9 +313,9 @@ class _DayViewState extends State<DayView> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5),
         child: ListTile(
-          tileColor: tileColor,
-          leading: Icon(icon, color: textColor2),
-          title: Text(this._events[i].name, style: TextStyle(color: textColor)),
+          //tileColor: tileColor,
+          leading: Icon(icon),
+          title: Text(this._events[i].name, style: TextStyle(/*color: textColor*/)),
           isThreeLine: false,
           onTap: () => _openEventDetails(i),
           subtitle: Padding(
@@ -328,7 +328,7 @@ class _DayViewState extends State<DayView> {
                       Expanded(
                           child: Text(this._events[i].location,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: textColor2))),
+                              style: TextStyle(/*color: textColor2*/))),
                       Text(
                         this._events[i].startDate.hour.toString() +
                             ":" +
@@ -337,7 +337,7 @@ class _DayViewState extends State<DayView> {
                             this._events[i].endDate.hour.toString() +
                             ":" +
                             _prettyMinutes(this._events[i].endDate.minute),
-                        style: TextStyle(color: textColor2),
+                        style: TextStyle(/*color: textColor2*/),
                       )
                     ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
                 Row(children: [
@@ -345,7 +345,7 @@ class _DayViewState extends State<DayView> {
                       child: Text(
                     policyString,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: textColor2),
+                    style: TextStyle(/*color: textColor2*/),
                   ))
                 ], mainAxisAlignment: MainAxisAlignment.start)
               ],

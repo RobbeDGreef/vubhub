@@ -11,7 +11,6 @@ class HelpView extends StatelessWidget {
   Widget _openMoreInfo(BuildContext context, String info) {
     Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
       return Scaffold(
-        backgroundColor: AlmostWhite,
         appBar: AppBar(title: Text("More info")),
         body:
             Padding(padding: EdgeInsets.all(12), child: Text(info, style: TextStyle(fontSize: 16))),

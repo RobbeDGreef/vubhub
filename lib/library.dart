@@ -173,7 +173,6 @@ class _SpotDetailPageState extends State<SpotDetailPage> {
     availableTimeText += " at " + DateFormat("d MMMM").format(this._selectedDate);
 
     return Scaffold(
-      backgroundColor: AlmostWhite,
       appBar: AppBar(
         title: Text("Seat details"),
       ),
@@ -797,7 +796,6 @@ class _LibraryBookingMenuState extends State<LibraryBookingMenu> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Book a spot at the library")),
-      backgroundColor: AlmostWhite,
       body: _buildBooking(),
     );
   }
