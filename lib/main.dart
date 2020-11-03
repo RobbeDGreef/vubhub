@@ -1,13 +1,18 @@
+import 'dart:async';
+
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import "package:flutter/material.dart";
 import 'package:vubhub/dayview.dart';
 import 'package:package_info/package_info.dart';
+import 'package:f_logs/f_logs.dart';
 
 import "mapview.dart";
 import "infohandler.dart";
 import "settings.dart";
-import "const.dart";
+import 'const.dart';
 import "placesview.dart";
-import 'coursesview.dart';
+import 'coursesview/coursesview.dart';
 import 'help.dart';
 import 'news.dart';
 import 'theming.dart';
@@ -21,8 +26,21 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await man.init();
 
+  FlutterError.onError = (details) {
+    FlutterError.dumpErrorToConsole(details);
+    FLog.error(stacktrace: details.stack, text: "Flutter error occurred (${details.exception})");
+  };
+
   InfoHandler infoHandler = InfoHandler();
   await infoHandler.init();
+
+  runZoned<Future<void>>(() async {
+    runApp(Vub(infoHandler));
+  }, onError: (error, stacktrace) {
+    print(error);
+    print(stacktrace);
+    FLog.error(stacktrace: stacktrace, text: "Dart error occurred (${error})");
+  });
 }
 
 /// The main app
@@ -208,6 +226,7 @@ class _MainUiState extends State<MainUi> {
       IconButton(
         icon: Icon(Icons.replay_sharp),
         onPressed: () {
+          print(tabText[6]);
           this.currentPage.fullUpdate();
         },
       ),
