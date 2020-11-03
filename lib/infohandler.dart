@@ -171,6 +171,11 @@ class InfoHandler {
     this._cache.courses = data;
   }
 
+  void setTheme(bool theme) {
+    this.user.theme = theme;
+    this._cache.setUser(this.user);
+  }
+
   InfoHandler() {
     this._cache = Cache();
     this._crawler = Crawler();

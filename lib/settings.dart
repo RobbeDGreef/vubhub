@@ -388,7 +388,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 subtitle: 'Experimental',
                 onToggle: (value) {
                   setState(() {
-                    this._info.user.theme = !value;
+                    this._info.setTheme(!value);
                     context.findAncestorStateOfType<VubState>().updateTheme(!value);
                   });
                 },
