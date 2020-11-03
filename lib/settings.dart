@@ -11,6 +11,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import "infohandler.dart";
 import 'const.dart';
 import 'educationdata.dart';
+import 'main.dart';
 
 class SelectMultiMenu extends StatefulWidget {
   String _title;
@@ -319,65 +320,83 @@ class _SettingsMenuState extends State<SettingsMenu> {
   }
 
   Widget _buildSettings() {
-    return SettingsList(sections: [
-      SettingsSection(
-        title: "User",
-        tiles: [
-          _buildAccountSettings(),
-          _buildChooseSettings(
-              "Color", this._dropDownColor, Icon(Icons.color_lens), ["blue", "orange"],
-              (String newval) {
-            setState(() {
-              this._dropDownColor = newval;
-              this._info.setUserRotationColor(newval == 'blue' ? 0 : 1);
-            });
-          }),
-          _buildChooseSettings("Level of education", this._dropDownEduType, Icon(Icons.menu_book),
-              EducationData.keys.toList(), (String newval) {
-            setState(() {
-              this._dropDownEduType = newval;
-              this._info.setUserEducationType(newval);
-            });
-          }),
-          _buildChooseSettings("Faculty", this._dropDownFac, Icon(Icons.account_balance),
-              EducationData[this._dropDownEduType].keys.toList(), (String newval) {
-            setState(() {
-              this._dropDownFac = newval;
-              this._info.setUserFaculty(newval);
-            });
-          }),
-          _buildChooseSettings(
-              "Education type", this._dropDownEdu, Icon(Icons.school), getEducations(), (val) {
-            setState(() {
-              this._dropDownEdu = val;
-              this._selectedUserGroups = [];
-              showLoadingDialog("Loading group data");
-              this._info.setUserEducation(val).then((v) {
-                setState(() {
-                  this._userGroups = this._info.groupIds.keys.toList();
-                  Navigator.pop(context);
+    return SettingsList(
+      darkBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      sections: [
+        SettingsSection(
+          title: "User",
+          tiles: [
+            _buildAccountSettings(),
+            _buildChooseSettings(
+                "Color", this._dropDownColor, Icon(Icons.color_lens), ["blue", "orange"],
+                (String newval) {
+              setState(() {
+                this._dropDownColor = newval;
+                this._info.setUserRotationColor(newval == 'blue' ? 0 : 1);
+              });
+            }),
+            _buildChooseSettings("Level of education", this._dropDownEduType, Icon(Icons.menu_book),
+                EducationData.keys.toList(), (String newval) {
+              setState(() {
+                this._dropDownEduType = newval;
+                this._info.setUserEducationType(newval);
+              });
+            }),
+            _buildChooseSettings("Faculty", this._dropDownFac, Icon(Icons.account_balance),
+                EducationData[this._dropDownEduType].keys.toList(), (String newval) {
+              setState(() {
+                this._dropDownFac = newval;
+                this._info.setUserFaculty(newval);
+              });
+            }),
+            _buildChooseSettings(
+                "Education type", this._dropDownEdu, Icon(Icons.school), getEducations(), (val) {
+              setState(() {
+                this._dropDownEdu = val;
+                this._selectedUserGroups = [];
+                showLoadingDialog("Loading group data");
+                this._info.setUserEducation(val).then((v) {
+                  setState(() {
+                    this._userGroups = this._info.groupIds.keys.toList();
+                    Navigator.pop(context);
+                  });
                 });
               });
-            });
-          }),
-          _buildChooseMultiSettings(
-              "Groups", this._selectedUserGroups, Icon(Icons.group), this._userGroups,
-              (valueSet, val) {
-            setState(() {
-              // TODO: maybe use a Set() for this ?
-              if (valueSet && !this._selectedUserGroups.contains(val)) {
-                this._selectedUserGroups.add(val);
-              } else if (!valueSet) {
-                this._selectedUserGroups.remove(val);
-              }
+            }),
+            _buildChooseMultiSettings(
+                "Groups", this._selectedUserGroups, Icon(Icons.group), this._userGroups,
+                (valueSet, val) {
+              setState(() {
+                // TODO: maybe use a Set() for this ?
+                if (valueSet && !this._selectedUserGroups.contains(val)) {
+                  this._selectedUserGroups.add(val);
+                } else if (!valueSet) {
+                  this._selectedUserGroups.remove(val);
+                }
 
-              // TODO: this is probably inefficient
-              this._info.setUserSelectedGroups(this._selectedUserGroups);
-            });
-          }),
-        ],
-      )
-    ]);
+                // TODO: this is probably inefficient
+                this._info.setUserSelectedGroups(this._selectedUserGroups);
+              });
+            }),
+          ],
+        ),
+        SettingsSection(
+          title: "Theme",
+          tiles: [
+            SettingsTile.switchTile(
+                title: 'Dark mode',
+                subtitle: 'Experimental',
+                onToggle: (value) {
+                  setState(() {
+                    this._info.user.theme = !value;
+                    context.findAncestorStateOfType<VubState>().updateTheme(!value);
+                  });
+                },
+                switchValue: !this._info.user.theme)
+          ],
+        ),
+      ],
+    );
   }
 
   @override
