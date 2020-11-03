@@ -377,8 +377,11 @@ class _CourseDetailsState extends State<CourseDetails> {
       });
     });
 
-    Image avatar = Image.network(ann.author.avatarUrl);
-    //print(ann.message);
+    Widget avatar = Center(child: Icon(Icons.person));
+    try {
+      avatar = Image.network(ann.author.avatarUrl);
+    } catch (e) {}
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: this._details.color,
