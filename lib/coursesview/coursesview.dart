@@ -681,7 +681,7 @@ class _CourseDetailsState extends State<CourseDetails> {
       if (this._details.imageUrl != null) {
         img = Image.network(this._details.imageUrl, fit: BoxFit.fitWidth);
       }
-    } catch (HttpException) {}
+    } catch (e) {}
 
     return ListView(
       children: [
