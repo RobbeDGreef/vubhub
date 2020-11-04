@@ -184,7 +184,7 @@ class _SpotDetailPageState extends State<SpotDetailPage> {
             padding: EdgeInsets.only(left: 8, top: 5),
             child: Text(
               this._detailData["resource_name"],
-              style: TextStyle(fontSize: 30, color: AlmostDark),
+              style: TextStyle(fontSize: 30),
             ),
           ),
           SizedBox(height: 10),

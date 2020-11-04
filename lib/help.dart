@@ -31,9 +31,9 @@ class HelpView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyleHeader = TextStyle(fontSize: 30, fontWeight: FontWeight.w600, color: AlmostDark);
-    final textStyleSub = TextStyle(fontSize: 20, color: AlmostDark);
-    final textStyleText = TextStyle(fontSize: 16, color: AlmostDark);
+    final textStyleHeader = TextStyle(fontSize: 30, fontWeight: FontWeight.w600);
+    final textStyleSub = TextStyle(fontSize: 20);
+    final textStyleText = TextStyle(fontSize: 16);
 
     return Scaffold(
       appBar: AppBar(title: Text("Help")),
