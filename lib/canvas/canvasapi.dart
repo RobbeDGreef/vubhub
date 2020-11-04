@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:f_logs/model/flog/flog.dart';
 import 'package:http/http.dart' as http;
 
 import '../const.dart';
@@ -44,6 +45,11 @@ class CanvasApi {
       req.body = body;
     }
 
-    return await req.send();
+    try {
+      return await req.send();
+    } catch (e) {
+      FLog.error(text: 'CanvasApi request exception $e');
+      return null;
+    }
   }
 }
