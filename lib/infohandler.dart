@@ -130,6 +130,9 @@ class InfoHandler {
   // This data is updated from crawler.getDepartmentGroups()
   Map<String, String> groupIds;
 
+  // This variable will be set to false in init() if this is not the first launch
+  bool isFirstLaunch = true;
+
   Crawler _crawler;
   Cache _cache;
   bool _updatingConnection = false;
@@ -165,6 +168,7 @@ class InfoHandler {
   void setUserSelectedGroups(List<String> groups) {
     this.user.selectedGroups = groups;
     this._cache.setUser(this.user);
+    registerPeriodic(LectureUpdateIntervals[this.user.updateInterval], this);
   }
 
   void setCourses(List<Course> data) {
@@ -176,6 +180,12 @@ class InfoHandler {
     this._cache.setUser(this.user);
   }
 
+  void setUpdateInterval(String interval) {
+    this.user.updateInterval = interval;
+    this._cache.setUser(this.user);
+    registerPeriodic(LectureUpdateIntervals[interval], this);
+  }
+
   InfoHandler() {
     this._cache = Cache();
     this._crawler = Crawler();
@@ -183,6 +193,12 @@ class InfoHandler {
 
   Future init() async {
     User user = await this._cache.getUser();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    isFirstLaunch = prefs.getBool('firstLaunch') ?? true;
+    if (isFirstLaunch) {
+      prefs.setBool('firstLaunch', false);
+    }
 
     if (user != null) this.user = user;
 
@@ -205,6 +221,26 @@ class InfoHandler {
     this.user.locale = data['locale'];
 
     this._cache.setUser(this.user);
+  }
+
+  Future<String> getWeekUpdateTime(int week) async {
+    if (week == -1) {
+      week = calcWeekFromDate(DateTime.now());
+    }
+
+    if (this.user.selectedGroups.isEmpty) {
+      return "Never";
+    }
+
+    var path = this._cache.getEventWeekFilepath(week, this.groupIds[this.user.selectedGroups[0]]);
+    File f = await Storage.getFile(path);
+
+    if (!(await f.exists())) {
+      print(f.path);
+      return "Never";
+    }
+
+    return DateFormat("d MMMM yyyy 'at' HH:mm").format(await f.lastModified());
   }
 
   Future<List<Event>> getWeekData(int week) async {

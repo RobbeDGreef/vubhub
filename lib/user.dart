@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:vubhub/const.dart';
+
 import 'educationdata.dart';
 
 class User {
@@ -14,6 +16,7 @@ class User {
   String education;
   List<String> selectedGroups = [];
   bool theme = true;
+  String updateInterval = LectureUpdateIntervals.keys.toList()[1];
 
   User.empty();
   User({this.accessToken});
@@ -36,6 +39,7 @@ class User {
     this.education = data['education'];
     this.selectedGroups = [];
     this.theme = data['theme'] ?? true;
+    this.updateInterval = data['updateInterval'];
     for (String s in data['selectedGroups']) {
       this.selectedGroups.add(s);
     }
@@ -54,6 +58,7 @@ class User {
       'education': this.education,
       'selectedGroups': this.selectedGroups,
       'theme': this.theme,
+      'updateInterval': this.updateInterval,
     };
 
     return jsonEncode(json);

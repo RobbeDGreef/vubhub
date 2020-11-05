@@ -94,6 +94,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
   List<String> _userGroups = [];
   InfoHandler _info;
   List<String> _selectedUserGroups;
+  String _updateInterval;
+  String latestTime = "...";
 
   List<String> getEducations() {
     return EducationData[this._dropDownEduType][this._dropDownFac].keys.toList();
@@ -108,6 +110,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
       this._dropDownFac = info.user.faculty;
       this._dropDownEdu = info.user.education;
       this._selectedUserGroups = info.user.selectedGroups;
+      this._updateInterval = info.user.updateInterval;
     }
 
     if (info.user.name != '') {
@@ -115,6 +118,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
     }
 
     if (info.groupIds != null) this._userGroups = info.groupIds.keys.toList();
+
+    this._info.getWeekUpdateTime(-1).then((val) {
+      setState(() {
+        this.latestTime = val;
+      });
+    });
   }
 
   void showLoadingDialog(String text) {
@@ -151,13 +160,32 @@ class _SettingsMenuState extends State<SettingsMenu> {
   Widget _buildSelectionScreen(
       String title, List<String> selection, String selected, Function(String) callback) {
     List<Widget> tiles = List();
+
+    String subtitle = selected;
+
+    if (!Platform.isAndroid) {
+      if (subtitle != null && subtitle.length > 20) {
+        subtitle = subtitle.substring(0, 20) + "...";
+      }
+    }
+
     for (String select in selection) {
+      print("$select $selected");
+      callCallback() {
+        Navigator.pop(context);
+        callback(select);
+      }
+
       tiles.add(ListTile(
-          title: Text(select),
-          onTap: () {
-            Navigator.pop(context);
-            callback(select);
-          }));
+        title: Text(select),
+        trailing: Radio(
+          toggleable: false,
+          onChanged: (bool) => callCallback(),
+          value: select,
+          groupValue: selected,
+        ),
+        onTap: callCallback,
+      ));
       tiles.add(Divider());
     }
 
@@ -166,14 +194,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   SettingsTile _buildChooseSettings(
       String title, String selected, Icon icon, List<String> selection, Function(String) ptr) {
-    if (selected != null && selected.length > 20) {
-      selected = selected.substring(0, 20) + "...";
-    }
     return SettingsTile(
         title: title,
         subtitle: selected,
         leading: icon,
-        //trailing: Icon(Icons.arrow_forward_ios),
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (BuildContext context) =>
@@ -182,10 +206,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
   }
 
   SettingsTile _buildChooseMultiSettings(String title, List<String> selected, Icon icon,
-      List<String> selection, Function(bool, String) ptr) {
+      List<String> selection, Function(bool, String) ptr,
+      {subtitle}) {
     return SettingsTile(
         title: title,
         leading: icon,
+        subtitle: subtitle,
         //trailing: Icon(Icons.arrow_forward_ios),
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
@@ -378,6 +404,28 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 this._info.setUserSelectedGroups(this._selectedUserGroups);
               });
             }),
+          ],
+        ),
+        SettingsSection(
+          title: 'Lectures',
+          tiles: [
+            _buildChooseSettings(
+              "Lecture update interval",
+              this._updateInterval,
+              Icon(Icons.update),
+              LectureUpdateIntervals.keys.toList(),
+              (val) {
+                setState(() {
+                  this._updateInterval = val;
+                  this._info.setUpdateInterval(val);
+                });
+              },
+            ),
+            SettingsTile(
+              title: "This weeks lectures latest update",
+              leading: Icon(Icons.access_time),
+              subtitle: this.latestTime,
+            )
           ],
         ),
         SettingsSection(

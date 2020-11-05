@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:vubhub/dayview.dart';
 import 'package:package_info/package_info.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:workmanager/workmanager.dart';
 
 import "mapview.dart";
 import "infohandler.dart";
@@ -18,8 +20,25 @@ import 'news.dart';
 import 'theming.dart';
 import 'dayview.dart';
 import 'push_notifications.dart';
+import 'backgroundfetch.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics();
+
+void callbackDispenser() {
+  Workmanager.executeTask((taskName, inputData) async {
+    try {
+      String curId = inputData['curId'];
+      int week = InfoHandler.calcWeekFromDate(DateTime.now());
+      List<dynamic> groups = inputData['groups'];
+      String path = inputData['path'];
+      await backgroundFetch(curId, week, groups, path);
+    } catch (e) {
+      print("exception $e\n");
+      FLog.error(text: "Error in background process $e");
+    }
+    return Future.value(true);
+  });
+}
 
 void main() async {
   final PushNotificationManager man = PushNotificationManager();
@@ -33,6 +52,11 @@ void main() async {
 
   InfoHandler infoHandler = InfoHandler();
   await infoHandler.init();
+
+  Workmanager.initialize(callbackDispenser, isInDebugMode: kDebugMode);
+  if (infoHandler.isFirstLaunch) {
+    registerPeriodic(LectureUpdateIntervals[infoHandler.user.updateInterval], infoHandler);
+  }
 
   runZoned<Future<void>>(() async {
     runApp(Vub(infoHandler));
@@ -242,7 +266,6 @@ class _MainUiState extends State<MainUi> {
       IconButton(
         icon: Icon(Icons.replay_sharp),
         onPressed: () {
-          print(tabText[6]);
           this.currentPage.fullUpdate();
         },
       ),

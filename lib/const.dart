@@ -120,3 +120,10 @@ final FileTypeNames = {
 
 final FileTypes = FileTypeNames.keys.toList();
 final LastPlainTextFileType = FileTypes.indexOf('txt');
+final LectureUpdateIntervals = {
+  'Every hour': Duration(hours: 1),
+  'Every 8 hours': Duration(hours: 8),
+  'Every day': Duration(days: 1),
+  'Every week': Duration(days: 7),
+  'Never': Duration.zero,
+};
