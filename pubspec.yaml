@@ -54,9 +54,11 @@ dependencies:
   html: ^0.14.0
 
   f_logs: ^1.2.2
-  advance_pdf_viewer: #^1.2.0
-    path: ../pdf_viewer
+  advance_pdf_viewer: ^1.2.0
+  #  path: ../pdf_viewer
   open_file: ^3.0.3
+  workmanager: ^0.2.3
+  
 
 dev_dependencies:
   flutter_test:
