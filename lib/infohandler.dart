@@ -73,7 +73,7 @@ class Cache {
     return this.user;
   }
 
-  String _getEventWeekFile(int week, String group) {
+  String getEventWeekFilepath(int week, String group) {
     return "${this.user.educationType}-${this.user.faculty}-${this.user.education}-$week-$group"
         .replaceAll(' ', '');
   }
@@ -87,7 +87,7 @@ class Cache {
     }
 
     // If the data is not in the memory cache check the storage
-    String eventDataString = await Storage.readFile(_getEventWeekFile(week, group));
+    String eventDataString = await Storage.readFile(getEventWeekFilepath(week, group));
     if (eventDataString == null) {
       // And if it is not in storage either, return null;
       return null;
@@ -117,7 +117,7 @@ class Cache {
     // Store it in storage too
     String content = "";
     for (Event ev in data) content += ev.toString() + '\n';
-    Storage.writeFile(_getEventWeekFile(week, group), content);
+    Storage.writeFile(getEventWeekFilepath(week, group), content);
   }
 }
 
