@@ -434,6 +434,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
             SettingsTile.switchTile(
                 title: 'Dark mode',
                 subtitle: 'Experimental',
+                leading: Icon(Icons.invert_colors),
                 onToggle: (value) {
                   setState(() {
                     this._info.setTheme(!value);
