@@ -29,10 +29,7 @@ class DayView extends StatefulWidget {
 
   DayView({this.info});
   @override
-  _DayViewState createState() {
-    this.state = _DayViewState(this.info);
-    return this.state;
-  }
+  _DayViewState createState() => _DayViewState(this.info);
 }
 
 class _DayViewState extends State<DayView> {
@@ -42,6 +39,12 @@ class _DayViewState extends State<DayView> {
   DateTime _selectedWeek = DateTime.now();
   int _todaysColor = 0;
   bool _loading = true;
+
+  @override
+  void initState() {
+    this.widget.state = this;
+    super.initState();
+  }
 
   _DayViewState(InfoHandler info) {
     this._info = info;
@@ -55,7 +58,7 @@ class _DayViewState extends State<DayView> {
         this._loading = true;
       },
     );
-    this._info.forceCrawlerFetch(this._info.calcWeekFromDate(this._selectedDay)).then((_) {
+    this._info.forceCrawlerFetch(InfoHandler.calcWeekFromDate(this._selectedDay)).then((_) {
       _loadNewClassData(this._selectedDay, false);
     });
   }
@@ -85,6 +88,7 @@ class _DayViewState extends State<DayView> {
   /// and other hacks.
   void _update(List<Event> classes) {
     print("Updating");
+    if (!this.mounted) return;
     setState(() {
       bool rotset = false;
       this._events.clear();
@@ -133,7 +137,7 @@ class _DayViewState extends State<DayView> {
     }
     */
 
-    int weekNum = this._info.calcWeekFromDate(this._selectedWeek);
+    int weekNum = InfoHandler.calcWeekFromDate(this._selectedWeek);
     String weekString = "week $weekNum";
 
     // We want to prevent printing week 0 or week -1 etc
