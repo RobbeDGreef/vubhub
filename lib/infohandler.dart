@@ -296,14 +296,14 @@ class InfoHandler {
     return events;
   }
 
-  DateTime _calcStartDate() {
+  static DateTime _calcStartDate() {
     return DateTime(2020, 9, 14);
   }
 
   /// The reason this function is inside this class and not a helper is because
   /// we need to calculate the year start date and we will probably need to
   /// fetch that from somehwere online, for now we just hard coded it.
-  int calcWeekFromDate(DateTime date) {
+  static int calcWeekFromDate(DateTime date) {
     DateTime start = _calcStartDate();
     DateTime selectedWeekStart = date.subtract(Duration(days: date.weekday - 1));
     return selectedWeekStart.difference(start).inDays ~/ 7 + 1;
