@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:f_logs/f_logs.dart';
 import 'package:flushbar/flushbar.dart';
 import "package:flutter/material.dart";
-import 'package:flutter/services.dart';
 import "package:settings_ui/settings_ui.dart";
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -442,6 +442,17 @@ class _SettingsMenuState extends State<SettingsMenu> {
                   });
                 },
                 switchValue: !this._info.user.theme)
+          ],
+        ),
+        SettingsSection(
+          title: "Logging",
+          tiles: [
+            SettingsTile(
+              title: 'Clear logs',
+              subtitle: 'Logs are used to track bugs when you send us a bug report.',
+              leading: Icon(Icons.invert_colors),
+              onTap: () => FLog.clearLogs(),
+            ),
           ],
         ),
       ],
