@@ -1,39 +1,39 @@
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_mailer/flutter_mailer.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'const.dart';
-import 'theming.dart';
 
 class HelpView extends StatelessWidget {
   String _subject = "";
   String _body = "";
 
-  Widget _openMoreInfo(BuildContext context, String info) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(title: Text("More info")),
-        body:
-            Padding(padding: EdgeInsets.all(12), child: Text(info, style: TextStyle(fontSize: 16))),
-      );
-    }));
-  }
-
   void _sendEmail() async {
     if (this._subject.isEmpty) this._subject = "I did not provide a subject :/";
     if (this._body.isEmpty) this._body = "I did not provide a body :/";
 
-    var url = 'mailto:$DeveloperEmail?subject=${this._subject}&body=${this._body}';
-    if (await canLaunch(url))
-      launch(url);
-    else
-      print("Could not send email :/");
+    FLog.exportLogs();
+    final MailOptions mailOptions = MailOptions(
+      subject: this._subject,
+      body: this._body,
+      recipients: ['robbedegreef@gmail.com'],
+      attachments: ["${(await getExternalStorageDirectory()).path}/FLogs/flog.txt"],
+    );
+    FlutterMailer.send(mailOptions);
   }
 
   @override
   Widget build(BuildContext context) {
     final textStyleHeader = TextStyle(fontSize: 30, fontWeight: FontWeight.w600);
     final textStyleSub = TextStyle(fontSize: 20);
-    final textStyleText = TextStyle(fontSize: 16);
+    final textStyleText =
+        TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyText1.color);
+    final textBoldStyleText = TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+      color: Theme.of(context).textTheme.bodyText1.color,
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text("Help")),
@@ -61,12 +61,12 @@ class HelpView extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(16),
             child: Column(
-              children: [
+                children: [
                 Text(IsSketchyText, style: textStyleText),
                 TextButton(
                   child: Text("You can read more about it here"),
                   onPressed: () => _openMoreInfo(context, WhyAccessTokenText),
-                ),
+              ),
               ],
             ),
           ),
@@ -75,21 +75,37 @@ class HelpView extends StatelessWidget {
             style: textStyleSub,
           ),
           SizedBox(height: 10),
-          TextField(
-            decoration: InputDecoration(
-                hintText: "The subject",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
-            onChanged: (val) => this._subject = val,
+          Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: Text("The subject"),
           ),
           SizedBox(height: 10),
-          SizedBox(
-            height: 300,
+          Padding(
+            padding: EdgeInsets.only(left: 8, right: 8),
             child: TextField(
-              onChanged: (val) => this._body = val,
-              maxLines: 99,
               decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "My crazy bug / Your crazy idea / Your friendly hello :)"),
+                  hintText: "The subject",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+              onChanged: (val) => this._subject = val,
+            ),
+          ),
+          SizedBox(height: 10),
+          Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: Text("The body"),
+          ),
+          SizedBox(height: 10),
+          Padding(
+            padding: EdgeInsets.only(left: 8, right: 8),
+            child: SizedBox(
+              height: 300,
+              child: TextField(
+                onChanged: (val) => this._body = val,
+                maxLines: 99,
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "My crazy bug / Your crazy idea / Your friendly hello :)"),
+              ),
             ),
           ),
           Align(
