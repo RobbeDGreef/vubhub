@@ -21,43 +21,15 @@ final Pattern emailPattern =
 final VubMapWidth = 3267;
 final VubMapHeight = 4000;
 
-final WhereIsAccessTokenText = """
-Your canvas access token can be generated at https://canvas.vub.be/profile/settings 
-by clicking on the orange 'new accesscode' button. You can then copy the token 
-and paste it manually in the app under settings > accounts > authentication token.
-"""
-    .replaceAll('\n', '');
-
-final IsSketchyText = """
-That's because it kinda is, we are currently a bit in legal limbo with Canvas's 
-terms of service because of this but since this is still a alpha/beta app, you are not 
-a user, you are a tester. Therefor we can ask you to do this, but we are not, if 
-anyone over at Canvas is reading this :| . We are simply nudging that manually 
-generating this token is something you COULD do, not something you SHOULD do.
-"""
-    .replaceAll('\n', '');
-
-final WhyAccessTokenText = """
-You may have noticed that you cannot login to Canvas directly from within the app. 
-This is because we (the developers) need a 'client key' as they are referred to, 
-issued by the institution (the VUB in this case) in order for us to be able to use 
-canvas's API's. Since this is an unofficial app, we currently do not have a key like 
-that. The only other option for us was to use what Canvas refers to as an access token. 
-These tokens are normally supposed to be used by developers (us) to test features before 
-they have implemented the user login stuff. However telling your users to generate 
-these keys manually and add them to your application would be a violation of the Canvas's 
-terms of service, so, we are not telling you to do anything. You don't need canvas to 
-use this app and you are most likely a tester for this app and therefor partially a developer. 
-But, in case you decide on your own that you would like to add some of Canvas's functionality 
-to this app, you could do so by going to your VUB canvas profile settings at 
-canvas.vub.be/profile/settings and click the 'new access token' button, generate 
-one and paste it in the app under settings > accounts > authentication token. """
-    .replaceAll('\n', '');
+final ClassScheduleMessedUp =
+    "If your class schedule is not showing the correct data (no data, duplicates, ...), check if you selected the correct groups in Settings > groups. If the groups are correct try removing the app's saved data in your phones settings, ";
+final ClassScheduleMessedUpBold =
+    "however please first send us a bug report using the forms below, removing the data will also remove the log files we use to identify problems.";
 
 final DeveloperEmail = "robbedg@gmail.com";
 
 final WhoAreWeText =
-    "With we I mostly refer to me (Robbe De Greef, currently the lead developer) and more recently also Thomas Vandermotten. We are two first year Computer Science bachelors who (among most of our class) were very annoyed by the VUB's cumbersome class schedule system. So I decided to write an app for it and then thought it would be fun to add some more functionality. If you want to contact us you can do so in the help tab, which you can find in the app drawer. We hope this app can help you in your daily life and please let us know if you want to change something.";
+    "With we I currently actually refer to me (Robbe De Greef), I am a freshman computer science student at the Vrije Universiteit Brussel. I made this app because I found that the VUB was lacking a simple way to access class schedules and afterwards thought it would be fun to add some more functionality. If you like the app, please let me know, I would love to get some feedback and any bug reports or features requests can be requested in the Help tab. I hope you like it :)";
 
 final CurrentAppRelease = "0.0.1 alpha";
 

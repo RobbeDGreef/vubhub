@@ -47,27 +47,19 @@ class HelpView extends StatelessWidget {
           ),
           SizedBox(height: 10),
           Text(
-            "Where do I find my canvas access token?",
+            "My class schedule is all messed up?",
             style: textStyleSub,
           ),
           Padding(
             padding: EdgeInsets.all(16),
-            child: Text(WhereIsAccessTokenText, style: textStyleText),
-          ),
-          Text(
-            "That seems hella sketchy dude.",
-            style: textStyleSub,
-          ),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
+            child: RichText(
+              text: TextSpan(
+                style: textStyleText,
                 children: [
-                Text(IsSketchyText, style: textStyleText),
-                TextButton(
-                  child: Text("You can read more about it here"),
-                  onPressed: () => _openMoreInfo(context, WhyAccessTokenText),
+                  TextSpan(text: ClassScheduleMessedUp),
+                  TextSpan(text: ClassScheduleMessedUpBold, style: textBoldStyleText),
+                ],
               ),
-              ],
             ),
           ),
           Text(
