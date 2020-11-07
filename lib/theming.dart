@@ -15,5 +15,8 @@ ThemeData buildTheme(bool light) {
     colorScheme: light ? ColorScheme.light() : ColorScheme.dark(),
     scaffoldBackgroundColor: light ? AlmostWhite : AlmostDark,
     cardColor: light ? null : NearDark,
+    textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color>(light ? VubBlue : VubOrange))),
   );
 }
