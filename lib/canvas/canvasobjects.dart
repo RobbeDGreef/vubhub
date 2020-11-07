@@ -251,3 +251,21 @@ class CanvasFile {
     }
   }
 }
+
+class CanvasPage {
+  String name;
+  String url;
+
+  DateTime created;
+  String body;
+
+  CanvasPage(Map<String, dynamic> page) {
+    this.name = page['title'];
+    this.url = page['url'];
+    this.body = page['body'];
+
+    if (page['created_at'] != null) {
+      this.created = DateTime.parse(page['created_at']);
+    }
+  }
+}
