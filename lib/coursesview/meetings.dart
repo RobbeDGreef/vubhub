@@ -120,9 +120,15 @@ class _MeetingsState extends State<Meetings> {
       ];
     }
 
+    ThemeData themeData = ThemeData(
+      accentColor: this._details.color,
+      textTheme: Theme.of(context).textTheme,
+      unselectedWidgetColor: Theme.of(context).textTheme.subtitle1.color,
+    );
+
     return Card(
       child: Theme(
-        data: ThemeData(accentColor: this._details.color),
+        data: themeData,
         child: ExpansionTile(
           childrenPadding: EdgeInsets.only(bottom: 8),
           title: Text(list[index].title),
