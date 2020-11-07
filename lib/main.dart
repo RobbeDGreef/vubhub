@@ -250,7 +250,7 @@ class _MainUiState extends State<MainUi> {
           label: "map",
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.meeting_room),
+          icon: Icon(Icons.location_on),
           label: "places",
         ),
         BottomNavigationBarItem(
