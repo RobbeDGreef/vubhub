@@ -13,19 +13,23 @@ class CanvasApi {
   }
 
   Future<dynamic> get(String url, {Map<String, String> headers}) async {
-    return jsonDecode(await (await request(url, headers: headers)).stream.bytesToString());
+    var res = (await request(url, headers: headers));
+    if (res == null) return null;
+
+    return jsonDecode(await res.stream.bytesToString());
   }
 
   Future<dynamic> post(String url, {Map<String, String> headers, String body}) async {
-    return jsonDecode(await (await request(url, headers: headers, body: body, method: 'POST'))
-        .stream
-        .bytesToString());
+    var res = (await request(url, headers: headers, body: body, method: 'POST'));
+    if (res == null) return null;
+    return jsonDecode(await res.stream.bytesToString());
   }
 
   Future<void> put(String url, {Map<String, String> headers, String body}) async {
-    return await (await request(url, headers: headers, body: body, method: 'PUT'))
-        .stream
-        .bytesToString();
+    var res = (await request(url, headers: headers, body: body, method: 'PUT'));
+    if (res == null) return null;
+
+    return await res.stream.bytesToString();
   }
 
   Future<http.StreamedResponse> request(String url,
