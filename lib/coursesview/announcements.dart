@@ -1,3 +1,11 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../canvas/canvasapi.dart';
+import '../canvas/canvasobjects.dart';
+import '../htmlParser.dart';
+import 'pagedetails.dart';
+
 class AnnouncementView extends StatelessWidget {
   Announcement _announcement;
   Course _details;
@@ -67,3 +75,57 @@ class AnnouncementView extends StatelessWidget {
   }
 }
 
+class Announcements extends StatelessWidget {
+  CanvasApi _canvas;
+  Course _details;
+
+  Announcements(Course details, CanvasApi canvas) {
+    this._canvas = canvas;
+    this._details = details;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageDetails(
+      title: "Announcements",
+      color: this._details.color,
+      buildTile: (BuildContext context, dynamic announcement) {
+        Announcement ann = announcement;
+        return Card(
+          child: ListTile(
+            leading: Icon(Icons.campaign),
+            trailing: !ann.isRead
+                ? Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Icon(Icons.brightness_1, size: 12, color: this._details.color),
+                  )
+                : null,
+            title: Text(ann.title),
+            subtitle: Text(DateFormat("d MMMM H:mm").format(ann.created)),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => AnnouncementView(ann, this._details, this._canvas)));
+            },
+          ),
+        );
+      },
+      getData: () async {
+        List<Announcement> announcements = [];
+        List<dynamic> res = await this._canvas.get(
+            "api/v1/courses/${this._details.id}/discussion_topics?only_announcements=true&per_page=99999");
+        for (Map<String, dynamic> announcement in res) {
+          var ann = Announcement(announcement);
+
+          // Canvas for some reason shows the announcements of the previous year but sets the
+          // dates to null.
+          if (ann.created != null) {
+            announcements.add(ann);
+          }
+        }
+
+        return announcements;
+      },
+      noDataText: "There are currently no announcements for this course",
+    );
+  }
+}
