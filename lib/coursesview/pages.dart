@@ -54,7 +54,8 @@ class PagesView extends StatelessWidget {
       title: "Pages",
       noDataText: "There are no pages for this course",
       getData: () async {
-        List<dynamic> data = await this._canvas.get('api/v1/courses/${this._details.id}/pages');
+        dynamic data = await this._canvas.get('api/v1/courses/${this._details.id}/pages');
+        if (data is Map<String, dynamic>) return [];
         List<CanvasPage> pages = [];
         for (Map<String, dynamic> e in data) {
           pages.add(CanvasPage(e));
