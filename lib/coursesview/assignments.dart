@@ -1,3 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../canvas/canvasobjects.dart';
+import '../canvas/canvasapi.dart';
+import '../htmlParser.dart';
+import 'pagedetails.dart';
 
 class AssignmentView extends StatelessWidget {
   Assignment _assignment;
@@ -56,6 +63,44 @@ class AssignmentView extends StatelessWidget {
           htmlParse(this._assignment.details),
         ],
       ),
+    );
+  }
+}
+
+class Assignments extends StatelessWidget {
+  CanvasApi _canvas;
+  Course _details;
+
+  Assignments(Course details, CanvasApi canvas) {
+    this._canvas = canvas;
+    this._details = details;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageDetails(
+      title: "Assignments",
+      color: this._details.color,
+      buildTile: (BuildContext context, dynamic assignment) {
+        Assignment assign = assignment;
+        return Card(
+          child: ListTile(
+            leading: Icon(Icons.campaign),
+            trailing: Padding(
+              padding: EdgeInsets.all(8),
+              child: assign.hasSubmitted
+                  ? Icon(Icons.check_circle, color: Colors.green)
+                  : Icon(Icons.clear, color: Colors.red),
+            ),
+            title: Text(assign.name),
+            subtitle: Text(DateFormat("d MMMM H:mm").format(assign.dueDate)),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => AssignmentView(assign, this._details))),
+          ),
+        );
+      },
+      getData: () => this._details.assignments,
+      noDataText: "There are currently no assignments for this course",
     );
   }
 }
