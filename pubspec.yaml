@@ -44,6 +44,7 @@ dependencies:
       ref: dab9923ad94cff9efa08203a27d30bbb92f985f6
   html_unescape: ^1.0.2
   webview_flutter: ^1.0.5
+  flutter_inappwebview: ^4.0.0+4
   package_info: ^0.4.3
   firebase_core: ^0.5.1
 
@@ -68,7 +69,8 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/vub-logo.png"
+  image_path: "assets/vub-logo-custom.png"
+  
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
