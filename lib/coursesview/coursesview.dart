@@ -11,6 +11,9 @@ import '../theming.dart';
 import '../htmlParser.dart';
 import '../const.dart';
 
+import 'announcements.dart';
+import 'assignments.dart';
+import 'coursemenu.dart';
 import 'fileview.dart';
 import 'meetings.dart';
 import 'pagedetails.dart';
@@ -71,51 +74,6 @@ class _CourseDetailsState extends State<CourseDetails> {
       return this._unreadAnnouncements.length;
     else
       return null;
-  }
-
-  Widget _buildNotificationButton({Icon icon, int amount, Color color, Function() onPressed}) {
-    /// Structure:
-    /// Padding
-    ///   - Stack to place the notification indicator on top of the iconbutton
-    ///     - IconButton
-    ///     - Positioned to place the card on the right of the stack (only if amount != 0)
-    ///       - Card
-    ///         - Text to display the notification amount
-
-    List<Widget> children = [
-      IconButton(
-        color: Colors.grey[600],
-        icon: icon,
-        iconSize: 35.0,
-        onPressed: onPressed,
-      )
-    ];
-
-    if (amount != 0) {
-      children.add(
-        Positioned(
-          right: 0,
-          child: Card(
-            color: color,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-
-            // The text here is pre and post-fixed with spaces to make it take up
-            // more space and create a properly sized card.
-            child: Text(
-              " " + amount.toString() + " ",
-              style: TextStyle(fontSize: 14, color: Colors.white),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsets.all(8),
-      child: Stack(
-        children: children,
-      ),
-    );
   }
 
   Future<http.Response> _sendPostToEventUrl(String url, String body) {
@@ -300,7 +258,7 @@ class _CourseDetailsState extends State<CourseDetails> {
       dueString,
       null,
       icon,
-      () => _pushView(() => _buildAssignmentView(this._details.assignments[index])),
+      () => _pushView(() => AssignmentView(this._details.assignments[index], this._details)),
     );
   }
 
@@ -334,7 +292,7 @@ class _CourseDetailsState extends State<CourseDetails> {
       date,
       null,
       icon,
-      () => _pushView(() => _buildAnnouncementView(ann)),
+      () => _pushView(() => AnnouncementView(ann, this._details, this.widget.canvas)),
     );
   }
 
@@ -366,192 +324,6 @@ class _CourseDetailsState extends State<CourseDetails> {
     }));
   }
 
-  Widget _buildAnnouncementView(Announcement ann) {
-    this
-        .widget
-        .canvas
-        .put('api/v1/courses/${this._details.id}/discussion_topics/${ann.id}/read')
-        .then((_) {
-      setState(() {
-        ann.isRead = true;
-      });
-    });
-
-    Widget avatar = Center(child: Icon(Icons.person));
-    try {
-      avatar = Image.network(ann.author.avatarUrl);
-    } catch (e) {}
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: this._details.color,
-        title: Text(
-          ann.title,
-          overflow: TextOverflow.fade,
-        ),
-      ),
-      body: ListView(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(10),
-            child: Row(
-              children: [
-                Container(
-                  clipBehavior: Clip.hardEdge,
-                  child: avatar,
-                  decoration: BoxDecoration(shape: BoxShape.circle),
-                  width: 50,
-                  height: 50,
-                ),
-                SizedBox(width: 5),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(ann.author.name, style: TextStyle(fontSize: 18)),
-                    Text(DateFormat("d MMMM H:mm").format(ann.created)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(5),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(width: 1, color: Colors.grey),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: htmlParse(ann.message),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAssignmentView(Assignment assignment) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(assignment.name),
-        backgroundColor: this._details.color,
-      ),
-      body: ListView(
-        padding: EdgeInsets.only(left: 16, right: 16, top: 20),
-        children: [
-          Text(assignment.name, style: TextStyle(fontSize: 25)),
-          Row(
-            children: [
-              assignment.hasSubmitted
-                  ? Icon(Icons.check_circle, color: Colors.green)
-                  : Icon(Icons.clear, color: Colors.red),
-              SizedBox(width: 5),
-              assignment.hasSubmitted
-                  ? Text("Submitted", style: TextStyle(color: Colors.green))
-                  : Text("Nothing submitted", style: TextStyle(color: Colors.red)),
-              SizedBox(width: 10),
-              Text('${assignment.gradeLimit.truncate()} marks')
-            ],
-          ),
-          Divider(),
-          Row(children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Due at", style: TextStyle(fontSize: 17)),
-                Text("Submission types", style: TextStyle(fontSize: 17)),
-              ],
-            ),
-            SizedBox(width: 25),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(DateFormat("d MMMM H:mm").format(assignment.dueDate),
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
-                Text(assignment.submissionTypes.join(', '),
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
-              ],
-            ),
-          ]),
-          Divider(),
-          htmlParse(assignment.details),
-        ],
-      ),
-    );
-  }
-
-  void _buildAnnouncements() {
-    _pushView(
-      () => PageDetails(
-        title: "Announcements",
-        color: this._details.color,
-        buildTile: (BuildContext context, dynamic announcement) {
-          Announcement ann = announcement;
-          return Card(
-            child: ListTile(
-              leading: Icon(Icons.campaign),
-              trailing: !ann.isRead
-                  ? Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(Icons.brightness_1, size: 12, color: this._details.color),
-                    )
-                  : null,
-              title: Text(ann.title),
-              subtitle: Text(DateFormat("d MMMM H:mm").format(ann.created)),
-              onTap: () {
-                _pushView(() => _buildAnnouncementView(ann));
-              },
-            ),
-          );
-        },
-        getData: () async {
-          List<Announcement> announcements = [];
-          List<dynamic> res = await this.widget.canvas.get(
-              "api/v1/courses/${this._details.id}/discussion_topics?only_announcements=true&per_page=99999");
-          for (Map<String, dynamic> announcement in res) {
-            var ann = Announcement(announcement);
-
-            // Canvas for some reason shows the announcements of the previous year but sets the
-            // dates to null.
-            if (ann.created != null) {
-              announcements.add(ann);
-            }
-          }
-
-          return announcements;
-        },
-        noDataText: "There are currently no announcements for this course",
-      ),
-    );
-  }
-
-  void _buildAssignments() {
-    _pushView(
-      () => PageDetails(
-        title: "Assignments",
-        color: this._details.color,
-        buildTile: (BuildContext context, dynamic assignment) {
-          Assignment assign = assignment;
-          return Card(
-            child: ListTile(
-              leading: Icon(Icons.campaign),
-              trailing: Padding(
-                padding: EdgeInsets.all(8),
-                child: assign.hasSubmitted
-                    ? Icon(Icons.check_circle, color: Colors.green)
-                    : Icon(Icons.clear, color: Colors.red),
-              ),
-              title: Text(assign.name),
-              subtitle: Text(DateFormat("d MMMM H:mm").format(assign.dueDate)),
-              onTap: () => _pushView(() => _buildAssignmentView(assign)),
-            ),
-          );
-        },
-        getData: () => this._details.assignments,
-        noDataText: "There are currently no assignments for this course",
-      ),
-    );
-  }
-
   void _buildMeetings() {
     _pushView(() => Meetings(details: this._details, canvas: this.widget.canvas));
   }
@@ -566,94 +338,6 @@ class _CourseDetailsState extends State<CourseDetails> {
         ),
       );
     });
-  }
-
-  Future<List<dynamic>> _getAllModuleItems() async {
-    List<dynamic> modules = [];
-
-    int i = 1;
-    while (true) {
-      print(i);
-      List<dynamic> mods = await this
-          .widget
-          .canvas
-          .get('api/v1/courses/${this._details.id}/modules?page=$i&include=items');
-
-      modules.addAll(mods);
-
-      if (mods.isEmpty) break;
-      i++;
-    }
-
-    return modules;
-  }
-
-  void _buildModules() {
-    _pushView(
-      () => PageDetails(
-        title: "Modules",
-        color: this._details.color,
-        getData: () async {
-          List<Module> modules = [];
-          print("${this._details.id} ${this.widget.canvas.accessToken}");
-
-          var resp = await _getAllModuleItems();
-
-          for (var mod in resp) {
-            modules.add(Module(mod));
-          }
-
-          return modules;
-        },
-        buildTile: (_, mod) {
-          Module module = mod;
-          return Theme(
-            data: Theme.of(context),
-            child: ExpansionTile(
-              title: Text(module.title),
-              initiallyExpanded: true,
-              children: module.items.map((e) {
-                return Column(
-                  children: [
-                    Divider(),
-                    Row(
-                      children: [
-                        SizedBox(width: e.indent * 30.0),
-                        Expanded(
-                          child: ListTile(
-                            title: Text(e.title),
-                            leading: e.icon,
-                            onTap: () {
-                              Widget widget;
-                              if (e.type == 'File') {
-                                widget = FileView(e.url, this.widget.canvas);
-                              } else {
-                                widget = WebView(
-                                    initialUrl: e.url, javascriptMode: JavascriptMode.unrestricted);
-                              }
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => Scaffold(
-                                      appBar: AppBar(
-                                          title: Text(e.title),
-                                          backgroundColor: this._details.color),
-                                      body: widget),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          );
-        },
-        noDataText: "There are no modules for this course",
-      ),
-    );
   }
 
   Widget _buildView() {
@@ -694,47 +378,21 @@ class _CourseDetailsState extends State<CourseDetails> {
           Container(color: this._details.color.withAlpha(153), width: width, height: height),
         ]),
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 16),
           child: Card(
             elevation: 3.0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNotificationButton(
-                  icon: Icon(Icons.campaign),
-                  amount: this._details.unreadAnnouncementCount,
-                  color: this._details.color,
-                  onPressed: _buildAnnouncements,
-                ),
-                _buildNotificationButton(
-                  icon: Icon(Icons.assignment),
-                  amount: this._details.dueAssignments,
-                  color: this._details.color,
-                  onPressed: _buildAssignments,
-                ),
-                _buildNotificationButton(
-                  icon: Icon(Icons.question_answer),
-                  amount: 0,
-                  color: this._details.color,
-                  onPressed: _launchChat,
-                ),
-                _buildNotificationButton(
-                  icon: Icon(Icons.computer),
-                  amount: this._details.curOngoingMeetings,
-                  color: this._details.color,
-                  onPressed: _buildMeetings,
-                ),
-                _buildNotificationButton(
-                  icon: Icon(Icons.view_list),
-                  amount: 0,
-                  color: this._details.color,
-                  onPressed: _buildModules,
-                ),
-              ],
-            ),
+            child: CourseMenuQuick(this._details, this.widget.canvas),
           ),
         ),
-
+/*
+        Align(
+          child: TextButton(
+            child: Text("More", style: TextStyle(color: this._details.color)),
+            onPressed: () => print("more"),
+          ),
+          alignment: Alignment.center,
+        ),
+*/
         // TODO: these should probably go into a generic _buildCourseSection function
         Padding(
           padding: EdgeInsets.only(left: 8),
