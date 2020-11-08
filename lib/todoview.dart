@@ -44,6 +44,7 @@ class TodoView extends StatelessWidget {
                         return FutureBuilder(
                           future: this._canvas.get('api/v1/users/self/colors'),
                           builder: (context, snapshot) {
+                            Widget child;
                             if (snapshot.hasData) {
                               Course details = Course(id: el['course_id']);
                               for (String key in snapshot.data['custom_colors'].keys) {
@@ -55,17 +56,23 @@ class TodoView extends StatelessWidget {
                                 }
                               }
 
-                              return AssignmentView(assign, details);
-                            }
-
-                            return Scaffold(
-                              appBar: AppBar(title: Text(assign.name)),
-                              body: Center(
-                                child: Container(
-                                  width: 50,
-                                  height: 50,
-                                  child: CircularProgressIndicator(),
+                              child = AssignmentView(assign, details);
+                            } else {
+                              child = Scaffold(
+                                appBar: AppBar(title: Text(assign.name)),
+                                body: Center(
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    child: CircularProgressIndicator(),
+                                  ),
                                 ),
+                              );
+                            }
+                            return AnimatedSwitcher(
+                              child: child,
+                              duration: Duration(
+                                milliseconds: 500,
                               ),
                             );
                           },
