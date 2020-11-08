@@ -8,10 +8,11 @@ import "package:settings_ui/settings_ui.dart";
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
 
-import "infohandler.dart";
-import 'const.dart';
-import 'educationdata.dart';
-import 'main.dart';
+import '../infohandler.dart';
+import '../const.dart';
+import '../educationdata.dart';
+import '../main.dart';
+import 'selection.dart';
 
 class SelectMultiMenu extends StatefulWidget {
   String _title;
@@ -67,7 +68,138 @@ class _SelectMultiMenuState extends State<SelectMultiMenu> {
       tiles.add(Divider());
     }
 
-    return Scaffold(appBar: AppBar(title: Text(this._title)), body: ListView(children: tiles));
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            this._title,
+            style: TextStyle(color: Theme.of(context).accentColor),
+          ),
+          iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: ListView(children: tiles));
+  }
+}
+
+void _popupMobile(context, info) {
+  // Clear cookies so that the user can re-login.
+  CookieManager().clearCookies();
+
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("Login", style: TextStyle(color: Theme.of(context).accentColor)),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+          ),
+          body: WebView(
+            initialUrl: CanvasLoginUrl,
+            javascriptMode: JavascriptMode.unrestricted,
+            onPageFinished: (url) {
+              if (url.startsWith('https://canvas.instructure.com')) {
+                final code = Uri.parse(url).queryParameters['code'];
+                String tokenUrl = CanvasTokenUrlBase + "&code=" + code;
+                print(tokenUrl);
+                http.post(tokenUrl).then((res) {
+                  Navigator.pop(context);
+                  var json = jsonDecode(res.body);
+                  if (json['error'] != null) {
+                    // Display error message
+                    Flushbar(
+                      message: "An error occurred while trying to log in",
+                      duration: Duration(seconds: 2),
+                      margin: EdgeInsets.all(8),
+                      borderRadius: 8,
+                      animationDuration: Duration(milliseconds: 500),
+                    ).show(context);
+                    return;
+                  } else {
+                    info.userLogin(json['access_token']);
+                  }
+                });
+              }
+            },
+          ),
+        );
+      },
+    ),
+  );
+}
+
+void _desktopLogin() {}
+
+/*
+void _popupDesktop(context, info) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) {
+        return Scaffold(
+          appBar: AppBar(title: Text("Login")),
+          body: Center(
+            child: Container(
+              width: 300,
+              height: 500,
+              child: ListView(
+                padding: EdgeInsets.all(8),
+                children: [
+                  Row(
+                    children: [
+                      Image(
+                        image: AssetImage("assets/canvasLogo.png"),
+                        fit: BoxFit.cover,
+                        width: 140,
+                      ),
+                      Image(
+                        image: AssetImage("assets/vub-logo.png"),
+                        fit: BoxFit.cover,
+                        width: 140,
+                      ),
+                    ],
+                  ),
+                  Text("E-mail"),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onChanged: (s) => this._email = s,
+                  ),
+                  Text("Password"),
+                  TextFormField(
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onChanged: (s) => this._password = s,
+                  ),
+                  TextButton(
+                    child: Text("Login"),
+                    onPressed: () => _desktopLogin(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
+*/
+
+void canvasLogin(BuildContext context, InfoHandler info) {
+  if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    // In development
+    //_popupDesktop();
+  } else {
+    _popupMobile(context, info);
   }
 }
 
@@ -157,41 +289,6 @@ class _SettingsMenuState extends State<SettingsMenu> {
         });
   }
 
-  Widget _buildSelectionScreen(
-      String title, List<String> selection, String selected, Function(String) callback) {
-    List<Widget> tiles = List();
-
-    String subtitle = selected;
-
-    if (!Platform.isAndroid) {
-      if (subtitle != null && subtitle.length > 20) {
-        subtitle = subtitle.substring(0, 20) + "...";
-      }
-    }
-
-    for (String select in selection) {
-      print("$select $selected");
-      callCallback() {
-        Navigator.pop(context);
-        callback(select);
-      }
-
-      tiles.add(ListTile(
-        title: Text(select),
-        trailing: Radio(
-          toggleable: false,
-          onChanged: (bool) => callCallback(),
-          value: select,
-          groupValue: selected,
-        ),
-        onTap: callCallback,
-      ));
-      tiles.add(Divider());
-    }
-
-    return Scaffold(appBar: AppBar(title: Text(title)), body: ListView(children: tiles));
-  }
-
   SettingsTile _buildChooseSettings(
       String title, String selected, Icon icon, List<String> selection, Function(String) ptr) {
     return SettingsTile(
@@ -200,8 +297,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
         leading: icon,
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  _buildSelectionScreen(title, selection, selected, ptr)));
+              builder: (BuildContext context) => SelectionView(
+                  title: title, selection: selection, selected: selected, onChosen: ptr)));
         });
   }
 
@@ -219,128 +316,14 @@ class _SettingsMenuState extends State<SettingsMenu> {
         });
   }
 
-  void _popupMobile() {
-    // Clear cookies so that the user can re-login.
-    CookieManager().clearCookies();
-
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return Scaffold(
-            appBar: AppBar(title: Text("Login")),
-            body: WebView(
-              initialUrl: CanvasLoginUrl,
-              javascriptMode: JavascriptMode.unrestricted,
-              onPageFinished: (url) {
-                if (url.startsWith('https://canvas.instructure.com')) {
-                  final code = Uri.parse(url).queryParameters['code'];
-                  String tokenUrl = CanvasTokenUrlBase + "&code=" + code;
-                  print(tokenUrl);
-                  http.post(tokenUrl).then((res) {
-                    Navigator.pop(context);
-                    var json = jsonDecode(res.body);
-                    if (json['error'] != null) {
-                      // Display error message
-                      Flushbar(
-                        message: "An error occurred while trying to log in",
-                        duration: Duration(seconds: 2),
-                        margin: EdgeInsets.all(8),
-                        borderRadius: 8,
-                        animationDuration: Duration(milliseconds: 500),
-                      ).show(context);
-                      return;
-                    } else {
-                      this._info.userLogin(json['access_token']);
-                      setState(() {
-                        this._userName = json['user']['name'];
-                      });
-                    }
-                  });
-                }
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _desktopLogin() {}
-
-  void _popupDesktop() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return Scaffold(
-            appBar: AppBar(title: Text("Login")),
-            body: Center(
-              child: Container(
-                width: 300,
-                height: 500,
-                child: ListView(
-                  padding: EdgeInsets.all(8),
-                  children: [
-                    Row(
-                      children: [
-                        Image(
-                          image: AssetImage("assets/canvasLogo.png"),
-                          fit: BoxFit.cover,
-                          width: 140,
-                        ),
-                        Image(
-                          image: AssetImage("assets/vub-logo.png"),
-                          fit: BoxFit.cover,
-                          width: 140,
-                        ),
-                      ],
-                    ),
-                    Text("E-mail"),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onChanged: (s) => this._email = s,
-                    ),
-                    Text("Password"),
-                    TextFormField(
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onChanged: (s) => this._password = s,
-                    ),
-                    TextButton(
-                      child: Text("Login"),
-                      onPressed: () => _desktopLogin(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _canvasLogin() {
-    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows)
-      _popupDesktop();
-    else
-      _popupMobile();
-  }
-
   Widget _buildAccountSettings() {
     return SettingsTile(
       title: "Login to canvas",
       subtitle: this._userName,
       leading: Icon(Icons.account_box),
       onTap: () {
-        _canvasLogin();
+        canvasLogin(context, this._info);
+        setState(() => this._userName = this._info.user.name);
       },
     );
   }
