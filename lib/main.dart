@@ -326,7 +326,7 @@ class _MainUiState extends State<MainUi> {
       ),
     ];
 
-    if (this._info.isFirstLaunch || this.widget.alreadyShowed) {
+    if (this._info.isFirstLaunch && !this.widget.alreadyShowed) {
       return Scaffold(
         body: FirstLaunchSetup(
             info: this._info, close: () => setState(() => this.widget.alreadyShowed = true)),
