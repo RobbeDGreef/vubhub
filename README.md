@@ -1,7 +1,7 @@
 # VubHub - The unofficial vub app
 
 <p float="left">
-    <img src="/screenshots/screenshots.png"/>
+    <img src="/screenshots/Screenshots.png"/>
 </p>
 
 # Info
