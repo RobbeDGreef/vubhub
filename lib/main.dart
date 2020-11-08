@@ -106,6 +106,7 @@ class VubState extends State<Vub> {
 /// so that we can change state using the State widget
 class MainUi extends StatefulWidget {
   InfoHandler infoHandler;
+  bool alreadyShowed = false;
 
   MainUi(InfoHandler info) {
     this.infoHandler = info;
@@ -270,6 +271,13 @@ class _MainUiState extends State<MainUi> {
         },
       ),
     ];
+
+    if (this._info.isFirstLaunch || this.widget.alreadyShowed) {
+      return Scaffold(
+        body: FirstLaunchSetup(
+            info: this._info, close: () => setState(() => this.widget.alreadyShowed = true)),
+      );
+    }
 
     return Scaffold(
         drawer: _buildDrawer(),
