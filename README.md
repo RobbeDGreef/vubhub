@@ -1,9 +1,7 @@
 # VubHub - The unofficial vub app
 
 <p float="left">
-    <img src="/screenshots/screenshot.png" width="30%" heigh="30%" />
-    <img src="/screenshots/screenshot-2.png" width="30%" height="30%" />
-    <img src="/screenshots/screenshot-3.png" width="30%" height="30%" />
+    <img src="/screenshots/screenshots.png"/>
 </p>
 
 # Info
@@ -15,10 +13,22 @@ help us by just using the app and giving us feedback and new ideas. You can cont
 section in the app or by create an issue in this repository.
 
 # Roadmap
+- [x] Dark mode
 - [ ] Message the user when their class schedule changes
-- [ ] More canvas features
+- [x] Periodic class schedule updates
+- More canvas features
+    - [x] Announcements
+    - [x] Assignments
+    - [x] Chat
+    - [x] Modules
+    - [x] Meetings
+    - [x] Files
+    - [x] External tools
+    - [ ] Discussions
+    - [ ] Syllabus
 - [ ] Multiple interactive campus map's
-- [ ] Further desktop development
+- [ ] Further ~~desktop~~ web development
+- [ ] 'Remind me about this lecture' feature
 - [ ] More 'places' in the places tab, e.i. food places, free rooms etc.
 - [ ] Additional student news section where students can share information
 
