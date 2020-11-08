@@ -113,7 +113,11 @@ class _FirstLaunchSetupState extends State<FirstLaunchSetup> {
                         EducationData[this.info.user.educationType][this.info.user.faculty]
                             .keys
                             .toList(),
-                        (edu) => setState(() => this.info.setUserEducation(edu)),
+                        (edu) {
+                          this.info.setUserEducation(edu).then((v) {
+                            setState(() {});
+                          });
+                        },
                       ),
                       Divider(),
                       _buildMutliSettingTile(
@@ -123,7 +127,7 @@ class _FirstLaunchSetupState extends State<FirstLaunchSetup> {
                         (this.info.groupIds?.keys ?? []).toList(),
                         (valueSet, val) {
                           var selectedGroups = this.info.user.selectedGroups;
-                          if (valueSet && selectedGroups.contains(val)) {
+                          if (valueSet && !selectedGroups.contains(val)) {
                             selectedGroups.add(val);
                           } else if (!valueSet) {
                             selectedGroups.remove(val);
