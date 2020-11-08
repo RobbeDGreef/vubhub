@@ -353,9 +353,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
           title: "User",
           tiles: [
             _buildAccountSettings(),
-            _buildChooseSettings(
-                "Color", this._dropDownColor, Icon(Icons.color_lens), ["blue", "orange"],
-                (String newval) {
+            _buildChooseSettings("Corona rotation color", this._dropDownColor,
+                Icon(Icons.color_lens), ["blue", "orange"], (String newval) {
               setState(() {
                 this._dropDownColor = newval;
                 this._info.setUserRotationColor(newval == 'blue' ? 0 : 1);
@@ -450,7 +449,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
             SettingsTile(
               title: 'Clear logs',
               subtitle: 'Logs are used to track bugs when you send us a bug report.',
-              leading: Icon(Icons.invert_colors),
+              leading: Icon(Icons.file_copy),
               onTap: () => FLog.clearLogs(),
             ),
           ],
