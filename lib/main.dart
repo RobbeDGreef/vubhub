@@ -9,9 +9,11 @@ import 'package:package_info/package_info.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'canvas/canvasapi.dart';
+import 'firstlaunch.dart';
 import "mapview.dart";
 import "infohandler.dart";
-import "settings.dart";
+import 'settings/settings.dart';
 import 'const.dart';
 import "placesview.dart";
 import 'coursesview/coursesview.dart';
@@ -184,13 +186,64 @@ class _MainUiState extends State<MainUi> {
   }
 
   Widget _buildDrawer() {
+    List<Widget> children = [Text("Not logged in to Canvas", style: TextStyle(fontSize: 20))];
+
+    if (this._info.user.name != null) {
+      children = [
+        Text("Logged into canvas as"),
+        SizedBox(height: 10),
+        Row(children: [
+          FutureBuilder(
+              future: CanvasApi(this._info.user.accessToken).get('api/v1/users/self'),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(shape: BoxShape.circle),
+                    clipBehavior: Clip.hardEdge,
+                    child: Image.network(
+                      snapshot.data['avatar_url'],
+                    ),
+                  );
+                }
+
+                return Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.grey[400]),
+                  child:
+                      Center(child: Text(this._info.user.name[0], style: TextStyle(fontSize: 35))),
+                );
+              }),
+          SizedBox(width: 10),
+          Expanded(
+            child: ListView(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              children: [
+                Text(this._info.user.name,
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                Text(this._info.user.email ?? '', style: Theme.of(context).textTheme.subtitle1),
+              ],
+            ),
+          ),
+        ]),
+      ];
+    }
+
     return Drawer(
         child: ListView(
       children: [
         DrawerHeader(
-            decoration: BoxDecoration(
-                image: DecorationImage(image: AssetImage("assets/vub-cs2.png")),
-                color: Colors.white)),
+          child: Center(
+            child: ListView(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              children: children,
+            ),
+          ),
+        ),
         ListTile(title: Text("Settings"), onTap: _openSettings),
         ListTile(title: Text("About"), onTap: _openAbout),
         ListTile(title: Text("Help"), onTap: _openHelp),
