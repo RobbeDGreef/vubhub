@@ -5,11 +5,13 @@ import 'package:flushbar/flushbar.dart';
 import 'package:intl/intl.dart';
 
 import 'calendar_strip/calendar_strip.dart';
+import 'canvas/canvasapi.dart';
 
 import 'infohandler.dart';
 import 'theming.dart';
 import 'const.dart';
 import 'event.dart';
+import 'todoview.dart';
 
 class DayView extends StatefulWidget {
   InfoHandler info;
@@ -40,6 +42,9 @@ class _DayViewState extends State<DayView> {
   int _todaysColor = 0;
   bool _loading = true;
 
+  CanvasApi _canvas;
+  int _todoCount = 0;
+
   @override
   void initState() {
     this.widget.state = this;
@@ -49,6 +54,17 @@ class _DayViewState extends State<DayView> {
   _DayViewState(InfoHandler info) {
     this._info = info;
     _loadNewClassData(DateTime.now(), false);
+
+    if (this._info.user.accessToken != null) {
+      this._canvas = CanvasApi(this._info.user.accessToken);
+      this._canvas.get('api/v1/users/self/todo_item_count').then((data) {
+        for (var key in data.keys) {
+          setState(() {
+            this._todoCount += data[key];
+          });
+        }
+      });
+    }
   }
 
   void fullUpdate() {
@@ -362,6 +378,19 @@ class _DayViewState extends State<DayView> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> todoChildren = [];
+
+    if (this._canvas != null && this._todoCount != 0) {
+      todoChildren = [
+        Divider(),
+        TextButton(
+          child: Text("You have ${this._todoCount} things to do."),
+          onPressed: () =>
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => TodoView(this._canvas))),
+        ),
+      ];
+    }
+
     // The ternary operator on the item count there is used to aways
     // at least return 1, so that we can call the listview builder to build
     // our "You have no classes" and loading symbol widgets.
@@ -369,9 +398,19 @@ class _DayViewState extends State<DayView> {
       children: [
         _buildWeekScroller(),
         Expanded(
-          child: ListView.builder(
-            itemBuilder: _buildEventTile,
-            itemCount: this._events.length == 0 ? 1 : this._events.length,
+          child: ListView(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: _buildEventTile,
+                  itemCount: this._events.length == 0 ? 1 : this._events.length,
+                ),
+              ),
+              ...todoChildren,
+            ],
           ),
         ),
       ],
