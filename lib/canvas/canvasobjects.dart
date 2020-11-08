@@ -106,16 +106,33 @@ class Course {
   String imageUrl = '';
   int id = -1;
   Color color = Colors.grey;
-  List<Assignment> assignments = [];
+  List<Assignment> _assignments = [];
   List<Discussion> discussions = [];
   List<CourseEvent> events = [];
   int unreadAnnouncementCount = 0;
-  int dueAssignments = 0;
+  List<Assignment> dueAssignments = [];
   int unreadDiscussions = 0;
   int curOngoingMeetings = 0;
 
+  List<Assignment> get assignments {
+    return this._assignments;
+  }
+
+  set assignments(List<Assignment> assignments) {
+    this._assignments = assignments;
+  }
+
   Course.empty();
   Course({this.name, this.id});
+
+  void calcDueAssignments() {
+    this.dueAssignments.clear();
+    for (Assignment assign in this.assignments) {
+      if (assign.dueDate.compareTo(DateTime.now()) > 0 && !assign.hasSubmitted) {
+        this.dueAssignments.add(assign);
+      }
+    }
+  }
 
   static final int stringListSize = 4;
 

@@ -62,7 +62,7 @@ class CourseMenu extends StatelessWidget {
         ),
         _buildCourseToolTile(
           icon: Icon(Icons.assignment),
-          amount: this._details.dueAssignments,
+          amount: this._details.dueAssignments.length,
           text: "Assignments",
           onTap: () => _pushView(context, () => Assignments(this._details, this._canvas)),
         ),
@@ -279,7 +279,7 @@ class CourseMenuQuick extends StatelessWidget {
         ),
         _buildNotificationButton(
           icon: Icon(Icons.assignment),
-          amount: this._details.dueAssignments,
+          amount: this._details.dueAssignments.length,
           color: this._details.color,
           onPressed: _buildAssignments,
         ),

@@ -63,8 +63,8 @@ class _CourseDetailsState extends State<CourseDetails> {
   }
 
   int _calcUpcomingAssignments() {
-    if (this._details.assignments.length != 0)
-      return this._details.assignments.length;
+    if (this._details.dueAssignments.isNotEmpty)
+      return this._details.dueAssignments.length;
     else
       return null;
   }
@@ -239,26 +239,26 @@ class _CourseDetailsState extends State<CourseDetails> {
   Widget _buildAssignmentTile(int index) {
     /// Will return "You currently have no assignments for this course." if
     /// the assignments list of the coursedetails is empty.
-    if (this._details.assignments.isEmpty) {
+    if (this._details.dueAssignments.isEmpty) {
       return _buildListTile(
-          null, null, "You currently have no assignments for this course.", null, null);
+          null, null, "You currently have no due assignments for this course.", null, null);
     }
 
-    final icon = this._details.assignments[index].hasSubmitted
+    final icon = this._details.dueAssignments[index].hasSubmitted
         ? Icon(Icons.check_circle, color: Colors.green)
         : Icon(Icons.clear, color: Colors.red);
 
     String dueString = "Could not find the due date.";
-    if (this._details.assignments[index].dueDate != null) {
+    if (this._details.dueAssignments[index].dueDate != null) {
       dueString =
-          "Due at ${DateFormat("d MMMM y").format(this._details.assignments[index].dueDate)}";
+          "Due at ${DateFormat("d MMMM y").format(this._details.dueAssignments[index].dueDate)}";
     }
     return _buildListTile(
-      this._details.assignments[index].name,
+      this._details.dueAssignments[index].name,
       dueString,
       null,
       icon,
-      () => _pushView(() => AssignmentView(this._details.assignments[index], this._details)),
+      () => _pushView(() => AssignmentView(this._details.dueAssignments[index], this._details)),
     );
   }
 
@@ -517,6 +517,7 @@ class _CoursesViewState extends State<CoursesView> {
               obj.assignments.add(assignment);
             }
           }
+          obj.calcDueAssignments();
         });
 
         this._courses.add(obj);
