@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:f_logs/model/flog/flog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -251,6 +252,8 @@ class InfoHandler {
     if (week == -1) {
       week = calcWeekFromDate(DateTime.now());
     }
+
+    FLog.info(text: "Getting data for ${this.user.selectedGroups}");
 
     List<Event> allGroupData = [];
     for (String group in this.user.selectedGroups) {
