@@ -94,6 +94,7 @@ class VubState extends State<Vub> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: buildTheme(this.infoHandler.user.theme ?? true),
       title: "VUB class schedules",
       home: MainUi(this.infoHandler),
