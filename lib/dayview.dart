@@ -298,7 +298,7 @@ class _DayViewState extends State<DayView> {
     // Display a widget so the user knows he has no classes and that it is
     // normal that the list view is empty.
     if (this._events.length == 0) {
-      return ListTile(title: Text("No classes today", textAlign: TextAlign.center));
+      return ListTile(title: Text("You have classes today.", textAlign: TextAlign.center));
     }
 
     var icon = Icons.record_voice_over_outlined;
