@@ -141,6 +141,7 @@ class InfoHandler {
   Crawler _crawler;
   Cache _cache;
   bool _updatingConnection = false;
+  bool alreadyShowed = false;
 
   String getUserId() {
     return EducationData[this.user.educationType][this.user.faculty][this.user.education];
