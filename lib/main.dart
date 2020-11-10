@@ -135,18 +135,14 @@ class _MainUiState extends State<MainUi> {
   }
 
   void _openSettings() async {
-    List<String> groups = [];
-    groups.addAll(this._info.user.selectedGroups);
-
     await Navigator.of(context)
         .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this._info)));
 
-    if (this._selectedNavBarIndex == 0 && this._info.user.selectedGroups == groups) {
-      return;
-    }
     try {
       this.currentPage.update();
-    } catch (e) {}
+    } catch (e) {
+      FLog.warning(text: "This page did not have an update function '${this.currentPage}' $e");
+    }
   }
 
   void _openAbout() {
