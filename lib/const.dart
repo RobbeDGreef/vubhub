@@ -37,7 +37,7 @@ final VubNewsUrl = "https://today.vub.be/nl/nieuws";
 final VubNewsPer = 100;
 
 final CanvasLoginUrl =
-    "https://canvas.vub.be/login/oauth2/auth?client_id=170000000000044&response_type=code&mobile=1&purpose=TestingStuff&redirect_uri=https://canvas.instructure.com/login/oauth2/auth";
+    "https://canvas.vub.be/login/oauth2/auth?client_id=170000000000044&response_type=code&mobile=1&purpose=VubHub&redirect_uri=https://canvas.instructure.com/login/oauth2/auth";
 final CanvasTokenUrlBase =
     "https://canvas.vub.be/login/oauth2/token?&redirect_uri=urn:ietf:wg:oauth:2.0:oob&grant_type=authorization_code&client_id=170000000000044&client_secret=3sxR3NtgXRfT9KdpWGAFQygq6O9RzLN021h2lAzhHUZEeSQ5XGV41Ddi5iutwW6f";
 
