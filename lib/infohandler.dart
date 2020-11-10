@@ -88,7 +88,16 @@ class Cache {
     Map<int, List<Event>> groupData = _eventData[group];
     if (groupData != null) {
       List<Event> data = groupData[week];
-      if (data != null) return data;
+      if (data != null) {
+        // We call toList() on this data object so that
+        // instead of returning a reference, it returns a copy.
+        // This is important because we run filters over this
+        // list object in the getWeekData function in the InfoHandler
+        // and if we run 'remove' on the list. The data would be
+        // removed in the memory cache too and that's not the
+        // desired behavior.
+        return data.toList();
+      }
     }
 
     // If the data is not in the memory cache check the storage
@@ -108,7 +117,11 @@ class Cache {
     } else {
       this._eventData[group][week] = data;
     }
-    return data;
+    // The same as the large block of code above. We return
+    // toList() to return a copy instead of a reference
+    // so that the memory cache would not be altered when we run
+    // filters over the list.
+    return data.toList();
   }
 
   void populateEvents(int week, String group, List<Event> data) {
@@ -229,6 +242,22 @@ class InfoHandler {
     this._cache.setUser(this.user);
   }
 
+  void addFilter(String group, CourseFilter filter) {
+    if (this.user.courseFilters[group] == null) {
+      this.user.courseFilters[group] = [];
+    }
+    this.user.courseFilters[group].add(filter);
+    this._cache.setUser(user);
+  }
+
+  void removeFilter(String group, String name) {
+    this.user.courseFilters[group].removeWhere((element) {
+      return (element.name == name);
+    });
+
+    this._cache.setUser(this.user);
+  }
+
   Future<String> getWeekUpdateTime(int week) async {
     if (week == -1) {
       week = calcWeekFromDate(DateTime.now());
@@ -249,6 +278,24 @@ class InfoHandler {
     return DateFormat("d MMMM yyyy 'at' HH:mm").format(await f.lastModified());
   }
 
+  // TODO: this is bruteforce and a slow algorithm, improve pls
+  bool applyFilters(Event event, String group) {
+    List<String> words = event.name.toLowerCase().split(' ');
+    print("words: $words");
+    for (CourseFilter filter in this.user.courseFilters[group] ?? []) {
+      bool containsAll = true;
+      for (String word in filter.words) {
+        if (!words.contains(word)) {
+          containsAll = false;
+          break;
+        }
+      }
+      if (containsAll) return true;
+    }
+
+    return false;
+  }
+
   Future<List<Event>> getWeekData(int week) async {
     if (week == -1) {
       week = calcWeekFromDate(DateTime.now());
@@ -263,6 +310,7 @@ class InfoHandler {
 
       // If the data was found in the cache or storage add it to all the group data.
       if (data != null) {
+        data.removeWhere((element) => applyFilters(element, group));
         allGroupData.addAll(data);
         continue;
       }
@@ -284,10 +332,10 @@ class InfoHandler {
 
       // Otherwise, populate the cache and add it to all the group data.
       this._cache.populateEvents(week, group, data);
+      data.removeWhere((element) => applyFilters(element, group));
       allGroupData.addAll(data);
     }
 
-    // TODO: match coursedata etc.
     return allGroupData;
   }
 

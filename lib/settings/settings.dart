@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:f_logs/f_logs.dart';
 import 'package:flushbar/flushbar.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import "package:settings_ui/settings_ui.dart";
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -12,6 +13,7 @@ import '../infohandler.dart';
 import '../const.dart';
 import '../educationdata.dart';
 import '../main.dart';
+import '../user.dart';
 import 'selection.dart';
 
 class SelectMultiMenu extends StatefulWidget {
@@ -79,6 +81,306 @@ class _SelectMultiMenuState extends State<SelectMultiMenu> {
           elevation: 0,
         ),
         body: ListView(children: tiles));
+  }
+}
+
+class KeywordSelector extends StatefulWidget {
+  final Function(String, List<String>) onAdded;
+  final Function(String, List<String>) onRemoved;
+
+  KeywordSelector({this.onAdded, this.onRemoved});
+
+  @override
+  _KeywordSelectorState createState() =>
+      _KeywordSelectorState(onAdded: onAdded, onRemoved: onRemoved);
+}
+
+class _KeywordSelectorState extends State<KeywordSelector> {
+  final Function(String, List<String>) onAdded;
+  final Function(String, List<String>) onRemoved;
+
+  final List<String> keywords = [];
+
+  String _oldString = ' ';
+
+  _KeywordSelectorState({this.onAdded, this.onRemoved});
+
+  Widget _buildChip(String el) {
+    return Chip(
+        label: Text(el, style: TextStyle(fontSize: 18)),
+        deleteIcon: Icon(Icons.close),
+        onDeleted: () {
+          setState(() {
+            this.keywords.remove(el);
+          });
+          this.onRemoved(el, this.keywords);
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // This piece of code is quite hacky but I wasn't able to find a way to get keypresses for phones in flutter
+    // We basically just default the text field out with
+    // a string containing a single space ' '. This way we can test
+    // if the backspace is called. We test if a new keyword was added using the space behind the string
+
+    var txt = TextEditingController(text: this._oldString);
+    txt.selection = TextSelection.fromPosition(TextPosition(offset: this._oldString.length));
+    return Wrap(
+      spacing: 5,
+      children: [
+        ...(keywords.map((e) => _buildChip(e)).toList()),
+        TextFormField(
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: EdgeInsets.only(left: 4, right: 4),
+          ),
+          maxLines: null,
+          style: TextStyle(fontSize: 18),
+          controller: txt,
+          enableInteractiveSelection: false,
+          onChanged: (String newstr) {
+            if (newstr.isEmpty) {
+              setState(() {
+                _oldString = ' ';
+                if (this.keywords.isNotEmpty) {
+                  String last = this.keywords.last;
+                  this.keywords.removeLast();
+                  this.onRemoved(last, this.keywords);
+                }
+              });
+            } else if (newstr.endsWith(' ')) {
+              setState(() {
+                _oldString = ' ';
+
+                // We have to make sure that the string does not consist of just spaces
+                bool onlySpaces = true;
+                for (var char in newstr.characters) {
+                  if (char != ' ') {
+                    onlySpaces = false;
+                    break;
+                  }
+                }
+                try {
+                  String keyword = newstr.substring(1, newstr.length - 1);
+                  if (!onlySpaces && !this.keywords.contains(keyword)) {
+                    this.keywords.add(keyword);
+                    this.onAdded(this.keywords.last, this.keywords);
+                  }
+                } catch (RangeError) {}
+              });
+            } else {
+              _oldString = newstr;
+            }
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class GroupFilterMenu extends StatelessWidget {
+  InfoHandler info;
+  String group;
+
+  GroupFilterMenu({this.info, this.group});
+
+  @override
+  Widget build(BuildContext context) {
+    Color color = Theme.of(context).accentColor;
+    return ListView(
+      children: [],
+    );
+  }
+}
+
+class GroupFilterView extends StatefulWidget {
+  final String group;
+  final InfoHandler info;
+
+  GroupFilterView({this.group, this.info});
+
+  @override
+  _GroupFilterViewState createState() => _GroupFilterViewState(group: this.group, info: this.info);
+}
+
+class _GroupFilterViewState extends State<GroupFilterView> {
+  final InfoHandler info;
+  final String group;
+
+  String _name;
+  List<String> _keywords;
+
+  _GroupFilterViewState({this.group, this.info});
+
+  Widget build(BuildContext context) {
+    Color color = Theme.of(context).accentColor;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          group,
+          style: TextStyle(color: color),
+        ),
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: color),
+        elevation: 0,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Card(
+              elevation: 3.0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: (this.info.user.courseFilters[group]?.length ?? 0) == 0
+                      ? 1
+                      : this.info.user.courseFilters[group].length,
+                  itemBuilder: (context, index) {
+                    if (this.info.user.courseFilters[group] == null ||
+                        this.info.user.courseFilters[group].isEmpty)
+                      return Padding(
+                        padding: EdgeInsets.only(top: 20, bottom: 20, left: 8, right: 8),
+                        child: Text(
+                          "No filters",
+                          style: TextStyle(fontSize: 16),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    return ListTile(
+                        title: Text(this.info.user.courseFilters[group][index].name),
+                        trailing: CloseButton(onPressed: () {
+                          setState(() => this.info.removeFilter(
+                              group, this.info.user.courseFilters[group][index].name));
+                        }));
+                  }),
+            ),
+          ),
+          Container(
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).chipTheme.backgroundColor,
+            ),
+            child: IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    this._keywords = [];
+                    this._name = "";
+                    return SimpleDialog(
+                      title: Text(group),
+                      titlePadding: EdgeInsets.all(16),
+                      contentPadding: EdgeInsets.only(left: 8, right: 8, bottom: 8, top: 16),
+                      children: [
+                        Text("Set a name for your filter"),
+                        TextField(style: TextStyle(fontSize: 20), onChanged: (s) => this._name = s),
+                        SizedBox(height: 20),
+                        Text("Words to match (press space to separate)"),
+                        SizedBox(height: 5),
+                        KeywordSelector(
+                          onAdded: (s, kwds) => this._keywords = kwds,
+                          onRemoved: (s, kwds) => this._keywords = kwds,
+                        ),
+                        TextButton(
+                          child: Text("Done"),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            if (this
+                                    .info
+                                    .user
+                                    .courseFilters[group]
+                                    .indexWhere((element) => element.name == this._name) ==
+                                -1) {
+                              setState(() => this.info.addFilter(
+                                    group,
+                                    CourseFilter(name: this._name, words: this._keywords),
+                                  ));
+                            } else {
+                              Flushbar(
+                                message: 'The given filter already exists',
+                                duration: Duration(seconds: 2),
+                                margin: EdgeInsets.all(8),
+                                borderRadius: 8,
+                                animationDuration: Duration(milliseconds: 500),
+                              ).show(context);
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 30, left: 16, right: 16),
+            child: Text(
+                "Add filters with keywords that match the course name. If a course matches all the keywords it won't be displayed on the day view.\n\nFor example:\n'Discrete mathematics' would be 'discrete' and 'mathematics' although one would probably sufise."),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FilterMenu extends StatefulWidget {
+  InfoHandler info;
+
+  FilterMenu({this.info});
+
+  @override
+  _FilterMenuState createState() => _FilterMenuState(info: this.info);
+}
+
+class _FilterMenuState extends State<FilterMenu> {
+  InfoHandler info;
+
+  _FilterMenuState({this.info});
+
+  Widget _buildContent() {
+    return ListView.builder(
+      itemCount: this.info.user.selectedGroups.length,
+      itemBuilder: (context, index) {
+        String group = this.info.user.selectedGroups[index];
+        return Card(
+          child: ListTile(
+            title: Text(this.info.user.selectedGroups[index]),
+            subtitle: Text(this.info.user.courseFilters[group] == null ||
+                    this.info.user.courseFilters[group].isEmpty
+                ? "No filters"
+                : "${this.info.user.courseFilters[group].length} filters"),
+            onTap: () => Navigator.of(context)
+                .push(
+                  MaterialPageRoute(
+                    builder: (context) => GroupFilterView(
+                        info: this.info, group: this.info.user.selectedGroups[index]),
+                  ),
+                )
+                .then((_) => setState(() {})),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color color = Theme.of(context).accentColor;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Course filters per group", style: TextStyle(color: color)),
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: color),
+        elevation: 0,
+      ),
+      body: _buildContent(),
+    );
   }
 }
 
@@ -316,6 +618,17 @@ class _SettingsMenuState extends State<SettingsMenu> {
         });
   }
 
+  SettingsTile _buildFilterSettings() {
+    return SettingsTile(
+        title: "Course filters",
+        leading: Icon(Icons.filter_list),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => FilterMenu(info: this._info),
+          ));
+        });
+  }
+
   Widget _buildAccountSettings() {
     return SettingsTile(
       title: "Login to canvas",
@@ -391,6 +704,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         SettingsSection(
           title: 'Lectures',
           tiles: [
+            _buildFilterSettings(),
             _buildChooseSettings(
               "Lecture update interval",
               this._updateInterval,

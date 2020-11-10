@@ -4,6 +4,28 @@ import 'package:vubhub/const.dart';
 
 import 'educationdata.dart';
 
+class CourseFilter {
+  String name;
+  List<String> words = [];
+
+  CourseFilter({this.name, this.words});
+
+  CourseFilter.fromJson(Map<String, dynamic> data) {
+    this.name = data['name'];
+
+    for (String s in data['words']) {
+      words.add(s);
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': this.name,
+      'words': this.words,
+    };
+  }
+}
+
 class User {
   String name;
   int id;
@@ -15,6 +37,7 @@ class User {
   String faculty;
   String education;
   List<String> selectedGroups = [];
+  Map<String, List<CourseFilter>> courseFilters = {};
   bool theme = true;
   String updateInterval = LectureUpdateIntervals.keys.toList()[1];
 
@@ -40,8 +63,19 @@ class User {
     this.selectedGroups = [];
     this.theme = data['theme'] ?? true;
     this.updateInterval = data['updateInterval'];
+
     for (String s in data['selectedGroups']) {
       this.selectedGroups.add(s);
+    }
+
+    this.courseFilters = {};
+    if (data['courseFilters'] != null) {
+      for (String key in data['courseFilters'].keys) {
+        this.courseFilters[key] = [];
+        for (Map<String, dynamic> filter in data['courseFilters'][key]) {
+          this.courseFilters[key].add(CourseFilter.fromJson(filter));
+        }
+      }
     }
   }
 
@@ -59,6 +93,7 @@ class User {
       'selectedGroups': this.selectedGroups,
       'theme': this.theme,
       'updateInterval': this.updateInterval,
+      'courseFilters': this.courseFilters,
     };
 
     return jsonEncode(json);
