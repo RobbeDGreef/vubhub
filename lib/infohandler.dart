@@ -280,8 +280,8 @@ class InfoHandler {
 
   // TODO: this is bruteforce and a slow algorithm, improve pls
   bool applyFilters(Event event, String group) {
-    List<String> words = event.name.toLowerCase().split(' ');
-    print("words: $words");
+    List<String> words = event.name.toLowerCase().replaceAll(RegExp(r'[,:\(\)]'), '').split(' ');
+
     for (CourseFilter filter in this.user.courseFilters[group] ?? []) {
       bool containsAll = true;
       for (String word in filter.words) {
