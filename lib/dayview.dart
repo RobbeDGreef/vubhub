@@ -106,15 +106,14 @@ class _DayViewState extends State<DayView> {
     print("Updating");
     if (!this.mounted) return;
     setState(() {
-      bool rotset = false;
       this._events.clear();
 
       for (Event lec in classes) {
-        // If the rotationsystem is already specified don't add it again
+        if (this._events.indexWhere((element) => (element == lec)) != -1) continue;
+
+        // Set the day's color
         if (lec.name.toLowerCase().contains("<font color")) {
-          if (rotset) continue;
           this._todaysColor = lec.name.toLowerCase().contains("blue") ? 0 : 1;
-          rotset = true;
         }
 
         int i = 0;

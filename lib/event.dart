@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quiver/core.dart';
 
 class Event {
   String name = "";
@@ -69,5 +70,30 @@ class Event {
     this.courseId = toCopy.courseId;
     this.customColor = toCopy.customColor;
     this.eventType = toCopy.eventType;
+  }
+
+  @override
+  int get hashCode {
+    // TODO: I don't know if this is a great idea.
+    return this.name.hashCode ^
+        this.startDate.hashCode ^
+        this.endDate.hashCode ^
+        this.location.hashCode ^
+        this.host.hashCode ^
+        this.remarks.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (!(other is Event)) return false;
+
+    Event event = other;
+    if (this.name == event.name &&
+        this.startDate == event.startDate &&
+        this.endDate == event.endDate &&
+        this.location == event.location &&
+        this.host == event.host &&
+        this.remarks == event.remarks) return true;
+    return false;
   }
 }
