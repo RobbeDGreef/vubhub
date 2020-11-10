@@ -401,7 +401,7 @@ void _popupMobile(context, info) {
           body: WebView(
             initialUrl: CanvasLoginUrl,
             javascriptMode: JavascriptMode.unrestricted,
-            onPageFinished: (url) {
+            onPageStarted: (url) {
               if (url.startsWith('https://canvas.instructure.com')) {
                 final code = Uri.parse(url).queryParameters['code'];
                 String tokenUrl = CanvasTokenUrlBase + "&code=" + code;
