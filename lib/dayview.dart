@@ -325,10 +325,6 @@ class _DayViewState extends State<DayView> {
               ? "you are allowed to come"
               : "you are not allowed to come");
 
-    Color tileColor = Colors.white;
-    Color textColor = Colors.black;
-    Color textColor2 = Colors.black54;
-
     return Card(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5),
