@@ -111,7 +111,7 @@ class _DayViewState extends State<DayView> {
 
       for (Event lec in classes) {
         // If the rotationsystem is already specified don't add it again
-        if (lec.name.toLowerCase().contains("rotatie")) {
+        if (lec.name.toLowerCase().contains("<font color")) {
           if (rotset) continue;
           this._todaysColor = lec.name.toLowerCase().contains("blue") ? 0 : 1;
           rotset = true;
@@ -207,10 +207,14 @@ class _DayViewState extends State<DayView> {
 
   List<Color> _colorFromRotString(String rotsystem) {
     rotsystem = rotsystem.toLowerCase();
+
+    // TODO: do this with a list or somthing similar
     if (rotsystem.contains("blauw")) {
       return [VubBlue, Colors.white];
     } else if (rotsystem.contains("oranje")) {
       return [VubOrange, Colors.white];
+    } else if (rotsystem.contains("red")) {
+      return [Colors.red, Colors.white];
     }
 
     return [null, null];
@@ -311,9 +315,7 @@ class _DayViewState extends State<DayView> {
     if (this._events[i].name.toLowerCase().contains("<font color=")) {
       return Card(
           child: ListTile(
-              title: Text(
-                  "Rotatiesysteem: rotatie " +
-                      (this._events[i].name.contains("BLAUW") ? "blauw" : "oranje"),
+              title: Text(this._events[i].name.substring(this._events[i].name.indexOf('>') + 1),
                   style: TextStyle(color: colors[1]))),
           color: colors[0]);
     }
