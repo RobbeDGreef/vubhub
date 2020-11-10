@@ -376,6 +376,9 @@ class _DayViewState extends State<DayView> {
   Widget build(BuildContext context) {
     List<Widget> todoChildren = [];
 
+    // Making sure that the state is set in the parent
+    this.widget.state = this;
+
     if (this._canvas != null && this._todoCount != 0) {
       todoChildren = [
         Divider(),
