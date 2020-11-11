@@ -290,16 +290,26 @@ class _GroupFilterViewState extends State<GroupFilterView> {
                           child: Text("Done"),
                           onPressed: () {
                             Navigator.pop(context);
-                            if (this
-                                    .info
-                                    .user
-                                    .courseFilters[group]
-                                    .indexWhere((element) => element.name == this._name) ==
-                                -1) {
+                            if (this._keywords.isNotEmpty &&
+                                (this.info.user.courseFilters[group] == null ||
+                                    this
+                                            .info
+                                            .user
+                                            .courseFilters[group]
+                                            .indexWhere((element) => element.name == this._name) ==
+                                        -1)) {
                               setState(() => this.info.addFilter(
                                     group,
                                     CourseFilter(name: this._name, words: this._keywords),
                                   ));
+                            } else if (this._keywords.isEmpty) {
+                              Flushbar(
+                                message: 'The given keywords were empty',
+                                duration: Duration(seconds: 2),
+                                margin: EdgeInsets.all(8),
+                                borderRadius: 8,
+                                animationDuration: Duration(milliseconds: 500),
+                              ).show(context);
                             } else {
                               Flushbar(
                                 message: 'The given filter already exists',
