@@ -167,7 +167,14 @@ class _MainUiState extends State<MainUi> {
                 ),
               ],
             ),
-            Text("Version: $CurrentAppRelease"),
+            FutureBuilder(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text("Version: ${snapshot.data.version}");
+                  }
+                  return Text("Version ...");
+                }),
           ],
         ),
       );

@@ -31,8 +31,6 @@ final DeveloperEmail = "robbedg@gmail.com";
 final WhoAreWeText =
     "With we I currently actually refer to me (Robbe De Greef), I am a freshman computer science student at the Vrije Universiteit Brussel. I made this app because I found that the VUB was lacking a simple way to access class schedules and afterwards thought it would be fun to add some more functionality. If you like the app, please let me know, I would love to get some feedback and any bug reports or features requests can be requested in the Help tab. I hope you like it :)";
 
-final CurrentAppRelease = "0.0.1 alpha";
-
 final VubNewsUrl = "https://today.vub.be/nl/nieuws";
 final VubNewsPer = 100;
 
