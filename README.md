@@ -65,3 +65,6 @@ It is however perfectly possible to use the app without canvas if you choose to.
 Check if you have selected the correct education type, faculty, education and groups. If there are
 still no lectures, try the reload button on the top right. And if all else fails try to 
 remove the app's stored data and retry.
+
+## License 
+GPL-3.0. See the LICENSE file for more information.
