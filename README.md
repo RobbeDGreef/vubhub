@@ -14,6 +14,9 @@ help us by just using the app and giving us feedback and new ideas. You can cont
 section in the app or by create an issue in this repository.
 
 # How safe is this?
+Safety is very important to us, so we want to be as transparent as possible in what
+data we save.
+
 This app is mainly build of two components. The canvas dependant functionality and the 
 canvas independent functionality.
 
@@ -30,7 +33,7 @@ and saved to make the app a little smoother (name, user id, email, locale. See u
 the complete structure). **This data is still only saved on your device, we do not store
 any data of you elsewhere. Making the canvas features perfectly safe.**
 
-However it is perfectly possible to use the app without canvas if you choose to.
+It is however perfectly possible to use the app without canvas if you choose to.
 
 # Roadmap
 - [x] Dark mode
