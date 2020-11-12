@@ -27,8 +27,8 @@ login identity. This does not mean your password! We never even have your passwo
 fill it into the canvas site directly (viewed through a webview in the app),
 which then returns us a oauth2 token. On top of that, some data from canvas is cached
 and saved to make the app a little smoother (name, user id, email, locale. See user.dart to view
-the complete structure). *This data is still only saved on your device, we do not store
-any data of you elsewhere. Making the canvas features perfectly safe.*
+the complete structure). **This data is still only saved on your device, we do not store
+any data of you elsewhere. Making the canvas features perfectly safe.**
 
 However it is perfectly possible to use the app without canvas if you choose to.
 
