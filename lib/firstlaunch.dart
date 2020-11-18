@@ -83,6 +83,7 @@ class _FirstLaunchSetupState extends State<FirstLaunchSetup> {
             child: Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               elevation: 5.0,
+              clipBehavior: Clip.hardEdge,
               child: ListView(
                 shrinkWrap: true,
                 children: [
