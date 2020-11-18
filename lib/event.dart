@@ -20,7 +20,6 @@ class Event {
   Event.empty();
 
   Event.fromStringList(List<String> data) {
-    print(data);
     this.name = data[0];
     this.details = data[1];
     this.remarks = data[2];

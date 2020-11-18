@@ -133,19 +133,6 @@ class Crawler {
     }
   }
 
-  Future _waitForContent(Duration interval) {
-    var compl = Completer();
-    check() {
-      if (this.content != null)
-        compl.complete();
-      else
-        Timer(interval, check);
-    }
-
-    check();
-    return compl.future;
-  }
-
   Future<String> getWeekData(int week, String group) async {
     // get week data
     if (this.content == null) {
