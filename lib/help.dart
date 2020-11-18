@@ -17,7 +17,7 @@ class HelpView extends StatelessWidget {
     final MailOptions mailOptions = MailOptions(
       subject: this._subject,
       body: this._body,
-      recipients: ['robbedegreef@gmail.com'],
+      recipients: ['robbedg@gmail.com'],
       attachments: ["${(await getExternalStorageDirectory()).path}/FLogs/flog.txt"],
     );
     FlutterMailer.send(mailOptions);
