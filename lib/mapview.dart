@@ -46,6 +46,11 @@ class _MapViewState extends State<MapView> {
 
   @override
   Widget build(BuildContext context) {
+    return InteractiveViewer(
+      scaleEnabled: true,
+      child: Image.asset(("assets/VubMapNew.png")),
+    );
+    /*
     this._photoView = PhotoView(
         imageProvider: AssetImage("assets/VubMapNew.png"),
         tightMode: false,
@@ -66,6 +71,7 @@ class _MapViewState extends State<MapView> {
           //_onTapped(details.globalPosition, Offset(xreal, yreal));
         });
     return this._photoView;
+    */
     /*
     return this._photoView;
     return GestureDetector(
