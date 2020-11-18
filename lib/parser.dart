@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import "package:html/parser.dart" as html;
 import "event.dart";
 import 'canvas/canvasobjects.dart';
+import 'infohandler.dart';
 
 /*
 /// The iCalendar parser, This is actually obsolete but I leave it in
@@ -166,4 +169,56 @@ List<Event> parseStoredEventData(String data) {
   }
 
   return events;
+}
+
+String trimUntil(String s, String pat) {
+  int i = s.indexOf(pat) + 1;
+  return s.substring(i);
+}
+
+Map<int, List<Event>> parseIcalToWeekEvents(String ical) {
+  Event e = Event.empty();
+  Map<int, List<Event>> data = {};
+
+  bool reading = false;
+  for (String line in LineSplitter().convert(ical)) {
+    if (line.startsWith('BEGIN:VEVENT')) {
+      reading = true;
+      continue;
+    }
+
+    if (reading) {
+      if (line.startsWith('SUMMARY')) {
+        e.name = trimUntil(line, ':');
+      } else if (line.startsWith('DTSTART')) {
+        e.startDate = DateTime.parse(trimUntil(line, ':'));
+      } else if (line.startsWith('DTEND')) {
+        e.endDate = DateTime.parse(trimUntil(line, ':'));
+      } else if (line.startsWith('DESCRIPTION')) {
+        var description = trimUntil(line, ':').split('\\n\\n');
+
+        for (String item in description) {
+          if (item.startsWith('Lokaal')) {
+            e.location = trimUntil(item, ':').substring(1);
+          } else if (item.startsWith('Docent')) {
+            e.host = trimUntil(item, ':').substring(1);
+          } else if (item.startsWith('Opmerkingen')) {
+            e.remarks = trimUntil(item, ':').substring(1);
+          }
+        }
+      }
+    }
+    if (line.startsWith('END:VEVENT')) {
+      reading = false;
+      if (e.startDate != null) {
+        if (data[InfoHandler.calcWeekFromDate(e.startDate)] == null)
+          data[InfoHandler.calcWeekFromDate(e.startDate)] = [];
+
+        data[InfoHandler.calcWeekFromDate(e.startDate)].add(e);
+      }
+      e = Event.empty();
+    }
+  }
+
+  return data;
 }

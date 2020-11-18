@@ -153,7 +153,13 @@ class Cache {
     for (Event ev in data) content += ev.toString() + '\n';
     Storage.writeFile(getEventWeekFilepath(week, group), content);
   }
+
+  void populateEventsByIcal(String ical, String group) {
+    this._eventData[group] = {};
+    var data = parseIcalToWeekEvents(ical);
+    this._eventData[group].addAll(data);
   }
+}
 
 class InfoHandler {
   /// Note that the fields in this.user should never be changed. If you want to change
@@ -179,11 +185,16 @@ class InfoHandler {
   Future<void> setUserEducation(String edu) async {
     this.user.education = edu;
     this._cache.setUser(this.user);
+    print("set user id");
 
+    if (kIsWeb) {
+      await webUpdateGroups();
+    } else {
       this._crawler.curId = getUserId();
       await this._crawler.updateConnection();
       this.groupIds = this._crawler.getDepartmentGroups();
     }
+  }
 
   void setUserFaculty(String fac) {
     this.user.faculty = fac;
@@ -239,6 +250,10 @@ class InfoHandler {
 
     if (this.user.education != null) {
       this._updatingConnection = true;
+
+      if (kIsWeb) {
+        webUpdateGroups();
+      } else {
         this._crawler.curId = getUserId();
         this._crawler.updateConnection().then(
           (_) {
@@ -247,6 +262,7 @@ class InfoHandler {
         );
       }
     }
+  }
 
   void userLogin(String token) async {
     this.user.accessToken = token;
@@ -317,7 +333,20 @@ class InfoHandler {
       week = calcWeekFromDate(DateTime.now());
     }
 
-    FLog.info(text: "Getting data for ${this.user.selectedGroups}");
+    if (!kIsWeb) FLog.info(text: "Getting data for ${this.user.selectedGroups}");
+
+    Map urls;
+    if (kIsWeb) {
+      var ids = this.user.selectedGroups.toList();
+      for (int i = 0; i < ids.length; i++) {
+        ids[i] = Uri.encodeComponent(this.groupIds[ids[i]]);
+      }
+
+      print(ids);
+      final requrl =
+          VubhubServerUrl + '/ical?education_id=${getUserId()}&group_ids=${ids.join(',')}';
+      urls = jsonDecode((await http.get(requrl)).body);
+    }
 
     List<Event> allGroupData = [];
     for (String group in this.user.selectedGroups) {
@@ -332,14 +361,14 @@ class InfoHandler {
       }
       // Otherwise try to fetch it with the crawler
 
+      if (!kIsWeb) {
         try {
-        print("try to get");
-        data = parseLectureList(await this._crawler.getWeekData(week, this.groupIds[group]), week);
+          data =
+              parseLectureList(await this._crawler.getWeekData(week, this.groupIds[group]), week);
           print(data);
         } catch (RangeError) {
           print("range error ?");
         }
-
         // If the data is null again, just skip this group and show error
         if (data == null) {
           print("ERROR: crawler could not fetch data for week $week and group $group");
@@ -348,6 +377,12 @@ class InfoHandler {
 
         // Otherwise, populate the cache and add it to all the group data.
         this._cache.populateEvents(week, group, data);
+      } else {
+        var res = await http.get(VubhubServerUrl + '/' + urls[this.groupIds[group]]);
+        this._cache.populateEventsByIcal(res.body, group);
+        data = await this._cache.getWeekEventData(week, group);
+      }
+
       data.removeWhere((element) => applyFilters(element, group));
       allGroupData.addAll(data);
     }
@@ -366,6 +401,15 @@ class InfoHandler {
       }
     }
     return events;
+  }
+
+  Future webUpdateGroups() async {
+    this.groupIds = {};
+    var serverres = await http.get(VubhubServerUrl + '/groups?education_id=${getUserId()}');
+    Map<String, dynamic> res = jsonDecode(serverres.body);
+    for (String key in res.keys) {
+      this.groupIds[key] = res[key];
+    }
   }
 
   static DateTime _calcStartDate() {
