@@ -16,11 +16,13 @@ class SelectionView extends StatelessWidget {
 
     String subtitle = selected;
 
+    /*
     if (!Platform.isAndroid) {
       if (subtitle != null && subtitle.length > 20) {
         subtitle = subtitle.substring(0, 20) + "...";
       }
     }
+    */
 
     for (String select in selection) {
       print("$select $selected");

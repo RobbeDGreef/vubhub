@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -642,7 +643,9 @@ class _CoursesViewState extends State<CoursesView> {
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Text(
-            "Your canvas authentication key does not seem to be valid. Please check Settings > Accounts if you want to view course information.",
+            kIsWeb
+                ? "Under construction, please refer to canvas.vub.be for all your canvas needs."
+                : "Your canvas authentication key does not seem to be valid. Please check Settin;gs > Accounts if you want to view course information.",
             style: TextStyle(fontSize: 18),
             softWrap: true,
             textAlign: TextAlign.center,

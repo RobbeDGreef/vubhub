@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vubhub/backgroundfetch.dart';
 import 'package:vubhub/const.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 import 'canvas/canvasobjects.dart';
 import 'canvas/canvasapi.dart';
@@ -21,6 +23,8 @@ import 'user.dart';
 // The storage handler
 class Storage {
   static Future<File> getFile(String filename) async {
+    if (kIsWeb) return null;
+
     final dir = await getApplicationDocumentsDirectory();
     return File("${dir.path}/$filename");
   }
@@ -28,7 +32,7 @@ class Storage {
   /// Reads contents out of file in string format
   static Future<String> readFile(String filename) async {
     File f = await getFile(filename);
-    if (!(await f.exists())) {
+    if (f == null || !(await f.exists())) {
       return null;
     }
 
@@ -39,7 +43,7 @@ class Storage {
   /// note: this overwrites previous data in this file.
   static Future<void> writeFile(String filename, String content) async {
     File f = await getFile(filename);
-    f.writeAsString(content);
+    if (f != null) f.writeAsString(content);
   }
 }
 
@@ -53,9 +57,14 @@ class Cache {
   /// as a key, the second one the week number.
   Map<String, Map<int, List<Event>>> _eventData = {};
 
-  void setUser(User user) {
+  void setUser(User user) async {
     this.user = user;
-    Storage.writeFile('user', user.toJson());
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('user', user.toJson());
+    } else {
+      Storage.writeFile('user', user.toJson());
+    }
   }
 
   Future<User> getUser() async {
@@ -65,7 +74,14 @@ class Cache {
     }
 
     // If this.user is unset, check the storage
-    String content = await Storage.readFile('user');
+    String content;
+    if (kIsWeb) {
+      // If we are in web mode we need to check the SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      content = await prefs.getString('user');
+    } else {
+      content = await Storage.readFile('user');
+    }
 
     // If storage does not contain the user file either, return null
     if (content == null) {
@@ -137,7 +153,7 @@ class Cache {
     for (Event ev in data) content += ev.toString() + '\n';
     Storage.writeFile(getEventWeekFilepath(week, group), content);
   }
-}
+  }
 
 class InfoHandler {
   /// Note that the fields in this.user should never be changed. If you want to change
@@ -164,10 +180,10 @@ class InfoHandler {
     this.user.education = edu;
     this._cache.setUser(this.user);
 
-    this._crawler.curId = getUserId();
-    await this._crawler.updateConnection();
-    this.groupIds = this._crawler.getDepartmentGroups();
-  }
+      this._crawler.curId = getUserId();
+      await this._crawler.updateConnection();
+      this.groupIds = this._crawler.getDepartmentGroups();
+    }
 
   void setUserFaculty(String fac) {
     this.user.faculty = fac;
@@ -223,14 +239,14 @@ class InfoHandler {
 
     if (this.user.education != null) {
       this._updatingConnection = true;
-      this._crawler.curId = getUserId();
-      this._crawler.updateConnection().then(
-        (_) {
-          this.groupIds = this._crawler.getDepartmentGroups();
-        },
-      );
+        this._crawler.curId = getUserId();
+        this._crawler.updateConnection().then(
+          (_) {
+            this.groupIds = this._crawler.getDepartmentGroups();
+          },
+        );
+      }
     }
-  }
 
   void userLogin(String token) async {
     this.user.accessToken = token;
@@ -316,22 +332,22 @@ class InfoHandler {
       }
       // Otherwise try to fetch it with the crawler
 
-      try {
+        try {
         print("try to get");
         data = parseLectureList(await this._crawler.getWeekData(week, this.groupIds[group]), week);
-        print(data);
-      } catch (RangeError) {
-        print("range error ?");
-      }
+          print(data);
+        } catch (RangeError) {
+          print("range error ?");
+        }
 
-      // If the data is null again, just skip this group and show error
-      if (data == null) {
-        print("ERROR: crawler could not fetch data for week $week and group $group");
-        continue;
-      }
+        // If the data is null again, just skip this group and show error
+        if (data == null) {
+          print("ERROR: crawler could not fetch data for week $week and group $group");
+          continue;
+        }
 
-      // Otherwise, populate the cache and add it to all the group data.
-      this._cache.populateEvents(week, group, data);
+        // Otherwise, populate the cache and add it to all the group data.
+        this._cache.populateEvents(week, group, data);
       data.removeWhere((element) => applyFilters(element, group));
       allGroupData.addAll(data);
     }

@@ -1,4 +1,5 @@
 import 'package:f_logs/model/flog/flog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'crawler.dart';
@@ -26,6 +27,8 @@ Future backgroundFetch(String curId, int week, List<dynamic> groups, String path
 }
 
 void registerPeriodic(Duration d, InfoHandler info, [waitForNextUpdate = true]) {
+  if (kIsWeb) return;
+
   try {
     Workmanager.cancelByUniqueName("UpdateLectureView");
   } catch (e) {

@@ -8,6 +8,7 @@ import 'package:vubhub/dayview.dart';
 import 'package:package_info/package_info.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:flutter/foundation.dart';
 
 import 'canvas/canvasapi.dart';
 import 'firstlaunch.dart';
@@ -43,21 +44,27 @@ void callbackDispenser() {
 }
 
 void main() async {
-  final PushNotificationManager man = PushNotificationManager();
-  WidgetsFlutterBinding.ensureInitialized();
-  await man.init();
+  if (!kIsWeb) {
+    final PushNotificationManager man = PushNotificationManager();
+    WidgetsFlutterBinding.ensureInitialized();
+    await man.init();
 
-  FlutterError.onError = (details) {
-    FlutterError.dumpErrorToConsole(details);
-    FLog.error(stacktrace: details.stack, text: "Flutter error occurred (${details.exception})");
-  };
+    FlutterError.onError = (details) {
+      FlutterError.dumpErrorToConsole(details);
+      FLog.error(stacktrace: details.stack, text: "Flutter error occurred (${details.exception})");
+    };
+  } else {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
 
   InfoHandler infoHandler = InfoHandler();
   await infoHandler.init();
 
-  Workmanager.initialize(callbackDispenser, isInDebugMode: kDebugMode);
-  if (infoHandler.isFirstLaunch) {
-    registerPeriodic(LectureUpdateIntervals[infoHandler.user.updateInterval], infoHandler);
+  if (!kIsWeb) {
+    Workmanager.initialize(callbackDispenser, isInDebugMode: kDebugMode);
+    if (infoHandler.isFirstLaunch) {
+      registerPeriodic(LectureUpdateIntervals[infoHandler.user.updateInterval], infoHandler);
+    }
   }
 
   runZoned<Future<void>>(() async {
@@ -65,7 +72,7 @@ void main() async {
   }, onError: (error, stacktrace) {
     print(error);
     print(stacktrace);
-    FLog.error(stacktrace: stacktrace, text: "Dart error occurred (${error})");
+    if (!kIsWeb) FLog.error(stacktrace: stacktrace, text: "Dart error occurred (${error})");
   });
 }
 
@@ -187,7 +194,7 @@ class _MainUiState extends State<MainUi> {
     }));
   }
 
-  Widget _buildDrawer() {
+  DrawerHeader _buildLoginWidget() {
     List<Widget> children = [Text("Not logged in to Canvas", style: TextStyle(fontSize: 20))];
 
     if (this._info.user.name != null) {
@@ -198,7 +205,7 @@ class _MainUiState extends State<MainUi> {
           FutureBuilder(
               future: CanvasApi(this._info.user.accessToken).get('api/v1/users/self'),
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
+                if (snapshot.hasData && snapshot.data['errors'] == null) {
                   return Container(
                     width: 50,
                     height: 50,
@@ -234,23 +241,78 @@ class _MainUiState extends State<MainUi> {
       ];
     }
 
-    return Drawer(
+    return DrawerHeader(
+      child: Center(
         child: ListView(
-      children: [
-        DrawerHeader(
-          child: Center(
-            child: ListView(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              children: children,
-            ),
-          ),
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          children: children,
         ),
-        ListTile(title: Text("Settings"), onTap: _openSettings),
-        ListTile(title: Text("About"), onTap: _openAbout),
-        ListTile(title: Text("Help"), onTap: _openHelp),
-      ],
-    ));
+      ),
+    );
+  }
+
+  Widget _buildDrawerPortrait() {
+    return Drawer(
+      child: ListView(
+        children: [
+          _buildLoginWidget(),
+          ListTile(leading: Icon(Icons.settings), title: Text("Settings"), onTap: _openSettings),
+          ListTile(leading: Icon(Icons.info), title: Text("About"), onTap: _openAbout),
+          ListTile(leading: Icon(Icons.help), title: Text("Help"), onTap: _openHelp),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerLandscape() {
+    return Drawer(
+      elevation: 0,
+      child: ListView(
+        children: [
+          _buildLoginWidget(),
+          ListTile(
+            leading: Icon(Icons.view_agenda),
+            title: Text("Classses"),
+            onTap: () => setState(() => this._selectedNavBarIndex = 0),
+            selected: this._selectedNavBarIndex == 0,
+            selectedTileColor: Theme.of(context).hoverColor,
+          ),
+          ListTile(
+            leading: Icon(Icons.dashboard),
+            title: Text("Courses"),
+            onTap: () => setState(() => this._selectedNavBarIndex = 1),
+            selected: this._selectedNavBarIndex == 1,
+            selectedTileColor: Theme.of(context).hoverColor,
+          ),
+          ListTile(
+            leading: Icon(Icons.map),
+            title: Text("Map"),
+            onTap: () => setState(() => this._selectedNavBarIndex = 2),
+            selected: this._selectedNavBarIndex == 2,
+            selectedTileColor: Theme.of(context).hoverColor,
+          ),
+          ListTile(
+            leading: Icon(Icons.location_on),
+            title: Text("Places"),
+            onTap: () => setState(() => this._selectedNavBarIndex = 3),
+            selected: this._selectedNavBarIndex == 3,
+            selectedTileColor: Theme.of(context).hoverColor,
+          ),
+          ListTile(
+            leading: Icon(Icons.public),
+            title: Text("News"),
+            onTap: () => setState(() => this._selectedNavBarIndex = 4),
+            selected: this._selectedNavBarIndex == 4,
+            selectedTileColor: Theme.of(context).hoverColor,
+          ),
+          Divider(color: Colors.red),
+          ListTile(leading: Icon(Icons.settings), title: Text("Settings"), onTap: _openSettings),
+          ListTile(leading: Icon(Icons.info), title: Text("About"), onTap: _openAbout),
+          ListTile(leading: Icon(Icons.help), title: Text("Help"), onTap: _openHelp),
+        ],
+      ),
+    );
   }
 
   Widget _buildTabScreen(int index) {
@@ -335,12 +397,30 @@ class _MainUiState extends State<MainUi> {
       );
     }
 
-    return Scaffold(
-        drawer: _buildDrawer(),
-        bottomNavigationBar: bottom,
-        appBar: AppBar(
-            title: Text(tabText[this._selectedNavBarIndex]),
-            actions: (this._selectedNavBarIndex == 0) ? refreshAction : []),
-        body: _buildTabScreen(this._selectedNavBarIndex));
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        if (orientation == Orientation.portrait) {
+          return Scaffold(
+              drawer: _buildDrawerPortrait(),
+              bottomNavigationBar: bottom,
+              appBar: AppBar(
+                  title: Text(tabText[this._selectedNavBarIndex]),
+                  actions: (this._selectedNavBarIndex == 0) ? refreshAction : []),
+              body: _buildTabScreen(this._selectedNavBarIndex));
+        } else {
+          return Scaffold(
+            //appBar: AppBar(title: Text(tabText[this._selectedNavBarIndex])),
+            body: Row(
+              children: [
+                _buildDrawerLandscape(),
+                Expanded(
+                  child: _buildTabScreen(this._selectedNavBarIndex),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+    );
   }
 }

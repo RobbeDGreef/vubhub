@@ -1,10 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:html';
+import 'dart:ui' as ui;
 
 import 'package:f_logs/f_logs.dart';
 import 'package:flushbar/flushbar.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import "package:settings_ui/settings_ui.dart";
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -442,6 +444,40 @@ void _popupMobile(context, info) {
   );
 }
 
+void _popupWeb(BuildContext context, InfoHandler info) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("Login", style: TextStyle(color: Theme.of(context).accentColor)),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+          ),
+          body:
+              Center(child: Text("Under contsruction, for now please just refer to canvas.vub.be")),
+        );
+        /*Nam
+        final IFrameElement iframe = IFrameElement();
+        iframe.src = VubhubServerUrl + '/' + CanvasLoginUrl;
+        iframe.style.border = 'none';
+
+        // ignore: undefined_prefixed_name
+        ui.platformViewRegistry.registerViewFactory(
+          'iframeElement',
+          (viewId) => iframe,
+        );
+
+        return HtmlElementView(
+          viewType: 'iframeElement',
+        );
+        */
+      },
+    ),
+  );
+}
+
 void _desktopLogin() {}
 
 /*
@@ -507,9 +543,8 @@ void _popupDesktop(context, info) {
 */
 
 void canvasLogin(BuildContext context, InfoHandler info) {
-  if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-    // In development
-    //_popupDesktop();
+  if (kIsWeb) {
+    _popupWeb(context, info);
   } else {
     _popupMobile(context, info);
   }
@@ -715,23 +750,25 @@ class _SettingsMenuState extends State<SettingsMenu> {
           title: 'Lectures',
           tiles: [
             _buildFilterSettings(),
-            _buildChooseSettings(
-              "Lecture update interval",
-              this._updateInterval,
-              Icon(Icons.update),
-              LectureUpdateIntervals.keys.toList(),
-              (val) {
-                setState(() {
-                  this._updateInterval = val;
-                  this._info.setUpdateInterval(val);
-                });
-              },
-            ),
-            SettingsTile(
-              title: "This weeks lectures latest update",
-              leading: Icon(Icons.access_time),
-              subtitle: this.latestTime,
-            )
+            if (!kIsWeb)
+              _buildChooseSettings(
+                "Lecture update interval",
+                this._updateInterval,
+                Icon(Icons.update),
+                LectureUpdateIntervals.keys.toList(),
+                (val) {
+                  setState(() {
+                    this._updateInterval = val;
+                    this._info.setUpdateInterval(val);
+                  });
+                },
+              ),
+            if (!kIsWeb)
+              SettingsTile(
+                title: "This weeks lectures latest update",
+                leading: Icon(Icons.access_time),
+                subtitle: this.latestTime,
+              )
           ],
         ),
         SettingsSection(

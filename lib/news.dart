@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
@@ -46,7 +47,8 @@ class _ArticleViewState extends State<ArticleView> {
   Article _article;
 
   void _loadArticle() async {
-    var res = await http.get(this._article.articleUrl);
+    var res =
+        await http.get(kIsWeb ? CorsProxyUrl + this._article.articleUrl : this._article.articleUrl);
     var doc = html.parse(res.body);
     var attr = doc.getElementsByTagName("vub-article")[0].attributes;
     setState(() {
@@ -170,7 +172,7 @@ class _NewsViewState extends State<NewsView> {
     }
 
     print(url);
-    var res = await http.get(url);
+    var res = await http.get(kIsWeb ? CorsProxyUrl + url : url);
 
     if (res.statusCode != 200) {
       print("News res code: ${res.statusCode}");

@@ -39,6 +39,9 @@ final CanvasLoginUrl =
 final CanvasTokenUrlBase =
     "https://canvas.vub.be/login/oauth2/token?&redirect_uri=urn:ietf:wg:oauth:2.0:oob&grant_type=authorization_code&client_id=170000000000044&client_secret=3sxR3NtgXRfT9KdpWGAFQygq6O9RzLN021h2lAzhHUZEeSQ5XGV41Ddi5iutwW6f";
 
+final VubhubServerUrl = 'http://vubhubserver.ddns.net';
+final CorsProxyUrl = VubhubServerUrl + '/corsproxy/';
+
 final FileTypeNames = {
   // Programing
   'rkt': 'Dr racket (scheme) source code',

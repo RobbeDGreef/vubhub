@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:f_logs/model/flog/flog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../const.dart';
@@ -15,7 +16,6 @@ class CanvasApi {
   Future<dynamic> get(String url, {Map<String, String> headers}) async {
     var res = (await request(url, headers: headers));
     if (res == null) return null;
-
     return jsonDecode(await res.stream.bytesToString());
   }
 
@@ -52,7 +52,10 @@ class CanvasApi {
     try {
       return await req.send();
     } catch (e) {
-      FLog.error(text: 'CanvasApi request exception $e');
+      if (kIsWeb)
+        print('CanvasAPI request exception $e');
+      else
+        FLog.error(text: 'CanvasApi request exception $e');
       return null;
     }
   }
