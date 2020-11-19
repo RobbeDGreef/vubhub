@@ -30,6 +30,31 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-analytics.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  var firebaseConfig = {
+    apiKey: "AIzaSyDjVaZCKd4td3BO8SZtjassU8UTvbr5y7M",
+    authDomain: "vubhub-41cc1.firebaseapp.com",
+    databaseURL: "https://vubhub-41cc1.firebaseio.com",
+    projectId: "vubhub-41cc1",
+    storageBucket: "vubhub-41cc1.appspot.com",
+    messagingSenderId: "82687590390",
+    appId: "1:82687590390:web:59309438bec074824251d7",
+    measurementId: "G-3TJPFP2BWY"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+</script>
+
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
