@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
 import 'dart:ui' as ui;
 
 import 'package:f_logs/f_logs.dart';
@@ -787,17 +786,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 switchValue: !this._info.user.theme)
           ],
         ),
-        SettingsSection(
-          title: "Logging",
-          tiles: [
-            SettingsTile(
-              title: 'Clear logs',
-              subtitle: 'Logs are used to track bugs when you send us a bug report.',
-              leading: Icon(Icons.file_copy),
-              onTap: () => FLog.clearLogs(),
-            ),
-          ],
-        ),
+        if (!kIsWeb)
+          SettingsSection(
+            title: "Logging",
+            tiles: [
+              SettingsTile(
+                title: 'Clear logs',
+                subtitle: 'Logs are used to track bugs when you send us a bug report.',
+                leading: Icon(Icons.file_copy),
+                onTap: () => FLog.clearLogs(),
+              ),
+            ],
+          ),
       ],
     );
   }
