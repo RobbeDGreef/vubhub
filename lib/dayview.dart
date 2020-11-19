@@ -5,7 +5,6 @@ import 'package:vubhub/infohandler.dart';
 import 'package:flutter/services.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:intl/intl.dart';
-import 'package:infinite_view_pager/infinite_view_pager.dart';
 
 import 'calendar_strip/calendar_strip.dart';
 import 'canvas/canvasapi.dart';
