@@ -252,7 +252,7 @@ class InfoHandler {
       this._updatingConnection = true;
 
       if (kIsWeb) {
-        webUpdateGroups();
+        await webUpdateGroups();
       } else {
         this._crawler.curId = getUserId();
         this._crawler.updateConnection().then(
@@ -337,15 +337,17 @@ class InfoHandler {
 
     Map urls;
     if (kIsWeb) {
+      print("urls");
       var ids = this.user.selectedGroups.toList();
       for (int i = 0; i < ids.length; i++) {
         ids[i] = Uri.encodeComponent(this.groupIds[ids[i]]);
       }
+      print("ids2 $ids");
 
-      print(ids);
       final requrl =
           VubhubServerUrl + '/ical?education_id=${getUserId()}&group_ids=${ids.join(',')}';
       urls = jsonDecode((await http.get(requrl)).body);
+      print(urls);
     }
 
     List<Event> allGroupData = [];
@@ -378,7 +380,7 @@ class InfoHandler {
         // Otherwise, populate the cache and add it to all the group data.
         this._cache.populateEvents(week, group, data);
       } else {
-        var res = await http.get(VubhubServerUrl + '/' + urls[this.groupIds[group]]);
+        var res = await http.get(VubhubServerUrl + '/corsproxy/' + urls[this.groupIds[group]]);
         this._cache.populateEventsByIcal(res.body, group);
         data = await this._cache.getWeekEventData(week, group);
       }
