@@ -8,6 +8,7 @@
 There is no IOS build yet, however we did build a web application
 that of course runs on any device. Now you can easily check your class schedules on your computer
 too. Visit the [vubhub.me](http://vubhub.me) site to see for yourself.
+(Please note that the vubhub.me site is still under heavy development)
 
 # Info
 This app hopes to make any VUB students life easier by concentrating all the information and VUB features into a single app.
