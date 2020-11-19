@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vubhub/infohandler.dart';
 import 'package:flutter/services.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:intl/intl.dart';
+import 'package:infinite_view_pager/infinite_view_pager.dart';
 
 import 'calendar_strip/calendar_strip.dart';
 import 'canvas/canvasapi.dart';
@@ -36,10 +39,11 @@ class DayView extends StatefulWidget {
 
 class _DayViewState extends State<DayView> {
   InfoHandler _info;
-  List<Event> _events = [];
   DateTime _selectedDay = DateTime.now();
   DateTime _selectedWeek = DateTime.now();
   int _todaysColor = 0;
+
+  int lastDayIndex = 1000;
   bool _loading = true;
 
   CanvasApi _canvas;
@@ -53,7 +57,6 @@ class _DayViewState extends State<DayView> {
 
   _DayViewState(InfoHandler info) {
     this._info = info;
-    _loadNewClassData(DateTime.now(), false);
 
     if (this._info.user.accessToken != null) {
       this._canvas = CanvasApi(this._info.user.accessToken);
@@ -68,67 +71,54 @@ class _DayViewState extends State<DayView> {
   }
 
   void fullUpdate() {
-    setState(
-      () {
-        this._events.clear();
-        this._loading = true;
-      },
-    );
+    // todo
+    setState(() {});
     this._info.forceCrawlerFetch(InfoHandler.calcWeekFromDate(this._selectedDay)).then((_) {
-      _loadNewClassData(this._selectedDay, false);
+      //_loadNewClassData(this._selectedDay, false);
     });
   }
 
   void update() {
-    this._loadNewClassData(this._selectedDay);
+    // todo: is this correct
+    setState(() {});
   }
 
-  /// This function will update the this._classes list
-  /// it takes an extra optional flag for handling the loading
-  void _loadNewClassData(DateTime date, [bool shouldSetState = true]) {
-    if (shouldSetState) {
-      setState(() {
-        this._loading = true;
-        this._events.clear();
-      });
-    }
-
-    this._info.getTodaysEvents(date).then((list) {
-      this._loading = false;
-      _update(list);
-    });
+  Future<List<Event>> _loadNewClassData(DateTime date) async {
+    this._loading = true;
+    List<Event> list = await this._info.getTodaysEvents(date);
+    print("list found $list");
+    return _parseEvents(list);
   }
 
   /// This function will update the this._classes list from
   /// a parsed Lecture object data list. It handles sorting
   /// and other hacks.
-  void _update(List<Event> classes) {
+  List<Event> _parseEvents(List<Event> classes) {
     print("Updating");
-    if (!this.mounted) return;
-    setState(() {
-      this._events.clear();
 
-      for (Event lec in classes) {
-        if (this._events.indexWhere((element) => (element == lec)) != -1) continue;
+    List<Event> parsed = [];
 
-        // Set the day's color
-        if (lec.name.toLowerCase().contains("<font color")) {
-          this._todaysColor = lec.name.toLowerCase().contains("blue") ? 0 : 1;
-        }
+    for (Event lec in classes) {
+      if (parsed.indexWhere((element) => (element == lec)) != -1) continue;
 
-        int i = 0;
-        for (Event prevLec in this._events) {
-          if (lec.startDate.compareTo(prevLec.startDate) < 0) {
-            this._events.insert(i, lec);
-            break;
-          }
-          ++i;
-        }
-        if (this._events.length == i) {
-          this._events.add(lec);
-        }
+      // Set the day's color
+      if (lec.name.toLowerCase().contains("<font color")) {
+        this._todaysColor = lec.name.toLowerCase().contains("blue") ? 0 : 1;
       }
-    });
+
+      int i = 0;
+      for (Event prevLec in parsed) {
+        if (lec.startDate.compareTo(prevLec.startDate) < 0) {
+          parsed.insert(i, lec);
+          break;
+        }
+        ++i;
+      }
+      if (parsed.length == i) {
+        parsed.add(lec);
+      }
+    }
+    return parsed;
   }
 
   DateTime _calcWeekStart(DateTime date) {
@@ -190,8 +180,10 @@ class _DayViewState extends State<DayView> {
           this._selectedWeek = date;
         }),
         onDateSelected: ((date) {
-          this._selectedDay = date;
-          _loadNewClassData(date);
+          setState(() {
+            this._selectedDay = date;
+            this._loading = true;
+          });
         }));
   }
 
@@ -239,9 +231,7 @@ class _DayViewState extends State<DayView> {
         ));
   }
 
-  Widget _buildEventDetails(int index) {
-    Event lec = this._events[index];
-
+  Widget _buildEventDetails(Event lec) {
     // Nothing special going on here, just instead of writing the whole
     // widget tree every time for theses objects i just added them to a list
     // to cleanly generate them at the bottom of the function.
@@ -280,47 +270,42 @@ class _DayViewState extends State<DayView> {
     );
   }
 
-  void _openEventDetails(int index) {
+  void _openEventDetails(Event lec) {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (BuildContext context) => _buildEventDetails(index)));
+        .push(MaterialPageRoute(builder: (BuildContext context) => _buildEventDetails(lec)));
   }
 
-  Widget _buildEventTile(BuildContext context, int i) {
-    // Display a circular throbber to show the user the system is loading
-    if (this._loading) {
-      return Center(
-        child: Container(
-          margin: EdgeInsets.all(8),
-          child: CircularProgressIndicator(),
-          width: 50,
-          height: 50,
-        ),
-      );
-    }
-
+  Widget _buildEventTile(List<Event> eventlist, int i) {
     // Display a widget so the user knows he has no classes and that it is
     // normal that the list view is empty.
-    if (this._events.length == 0) {
+    if (eventlist.length == 0) {
       return ListTile(title: Text("You have no classes today.", textAlign: TextAlign.center));
     }
 
     var icon = Icons.record_voice_over_outlined;
-    if (this._events[i].name.toLowerCase().contains("wpo")) {
+    if (eventlist[i].name.toLowerCase().contains("wpo")) {
       icon = Icons.subject;
     }
 
-    var colors = _colorFromRotString(this._events[i].name);
+    var colors = _colorFromRotString(eventlist[i].name);
 
-    if (this._events[i].name.toLowerCase().contains("<font color=")) {
+    if (eventlist[i].name.toLowerCase().contains(RegExp("<font color=|&lt;font color="))) {
       return Card(
           child: ListTile(
-              title: Text(this._events[i].name.substring(this._events[i].name.indexOf('>') + 1),
-                  style: TextStyle(color: colors[1]))),
+            title: Text(
+              kIsWeb
+                  ? eventlist[i].name.substring(eventlist[i].name.indexOf(RegExp('&gt;')) + 4)
+                  : eventlist[i].name.substring(eventlist[i].name.indexOf(RegExp('>')) + 1),
+              style: TextStyle(
+                color: colors[1],
+              ),
+            ),
+          ),
           color: colors[0]);
     }
 
-    String policyString = this._events[i].remarks;
-    if (this._events[i].remarks.toLowerCase().contains("rotatiesysteem"))
+    String policyString = eventlist[i].remarks;
+    if (eventlist[i].remarks.toLowerCase().contains("rotatiesysteem"))
       policyString = "Rotatiesysteem: " +
           ((this._info.user.rotationColor == this._todaysColor)
               ? "you are allowed to come"
@@ -332,9 +317,9 @@ class _DayViewState extends State<DayView> {
         child: ListTile(
           //tileColor: tileColor,
           leading: Icon(icon),
-          title: Text(this._events[i].name, style: TextStyle(/*color: textColor*/)),
+          title: Text(eventlist[i].name, style: TextStyle(/*color: textColor*/)),
           isThreeLine: false,
-          onTap: () => _openEventDetails(i),
+          onTap: () => _openEventDetails(eventlist[i]),
           subtitle: Padding(
             padding: EdgeInsets.all(0),
             child: Column(
@@ -343,17 +328,17 @@ class _DayViewState extends State<DayView> {
                     padding: EdgeInsets.only(bottom: 8),
                     child: Row(children: [
                       Expanded(
-                          child: Text(this._events[i].location,
+                          child: Text(eventlist[i].location,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(/*color: textColor2*/))),
                       Text(
-                        this._events[i].startDate.hour.toString() +
+                        eventlist[i].startDate.hour.toString() +
                             ":" +
-                            _prettyMinutes(this._events[i].endDate.minute) +
+                            _prettyMinutes(eventlist[i].endDate.minute) +
                             " - " +
-                            this._events[i].endDate.hour.toString() +
+                            eventlist[i].endDate.hour.toString() +
                             ":" +
-                            _prettyMinutes(this._events[i].endDate.minute),
+                            _prettyMinutes(eventlist[i].endDate.minute),
                         style: TextStyle(/*color: textColor2*/),
                       )
                     ], mainAxisAlignment: MainAxisAlignment.spaceBetween)),
@@ -373,13 +358,8 @@ class _DayViewState extends State<DayView> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildEventView(Future<List<Event>> eventlist) {
     List<Widget> todoChildren = [];
-
-    // Making sure that the state is set in the parent
-    this.widget.state = this;
-
     if (this._canvas != null && this._todoCount != 0) {
       todoChildren = [
         Divider(),
@@ -394,25 +374,71 @@ class _DayViewState extends State<DayView> {
     // The ternary operator on the item count there is used to aways
     // at least return 1, so that we can call the listview builder to build
     // our "You have no classes" and loading symbol widgets.
-    return Column(
-      children: [
-        _buildWeekScroller(),
-        Expanded(
-          child: ListView(
+    print("builddd");
+    return FutureBuilder(
+      future: eventlist,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && !this._loading) {
+          this._loading = false;
+          return ListView(
             children: [
               Padding(
                 padding: EdgeInsets.only(bottom: 0),
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: _buildEventTile,
-                  itemCount: this._events.length == 0 ? 1 : this._events.length,
+                  itemBuilder: (context, index) => _buildEventTile(snapshot.data, index),
+                  itemCount: snapshot.data.length == 0 ? 1 : snapshot.data.length,
                 ),
               ),
               ...todoChildren,
             ],
+          );
+        }
+        this._loading = false;
+        return Center(child: Container(width: 50, height: 50, child: CircularProgressIndicator()));
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Making sure that the state is set in the parent
+    this.widget.state = this;
+
+    return Column(
+      children: [
+        _buildWeekScroller(),
+        Expanded(
+          child: GestureDetector(
+            onPanEnd: (details) {
+              if (kIsWeb) {
+                setState(() {
+                  if (details.velocity.pixelsPerSecond.dx > 0)
+                    this._selectedDay = this._selectedDay.subtract(Duration(days: 1));
+                  else
+                    this._selectedDay = this._selectedDay.add(Duration(days: 1));
+                });
+              }
+            },
+            child: _buildEventView(_loadNewClassData(this._selectedDay)),
           ),
         ),
+        /*
+          child: GestureDetector(
+            onHorizontalDragUpdate: (details) {},
+            onHorizontalDragEnd: (details) {
+              setState(() {
+                if (details.primaryVelocity > 0)
+                  this._selectedDay = this._selectedDay.subtract(Duration(days: 1));
+                else
+                  this._selectedDay = this._selectedDay.add(Duration(days: 1));
+              });
+            },
+            child: _buildEventView(_loadNewClassData(this._selectedDay)),
+          ),
+        ),
+        */
       ],
     );
   }
