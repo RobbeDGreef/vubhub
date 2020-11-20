@@ -94,5 +94,28 @@ Check if you have selected the correct education type, faculty, education and gr
 still no lectures, try the reload button on the top right. And if all else fails try to 
 remove the app's stored data and retry.
 
+# Building the app
+Vubhub is written in Dart / flutter so to build the app from source you will need to [install flutter](https://flutter.dev/docs/get-started/install).
+(Note that for ios you also need Xcode to install and sign the app)
+
+Afterwards you can just run `flutter build` followed by `apk`, `ios` or `web`. This will build
+the app in debug mode. If you want a release build you need to add the `--release` flag. 
+So all together that leaves us with:
+
+    flutter build apk --release     (android)
+    flutter build ios --release     (ios)
+    flutter build web --release     (web)
+
+This will build the app somewhere in the build/ folder. If you don't care about building and you
+just want to run it directly you can run
+
+    flutter run apk --release
+    flutter run ios --release
+    flutter run web --release
+    
+If you are planning on playing with the vubhub code and making changes, it might be better to run
+the app in `--debug` mode. 
+
+
 ## License 
 GPL-3.0. See the LICENSE file for more information.
