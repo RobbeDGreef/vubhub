@@ -10,6 +10,18 @@ that of course runs on any device. Now you can easily check your class schedules
 too. Visit the [vubhub.me](http://vubhub.me) site to see for yourself.
 (Please note that the vubhub.me site is still under heavy development)
 
+Now if you want to have a real app experience, you can add the vubhub.me site to your homescreen.
+
+To do so:
+- Go to vubhub.me using safari.
+- Click the share button on the bottom of the screen (the middle one)
+- Select "Add to Home Screen"
+- Press the "Add" button
+
+This still does not give you any offline view and currently has no canvas support either, but
+its a start.
+
+
 # Info
 This app hopes to make any VUB students life easier by concentrating all the information and VUB features into a single app.
 VubHub currently supports an easy to read class schedule, news feed, partial Canvas functionality, a library seat registration
@@ -22,6 +34,7 @@ section in the app or by create an issue in this repository.
 Safety is very important to us, so we want to be as transparent as possible in what
 data we save.
 
+## Android app
 This app is mainly build of two components. The canvas dependant functionality and the 
 canvas independent functionality.
 
@@ -39,6 +52,16 @@ the complete structure). **This data is still only saved on your device, we do n
 any data of you elsewhere. Making the canvas features perfectly safe.**
 
 It is however perfectly possible to use the app without canvas if you choose to.
+
+## vubhub.me web application
+The web application currently does not support canvas yet. This is due to the fact that building
+a reliable and most importantly safe login system for canvas is hard on the web. On top of that
+requests like getting class schedule data have to go through our own server because of [cors](https://developer.mozilla.org/nl/docs/Web/HTTP/CORS)
+policy.
+
+Currently we use cookies and local browser storage to save your user data (education type, faculty, groups, etc.).
+And we intent to keep it that way because this is the best form of 
+
 
 # Roadmap
 - [x] Dark mode
