@@ -60,7 +60,7 @@ requests like getting class schedule data have to go through our own server beca
 policy.
 
 Currently we use cookies and local browser storage to save your user data (education type, faculty, groups, etc.).
-And we intent to keep it that way because this is the best form of 
+And we intent to keep it that way because this is the easiest solution.
 
 
 # Roadmap
