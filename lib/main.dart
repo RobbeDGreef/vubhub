@@ -4,11 +4,11 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/foundation.dart';
 import 'package:vubhub/dayview.dart';
 import 'package:package_info/package_info.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:flutter/foundation.dart';
 
 import 'canvas/canvasapi.dart';
 import 'firstlaunch.dart';
@@ -273,7 +273,7 @@ class _MainUiState extends State<MainUi> {
           _buildLoginWidget(),
           ListTile(
             leading: Icon(Icons.view_agenda),
-            title: Text("Classses"),
+            title: Text("Classes"),
             onTap: () => setState(() => this._selectedNavBarIndex = 0),
             selected: this._selectedNavBarIndex == 0,
             selectedTileColor: Theme.of(context).hoverColor,

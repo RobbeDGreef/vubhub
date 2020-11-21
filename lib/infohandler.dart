@@ -336,20 +336,6 @@ class InfoHandler {
     if (!kIsWeb) FLog.info(text: "Getting data for ${this.user.selectedGroups}");
 
     Map urls;
-    if (kIsWeb) {
-      print("urls");
-      var ids = this.user.selectedGroups.toList();
-      for (int i = 0; i < ids.length; i++) {
-        ids[i] = Uri.encodeComponent(this.groupIds[ids[i]]);
-      }
-      print("ids2 $ids");
-
-      final requrl =
-          VubhubServerUrl + '/ical?education_id=${getUserId()}&group_ids=${ids.join(',')}';
-      urls = jsonDecode((await http.get(requrl)).body);
-      print(urls);
-    }
-
     List<Event> allGroupData = [];
     for (String group in this.user.selectedGroups) {
       // Check the data in the memory cache and storage
@@ -380,6 +366,16 @@ class InfoHandler {
         // Otherwise, populate the cache and add it to all the group data.
         this._cache.populateEvents(week, group, data);
       } else {
+        if (urls == null) {
+          var ids = this.user.selectedGroups.toList();
+          for (int i = 0; i < ids.length; i++) {
+            ids[i] = Uri.encodeComponent(this.groupIds[ids[i]]);
+          }
+
+          final requrl =
+              VubhubServerUrl + '/ical?education_id=${getUserId()}&group_ids=${ids.join(',')}';
+          urls = jsonDecode((await http.get(requrl)).body);
+        }
         var res = await http.get(VubhubServerUrl + '/corsproxy/' + urls[this.groupIds[group]]);
         this._cache.populateEventsByIcal(res.body, group);
         data = await this._cache.getWeekEventData(week, group);
