@@ -5,6 +5,7 @@ import 'package:vubhub/infohandler.dart';
 import 'package:flutter/services.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:intl/intl.dart';
+import 'package:vubhub/timetableview/timetableview.dart';
 
 import 'calendar_strip/calendar_strip.dart';
 import 'canvas/canvasapi.dart';
@@ -18,6 +19,7 @@ import 'todoview.dart';
 class DayView extends StatefulWidget {
   InfoHandler info;
   _DayViewState state;
+  Orientation orientation;
 
   void fullUpdate() {
     if (this.state != null) {
@@ -31,16 +33,18 @@ class DayView extends StatefulWidget {
     }
   }
 
-  DayView({this.info});
+  DayView(this.info, this.orientation);
   @override
-  _DayViewState createState() => _DayViewState(this.info);
+  _DayViewState createState() => _DayViewState(this.info, this.orientation);
 }
 
 class _DayViewState extends State<DayView> {
   InfoHandler _info;
   DateTime _selectedDay = DateTime.now();
   DateTime _selectedWeek = DateTime.now();
+  Orientation _orientation;
   int _todaysColor = 0;
+  bool timeTableView = false;
 
   int lastDayIndex = 1000;
   bool _loading = true;
@@ -54,8 +58,11 @@ class _DayViewState extends State<DayView> {
     super.initState();
   }
 
-  _DayViewState(InfoHandler info) {
+  _DayViewState(InfoHandler info, Orientation orientation) {
     this._info = info;
+    this._orientation = orientation;
+
+    if (this._orientation == Orientation.landscape) this.timeTableView = true;
 
     if (this._info.user.accessToken != null) {
       this._canvas = CanvasApi(this._info.user.accessToken);
@@ -87,6 +94,14 @@ class _DayViewState extends State<DayView> {
     List<Event> list = await this._info.getTodaysEvents(date);
     print("list found $list");
     return _parseEvents(list);
+  }
+
+  Future<List<Event>> _loadNewWeekClassData([int week = -1]) async {
+    this._loading = true;
+    List<Event> list = await this._info.getWeekData(week);
+
+    // Easy way to remove duplicates from a list.
+    return list.toSet().toList();
   }
 
   /// This function will update the this._classes list from
@@ -399,11 +414,47 @@ class _DayViewState extends State<DayView> {
       },
     );
   }
+  /*
+  Widget _buildTimeTable(List<Event> list) {
+    final provider = tt.EventProvider.list(
+      List<tt.BasicEvent>.generate(
+        list.length,
+        (i) => tt.BasicEvent(
+          start: LocalDateTime.dateTime(list[i].startDate),
+          end: LocalDateTime.dateTime(list[i].endDate),
+          title: list[i].name,
+          id: list[i],
+          color: Colors.white,
+        ),
+      ),
+    );
+    return tt.Timetable(
+      eventBuilder: (tt.Event e) {
+        return tt.BasicEventWidget(
+          e,
+        );
+      },
+      controller: tt.TimetableController(eventProvider: provider, initialDate: LocalDate.today()),
+    );
+  }
+  */
 
   @override
   Widget build(BuildContext context) {
     // Making sure that the state is set in the parent
     this.widget.state = this;
+
+    if (this.timeTableView) {
+      return TimeTableView(
+        weekStartDate: DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)),
+        provider: (DateTime startDate) {
+          int week = InfoHandler.calcWeekFromDate(startDate);
+          return _loadNewWeekClassData(week);
+        },
+        weekLength: 5,
+        onTap: _openEventDetails,
+      );
+    }
 
     return Column(
       children: [

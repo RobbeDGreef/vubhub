@@ -315,10 +315,10 @@ class _MainUiState extends State<MainUi> {
     );
   }
 
-  Widget _buildTabScreen(int index) {
+  Widget _buildTabScreen(int index, Orientation orientation) {
     switch (index) {
       case 0:
-        this.currentPage = DayView(info: this._info);
+        this.currentPage = DayView(this._info, orientation);
         break;
 
       case 1:
@@ -379,7 +379,7 @@ class _MainUiState extends State<MainUi> {
       ],
     );
 
-    final tabText = ["Today", "Course information", "VUB campus map", "Places", "News"];
+    final tabText = ["Day view", "Course information", "VUB campus map", "Places", "News"];
 
     final refreshAction = [
       IconButton(
@@ -406,7 +406,7 @@ class _MainUiState extends State<MainUi> {
               appBar: AppBar(
                   title: Text(tabText[this._selectedNavBarIndex]),
                   actions: (this._selectedNavBarIndex == 0) ? refreshAction : []),
-              body: _buildTabScreen(this._selectedNavBarIndex));
+              body: _buildTabScreen(this._selectedNavBarIndex, orientation));
         } else {
           return Scaffold(
             //appBar: AppBar(title: Text(tabText[this._selectedNavBarIndex])),
@@ -414,7 +414,7 @@ class _MainUiState extends State<MainUi> {
               children: [
                 _buildDrawerLandscape(),
                 Expanded(
-                  child: _buildTabScreen(this._selectedNavBarIndex),
+                  child: _buildTabScreen(this._selectedNavBarIndex, orientation),
                 ),
               ],
             ),
