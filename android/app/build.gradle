@@ -49,6 +49,7 @@ android {
         targetSdkVersion 29
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
 
     signingConfigs {
@@ -64,7 +65,7 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -76,6 +77,7 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.google.firebase:firebase-messaging:7.0.3'
+    implementation 'com.android.support:multidex:1.0.3'
 }
 
 apply plugin: 'com.google.gms.google-services'
