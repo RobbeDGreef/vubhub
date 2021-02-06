@@ -462,14 +462,12 @@ class _DayViewState extends State<DayView> {
         Expanded(
           child: GestureDetector(
             onPanEnd: (details) {
-              if (kIsWeb) {
-                setState(() {
-                  if (details.velocity.pixelsPerSecond.dx > 0)
-                    this._selectedDay = this._selectedDay.subtract(Duration(days: 1));
-                  else
-                    this._selectedDay = this._selectedDay.add(Duration(days: 1));
-                });
-              }
+              setState(() {
+                if (details.velocity.pixelsPerSecond.dx > 0)
+                  this._selectedDay = this._selectedDay.subtract(Duration(days: 1));
+                else
+                  this._selectedDay = this._selectedDay.add(Duration(days: 1));
+              });
             },
             child: _buildEventView(_loadNewClassData(this._selectedDay)),
           ),
