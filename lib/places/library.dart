@@ -7,9 +7,9 @@ import "package:interval_time_picker/interval_time_picker.dart" as interval;
 import "package:photo_view/photo_view.dart";
 import "package:http/http.dart" as http;
 
-import 'const.dart';
-import 'infohandler.dart';
-import 'theming.dart';
+import '../const.dart';
+import '../infohandler.dart';
+import '../theming.dart';
 
 /// Helper
 String _addHalfhourToString(String time) {
