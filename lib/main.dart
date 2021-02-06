@@ -11,12 +11,13 @@ import 'package:f_logs/f_logs.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'canvas/canvasapi.dart';
+import 'examview.dart';
 import 'firstlaunch.dart';
 import "mapview.dart";
 import "infohandler.dart";
 import 'settings/settings.dart';
 import 'const.dart';
-import "placesview.dart";
+import 'places/placesview.dart';
 import 'coursesview/coursesview.dart';
 import 'help.dart';
 import 'news.dart';
@@ -141,6 +142,11 @@ class _MainUiState extends State<MainUi> {
     this._info = info;
   }
 
+  void _openExams() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (BuildContext context) => ExamView(this._info)));
+  }
+
   void _openSettings() async {
     await Navigator.of(context)
         .push(MaterialPageRoute(builder: (BuildContext context) => SettingsMenu(this._info)));
@@ -257,6 +263,7 @@ class _MainUiState extends State<MainUi> {
       child: ListView(
         children: [
           _buildLoginWidget(),
+          //ListTile(leading: Icon(Icons.text_snippet), title: Text("View exams"), onTap: _openExams),
           ListTile(leading: Icon(Icons.settings), title: Text("Settings"), onTap: _openSettings),
           ListTile(leading: Icon(Icons.info), title: Text("About"), onTap: _openAbout),
           ListTile(leading: Icon(Icons.help), title: Text("Help"), onTap: _openHelp),
@@ -307,6 +314,7 @@ class _MainUiState extends State<MainUi> {
             selectedTileColor: Theme.of(context).hoverColor,
           ),
           Divider(color: Colors.red),
+          //ListTile(leading: Icon(Icons.text_snippet), title: Text("View exams"), onTap: _openExams),
           ListTile(leading: Icon(Icons.settings), title: Text("Settings"), onTap: _openSettings),
           ListTile(leading: Icon(Icons.info), title: Text("About"), onTap: _openAbout),
           ListTile(leading: Icon(Icons.help), title: Text("Help"), onTap: _openHelp),
