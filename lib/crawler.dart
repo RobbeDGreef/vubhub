@@ -2,6 +2,8 @@ import 'dart:async';
 
 import "package:http/http.dart" as http;
 import "package:html/parser.dart" as html;
+import 'package:http/io_client.dart';
+import "dart:io";
 
 import 'const.dart';
 
@@ -34,10 +36,13 @@ class Crawler {
 
     // Max crawlReq.redirectCount amount of redirections
     for (int i = 0; i < crawlReq.redirectCount; i++) {
-      final client = http.Client();
+      var client = HttpClient();
+      client.badCertificateCallback = (c, h, p) => true;
+      IOClient ioClient = IOClient(client);
 
       // Build the http request from our CrawlRequest object
       crawlReq.headers["cookie"] = cookies;
+
       final req = http.Request(crawlReq.type, Uri.parse(crawlReq.url))
         ..followRedirects = false
         ..headers.clear()
@@ -45,7 +50,8 @@ class Crawler {
         ..body = crawlReq.body;
 
       // Send the request and check if we need to follow this redirection
-      final res = await client.send(req);
+      print("req: " + crawlReq.url);
+      final res = await ioClient.send(req);
       if (!followRedirect) return res;
 
       print(res.statusCode);
