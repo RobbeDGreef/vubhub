@@ -221,7 +221,7 @@ class _TimeTableViewState extends State<TimeTableView> {
           Padding(
             padding: EdgeInsets.only(right: 10),
             child: OutlinedButton(
-              child: Text("Jump to this week"),
+              child: Text("This week"),
               style: ButtonStyle(
                   foregroundColor:
                       MaterialStateProperty.all<Color>(Theme.of(context).primaryColor)),
