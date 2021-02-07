@@ -250,9 +250,7 @@ class InfoHandler {
     if (this.user.education != null) {
       this._updatingConnection = true;
 
-      if (kIsWeb) {
-        await webUpdateGroups();
-      } else {
+      if (!kIsWeb) {
         this._crawler.curId = getUserId();
         this._crawler.updateConnection().then(
           (_) {
@@ -400,13 +398,14 @@ class InfoHandler {
     return events;
   }
 
-  Future webUpdateGroups() async {
+  Future<bool> webUpdateGroups() async {
     this.groupIds = {};
     var serverres = await http.get(VubhubServerUrl + '/groups?education_id=${getUserId()}');
     Map<String, dynamic> res = jsonDecode(serverres.body);
     for (String key in res.keys) {
       this.groupIds[key] = res[key];
     }
+    return true;
   }
 
   static DateTime _calcStartDate() {
