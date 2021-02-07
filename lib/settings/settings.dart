@@ -17,6 +17,9 @@ import '../main.dart';
 import '../user.dart';
 import 'selection.dart';
 
+// Uncomment for web build
+// import 'dart:html';
+
 class SelectMultiMenu extends StatefulWidget {
   String _title;
   List<String> _selected;
@@ -444,22 +447,12 @@ void _popupMobile(context, info) {
 }
 
 void _popupWeb(BuildContext context, InfoHandler info) {
+  /* Uncomment for web build 
   Navigator.of(context).push(
     MaterialPageRoute(
       builder: (context) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text("Login", style: TextStyle(color: Theme.of(context).accentColor)),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            iconTheme: IconThemeData(color: Theme.of(context).accentColor),
-          ),
-          body:
-              Center(child: Text("Under contsruction, for now please just refer to canvas.vub.be")),
-        );
-        /*Nam
         final IFrameElement iframe = IFrameElement();
-        iframe.src = VubhubServerUrl + '/' + CanvasLoginUrl;
+        iframe.src = CorsProxyUrl + CanvasLoginUrl;
         iframe.style.border = 'none';
 
         // ignore: undefined_prefixed_name
@@ -468,13 +461,21 @@ void _popupWeb(BuildContext context, InfoHandler info) {
           (viewId) => iframe,
         );
 
-        return HtmlElementView(
-          viewType: 'iframeElement',
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("Login", style: TextStyle(color: Theme.of(context).accentColor)),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+          ),
+          body: HtmlElementView(
+            viewType: 'iframeElement',
+          ),
         );
-        */
       },
     ),
   );
+  */
 }
 
 void _desktopLogin() {}
