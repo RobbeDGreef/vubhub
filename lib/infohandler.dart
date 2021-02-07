@@ -185,7 +185,6 @@ class InfoHandler {
   Future<void> setUserEducation(String edu) async {
     this.user.education = edu;
     this._cache.setUser(this.user);
-    print("set user id");
 
     if (kIsWeb) {
       await webUpdateGroups();
