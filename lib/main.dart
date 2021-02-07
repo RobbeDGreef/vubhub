@@ -352,8 +352,7 @@ class _MainUiState extends State<MainUi> {
     return this.currentPage;
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget buildMain(BuildContext context) {
     final bottom = BottomNavigationBar(
       currentIndex: this._selectedNavBarIndex,
       selectedItemColor: Theme.of(context).primaryColor,
@@ -398,13 +397,6 @@ class _MainUiState extends State<MainUi> {
       ),
     ];
 
-    if (this._info.isFirstLaunch && !this._info.alreadyShowed) {
-      return Scaffold(
-        body: FirstLaunchSetup(
-            info: this._info, close: () => setState(() => this._info.alreadyShowed = true)),
-      );
-    }
-
     return OrientationBuilder(
       builder: (context, orientation) {
         if (orientation == Orientation.portrait) {
@@ -430,5 +422,43 @@ class _MainUiState extends State<MainUi> {
         }
       },
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (this._info.isFirstLaunch && !this._info.alreadyShowed) {
+      return Scaffold(
+        body: FirstLaunchSetup(
+            info: this._info, close: () => setState(() => this._info.alreadyShowed = true)),
+      );
+    }
+
+    if (kIsWeb) {
+      return FutureBuilder(
+        future: this._info.webUpdateGroups().timeout(Duration(seconds: 15)),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            print("error: ${snapshot.error}");
+            return Scaffold(
+              body: Center(
+                child: Text(
+                  "Oh oh, looks like we have some trouble connecting to our severs, please try again later.",
+                ),
+              ),
+            );
+          }
+          if (snapshot.hasData) {
+            // Update
+            return buildMain(context);
+          }
+
+          return Scaffold(
+            body:
+                Center(child: Container(width: 50, height: 50, child: CircularProgressIndicator())),
+          );
+        },
+      );
+    }
+    return buildMain(context);
   }
 }
