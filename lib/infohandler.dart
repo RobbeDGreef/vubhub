@@ -376,6 +376,7 @@ class InfoHandler {
         var res = await http.get(VubhubServerUrl + '/corsproxy/' + urls[this.groupIds[group]]);
         this._cache.populateEventsByIcal(res.body, group);
         data = await this._cache.getWeekEventData(week, group);
+        if (data == null) data = [];
       }
 
       data.removeWhere((element) => applyFilters(element, group));
