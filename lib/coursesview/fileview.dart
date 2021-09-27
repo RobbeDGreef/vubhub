@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
+//import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
@@ -22,6 +22,8 @@ class FileView extends StatelessWidget {
   }
 
   static Widget _buildPreview(CanvasFile file) {
+    // Temporary
+    /*
     String ext = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
     if (ext == 'pdf') {
       return FutureBuilder(
@@ -48,6 +50,7 @@ class FileView extends StatelessWidget {
         },
       );
     }
+    */
 
     return Center(child: Text("Cannot preview this filetype"));
   }

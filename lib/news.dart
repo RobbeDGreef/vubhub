@@ -9,8 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 // I really don't like to use two different html packages in one
 // project but I also don't want to implement a html parser myself
 // so yeah this is the quickfix solution rn.
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/style.dart';
+//import 'package:flutter_html/flutter_html.dart';
+//import 'package:flutter_html/style.dart';
 
 import 'const.dart';
 
@@ -87,13 +87,15 @@ class _ArticleViewState extends State<ArticleView> {
         this._article.imageUrl != null
             ? Image.network(this._article.imageUrl)
             : Text("No image provided"),
-        Html(
+        /*Html(
           data: this._article.body,
           onLinkTap: (String url) => launch(url),
           style: {
             'p': Style(fontSize: FontSize(18)),
           },
         ),
+        */
+        Text("Temporarily disabled"),
       ],
     );
   }

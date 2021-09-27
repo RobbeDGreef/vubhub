@@ -118,6 +118,7 @@ List<Event> parseLectureList(String data, int week) {
       }
       var parts = date.substring(date.indexOf("(") + 1).split("/");
       var toDay = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+      print("today stuff: $toDay");
       lec.startDate = DateTime(
           toDay.year,
           toDay.month,

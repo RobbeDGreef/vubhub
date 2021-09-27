@@ -39,10 +39,10 @@ dependencies:
   url_launcher: ^5.7.5
   flutter_launcher_icons: ^0.8.1
   palette_generator: ^0.2.3
-  flutter_html: #^1.0.2
-    git:
-      url: https://github.com/Sub6Resources/flutter_html
-      ref: dab9923ad94cff9efa08203a27d30bbb92f985f6
+  #flutter_html: #^1.0.2
+  #  git:
+  #    url: https://github.com/Sub6Resources/flutter_html
+  #    ref: dab9923ad94cff9efa08203a27d30bbb92f985f6
   html_unescape: ^1.0.2
   webview_flutter: ^1.0.5
   flutter_inappwebview: ^4.0.0+4
@@ -56,7 +56,8 @@ dependencies:
   html: ^0.14.0
 
   f_logs: ^1.2.2
-  advance_pdf_viewer: ^1.2.0
+  # this is giving me a hard time so I'm disabling it for now
+  #advance_pdf_viewer: ^1.2.0
   #  path: ../pdf_viewer
   open_file: ^3.0.3
   workmanager: ^0.2.3

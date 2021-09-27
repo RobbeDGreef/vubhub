@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/style.dart';
-import 'package:url_launcher/url_launcher.dart';
+//import 'package:flutter_html/flutter_html.dart';
+//import 'package:flutter_html/style.dart';
 
 /// TODO: Create our own html parser, with one large selectable text widget and NO BUGS LIKE <p><a></a></p> is equal to a <p> tag like wth?????
 
@@ -28,6 +27,7 @@ String processHtmlData(String data) {
 
 Widget htmlParse(String data) {
   data = processHtmlData(data);
+  /*
   return Html(
     data: data,
     onLinkTap: (String url) => launch(url),
@@ -43,4 +43,6 @@ Widget htmlParse(String data) {
       'li': Style(fontSize: FontSize(18)),
     },
   );
+  */
+  return Text("Temporarily disabled");
 }

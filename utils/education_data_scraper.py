@@ -10,7 +10,7 @@ def removeSpace(string):
     
     return string
 
-url = "https://splus.cumulus.vub.ac.be/SWS/v3/evenjr/NL/STUDENTSET/studentset.aspx"
+url = "https://splus.cumulus.vub.ac.be/SWS/v3/onevenjr/NL/STUDENTSET/studentset.aspx"
 session = requests.Session()
 page = session.get(url)
 soup = BeautifulSoup(page.content, 'html.parser')

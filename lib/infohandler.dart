@@ -391,7 +391,9 @@ class InfoHandler {
 
     List<Event> events = [];
     for (Event ev in await getWeekData(calcWeekFromDate(day))) {
+      print("event: $ev ${ev.startDate.day} - ${today.day}");
       DateTime evDay = DateTime(ev.startDate.year, ev.startDate.month, ev.startDate.day);
+      print("start: ${ev.startDate.year} ${ev.startDate.month} ${ev.startDate.day}");
       if (evDay == today) {
         events.add(ev);
       }
@@ -410,7 +412,7 @@ class InfoHandler {
   }
 
   static DateTime _calcStartDate() {
-    return DateTime(2020, 9, 14);
+    return DateTime(2021, 9, 20);
   }
 
   /// The reason this function is inside this class and not a helper is because

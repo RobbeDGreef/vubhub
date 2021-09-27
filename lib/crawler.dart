@@ -183,7 +183,7 @@ class Crawler {
     String urlTmp = this._request.url;
 
     // Make the second request
-    this._request.url = this._request.baseUrl + "/SWS/v3/evenjr/NL/STUDENTSET/showtimetable.aspx";
+    this._request.url = this._request.baseUrl + "/SWS/v3/onevenjr/NL/STUDENTSET/showtimetable.aspx";
     this._request.body = "";
     this._request.type = "GET";
     r = await makeRequest(this._request);
@@ -191,6 +191,7 @@ class Crawler {
 
     // Reset url
     this._request.url = urlTmp;
-    return r.stream.bytesToString();
+    var data = r.stream.bytesToString();
+    return data;
   }
 }
